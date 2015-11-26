@@ -29,20 +29,24 @@ Strings are the most common sequence type we see in programming, but there are m
 <h3>
 <a id="why-estimate-it" class="anchor" href="#why-estimate-it" aria-hidden="true"><span class="octicon octicon-link"></span></a>Why Estimate It When You Could Compute The Real Thing?</h3>
 
-<p>The algorithms for LD are quadratic---they take time and space proportional to the product of the length of the two 
-strings (or sequences.) If you're interested in strings of a few hundred characters, this is fine---go ahead an use the real LD. 
-But what if you want to compare pairs of documents or Web pages that might be anywhere from 10K to megabytes in size? 
-Executing LD on pairs of 20K strings takes several seconds on a fast computer. 
-On 50K strings, a lot of computers can't run it at all because the space required also grows at the same rate. Megabytes? Forget it.
+<p>The algorithm for computing LD is quadratic, which means it takes time and space proportional to the product of the length of the two 
+strings (or sequences.) 
+If you're interested in strings of a few hundred characters, this is not usually a problem because LD will execute in a few tens of microseconds. 
+But what if you want to compare pairs of documents or Web pages? 
+Executing LD on pairs of 20K strings takes several seconds on a fast computer, and a lot of memory. 
+Computing the LD of 50K strings will take many seconds if your computer can do it at all, because the amount of memory required increases at the same rate. 
+Documents in the megabytes?  Forget it---computing LD on a pair of one-megabyte files would take hours even if you had the memory. 
 </p>
 
 <h3>
 <a id="what-does-this-heuristic-do" class="anchor" href="#what-does-this-heuristic-do" aria-hidden="true"><span class="octicon octicon-link"></span></a>What Does This Heuristic Do?</h3>
 
 <p>This heuristic compresses the intput radically (25x to 300X might be typical) and then compares the signatures using LD. 
-This time the quadratic space and time complexity work <strong>for</strong> you, because a 100X compression implies a 10,000X speedup. 
+This time the quadratic space and time complexity work <strong>for</strong> you, because a 150X compression implies a 22,500X speedup. 
 You sacrifice some accuracy, but not too much---estimates are typically within about 0.05 of the true value for related documents, 
-and somewhat worse for random text. </p>
+and somewhat worse for random text. 
+
+</p>
 
 <p>The trick is in the compression. A string--say, a paragraph, compressed by itself, looks much like it does when 
 compressed in the middle of a larger document (exactly the same, in fact, except for maybe a few characters at either end.) 
