@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Fast Estimates of Levenshtein Distance by coatespt</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Fast Estimates of Levenshtein Distance</h1>
+      <h2 class="project-tagline">Estimate Levenshtein Distance fast on large files (10&#39;s of K to 1000&#39;s of K)</h2>
+      <a href="https://github.com/coatespt/Fast-Levenshtein-Distance" class="btn">View on GitHub</a>
+      <a href="https://github.com/coatespt/Fast-Levenshtein-Distance/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/coatespt/Fast-Levenshtein-Distance/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h3>
+<a id="what-is-levenshtein-distance-ld" class="anchor" href="#what-is-levenshtein-distance-ld" aria-hidden="true"><span class="octicon octicon-link"></span></a>What Is Levenshtein Distance (LD)</h3>
+
+<p>LD is a way to express how similar two sequences are. Also called "edit distance," it is the number of single element changes (additions, deletions, etc.) that are needed to turn one sequence into the other. Strings are the most common sequence type we see in programming, but there are many others. In this demo, we'll stick to strings.</p>
+
+<h3>
+<a id="why-estimate-it" class="anchor" href="#why-estimate-it" aria-hidden="true"><span class="octicon octicon-link"></span></a>Why Estimate It?</h3>
+
+<p>The algorithms for LD are quadratic---they take time and space proportional to the length of the two strings (or sequences.) If you're interested in strings of a few hundred characters, fine, use the real LD. But what if you want to look at documents or Web pages that might be 10K up to megabytes? Executing LD on pairs of 20K strings takes several seconds on a fast computer. On 50K strings, a lot of computers can't run it at all because the space required grows at the same rate. Megabytes? Forget it.</p>
+
+<h3>
+<a id="what-does-this-heuristic-do" class="anchor" href="#what-does-this-heuristic-do" aria-hidden="true"><span class="octicon octicon-link"></span></a>What Does This Heuristic Do?</h3>
+
+<p>This heuristic compresses the intput radically (25x to 300X might be typical) and then compares the signatures using LD. This time the quadratic space and time complexity work <strong>for</strong> you, because a 100X compression implies a 10,000X speedup. You sacrifice some accuracy, but not too much---estimates are typically within about 0.05 of the true value for related documents, and somewhat worse for random text. </p>
+
+<p>The trick is in the compression. A string--say, a paragraph, compressed by itself, looks pretty much like it does when compressed in the middle of a larger document (exactly the same, in fact, except for maybe a few characters at either end.) A pair signatures will tend to differ in locations proportional to where their pre-images differ.  So if you have a document, plus a the same document embedded in an HTML page, the signatures will differ mostly at the beginning, where the header is, and in a few places elsewhere.  The LD of the signatures will be of predictable proportion to the LD of the original files.</p>
+
+<p>The signatures can also be used to compare documents that are presumed to be similar to see approximately where they differ. Is one signature more or less contained in another? The same will be true of the corresponding documents. Are differences sprinkled throughout? One document is probably an edited version, or perhaps a text document converted to HTML. Etc.</p>
+
+<p>Other techniques are discussed in <a href="http://hadoopoopadoop.com/2015/11/08/super-fast-estimates-of-levenshtein-distance/">http://hadoopoopadoop.com/2015/11/08/super-fast-estimates-of-levenshtein-distance/</a></p>
+
+<h3>
+<a id="authors-and-contributors" class="anchor" href="#authors-and-contributors" aria-hidden="true"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
+
+<p>This heuristic is original---some of the incidental code has been cribbed from here or there, and is credited. In particular, the algorithm for computing LD, and the algorithm for computing Shannon Entropy are credited in the code.</p>
+
+<h3>
+<a id="support-or-contact" class="anchor" href="#support-or-contact" aria-hidden="true"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
+
+<p>Please feel free to use this idea, and please contact the author if you would like to incorporate your changes here and make this a useful library. </p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/coatespt/Fast-Levenshtein-Distance">Fast Estimates of Levenshtein Distance</a> is maintained by <a href="https://github.com/coatespt">coatespt</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
