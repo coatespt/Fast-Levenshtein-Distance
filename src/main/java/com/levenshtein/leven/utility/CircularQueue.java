@@ -5,10 +5,13 @@ import com.levenshtein.leven.utility.exception.QueueEmptyException;
 import com.levenshtein.leven.utility.exception.QueueFullException;
 
 /**
- * Todo fix the templating
+ * This is used only in the experimental RollingHash, which is not yet as solid as the 
+ * method used in StringCompressorPlain, and may be discarded.  
  * 
- * This code cribbed from http://oppansource.com/queue-implementation-in-java-using-circular-array/ and 
- * subsequently modified slightly by me.
+ * TODO fix the templating
+ * 
+ * This code was cribbed from http://oppansource.com/queue-implementation-in-java-using-circular-array/ and 
+ * subsequently modified slightly by me. It needs to be cleaned up.
  * 
  * @author pcoates
  * @param <E> The type stored by the Queue

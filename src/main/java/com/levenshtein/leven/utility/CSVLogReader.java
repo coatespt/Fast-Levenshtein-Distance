@@ -9,8 +9,8 @@ import java.io.FileReader;
 import org.apache.log4j.Logger;
 
 /**
- * Various ways to read in a CSV file such as Map<String,Integer>,
- * Map<Integer,String> etc.
+ * Convenience class for reading CSV files. 
+ * TODO Stripped out of something else -- may need cleanup. 
  * 
  * @author peter
  * 
@@ -24,19 +24,6 @@ public class CSVLogReader {
 
 	public CSVLogReader() {
 	}
-
-	/**
-	 * Read in a map of integers to strings. Format is one comma-separated pair
-	 * of integer and string with lines separated by a "\n". It is assumed that
-	 * the input data is valid. It fails if the format is violated and it does
-	 * not fail if the same key is used twice. The second simply overwrites the
-	 * first.
-	 * 
-	 * @param fileSpec
-	 * @return
-	 * @throws Exception
-	 */
-
 
 	public long getWordsRead() {
 		return totalWords;
@@ -59,11 +46,9 @@ public class CSVLogReader {
 
 	/**
 	 * Reads a file and returns one line at a time. This is intended to be for
-	 * files with one word on a line, but it doesn't have to be. Note, this
-	 * closes the file when it's emptied.
+	 * files with one word on a line, but it doesn't have to be. 
 	 * 
-	 * @param fileSpec
-	 *            If the file is not yet open, open it.
+	 * @param fileSpec If the file is not yet open, open it.
 	 * @return The line that was read or null, if the file is empty.
 	 * @throws Exception
 	 */

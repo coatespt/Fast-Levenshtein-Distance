@@ -19,16 +19,32 @@ import com.levenshtein.leven.utility.FileAndTimeUtility;
 
 
 /**
- * Simple demo class for estimating Levenshtein distance on all the files in a directory.
- * 
- * Optional invoke with full path name of a property file.
- * Property file has n, c, input-file-dir, sig-dir, and some other things. 
+ * Simple demo class compares does pair-wise comparison of all the files in 
+ * the specified directory, computing both an estimate of LD and the actual LD 
+ * for each pair.
  * <p>
- * Demo creates signatures for every file in the input-file-dir.
+ * Optional invoke with full path name of a property file in which you can
+ * specify different file sets, compression rates, etc.
+ * <p>
+ * The files supplied are clipped out of Gutenberg books and are about 25KB each.
+ * Almost all of the demo time is spent on computing LD of the raw files, which 
+ * takes a few seconds per pair. Compressing them into signatures only takes 
+ * a blink,and computing the estimate on the signatures takes well 
+ * under a millisecond.
+ * <p>
+ * All run parameters are set in ./config/demo.properties, but you can clone the config file 
+ * for variations with different file sets, n and c values, etc.
+ * 
+ * Beware that 25KB is a pretty big file for LD---50KB is beyond what I can do on 
+ * a Mac.  However, if you are not computing the real LD, the max size is several hundreds of
+ * time bigger---several thousand KB files should not present a problem for estimates.
+ * <p>
+ * Demo creates signatures for every file in the input-file-dir 
  * <p>
  * For each signature, it scans the other signatures for matches.
  * <p>
  * Output something like filenamne: <some-file>.txt est. LD: <some-number> is match?: <true/false>
+ * <p>
  * 
  * TODO: Need a way to compute the unlikeliness of a give expected/actual length ratio.
  *  

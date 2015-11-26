@@ -23,14 +23,22 @@
           <target>1.6</target>
         </configuration>
       </plugin>
+	<plugin>
+      <artifactId>maven-assembly-plugin</artifactId>
+      <configuration>
+        <descriptorRefs>
+          <descriptorRef>jar-with-dependencies</descriptorRef>
+        </descriptorRefs>
+        <archive>
+          <manifest>
+            <mainClass>com.levenshtein.leven.demo.Demo</mainClass>
+          </manifest>
+        </archive>
+      </configuration>
+	</plugin>
     </plugins>
   </build>
   <dependencies>
-    <!--dependency>
-      <groupId>Utility</groupId>
-      <artifactId>Utility</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
-    </dependency-->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
