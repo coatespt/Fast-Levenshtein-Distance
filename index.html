@@ -30,54 +30,73 @@ Strings are the most common sequence type we see in programming, but there are m
 <a id="why-estimate-it" class="anchor" href="#why-estimate-it" aria-hidden="true"><span class="octicon octicon-link"></span></a>Why Estimate It When You Could Compute The Real Thing?</h3>
 
 <p>The algorithm for computing LD is quadratic, which means it takes time and space proportional to the product of the length of the two 
-strings (or sequences.) 
+sequences (from now on I'll just say strings.) 
 If you're interested in strings of a few hundred characters, this is not usually a problem because LD will execute in a few tens of microseconds. 
 But what if you want to compare pairs of documents or Web pages? 
 Executing LD on pairs of 20K strings takes several seconds on a fast computer, and a lot of memory. 
-Computing the LD of 50K strings will take many seconds if your computer can do it at all, because the amount of memory required increases at the same rate. 
+Computing the LD of 50K strings will take many seconds if your computer can do it at all, because the amount of memory required also increases quadratically. 
 Documents in the megabytes?  Forget it---computing LD on a pair of one-megabyte files would take hours even if you had the memory. 
 </p>
 
 <h3>
 <a id="what-does-this-heuristic-do" class="anchor" href="#what-does-this-heuristic-do" aria-hidden="true"><span class="octicon octicon-link"></span></a>What Does This Heuristic Do?</h3>
 
-<p>This heuristic compresses the intput radically (25x to 300X might be typical) and then compares the signatures using LD. 
+<p>This heuristic compresses the intput radically (25x to 300X is typical) and infers the estimate from the LD of the signatures. 
 This time the quadratic space and time complexity work <strong>for</strong> you, because a 150X compression implies a 22,500X speedup. 
+To make this concrete, a Java program running on a fast Mac computes the LD of strings of length 27,600 takes about four seconds using 
+a lot of memory. 
+With compressions set to 150, computing the estimate from signatures takes only about 0.00018 seconds, or 22,000/second.
+(The compression is a linear time procedure, so it takes only about as long as it takes to get the data from the disk, but it would
+normally be done only once anyway.)
+<p>
 You sacrifice some accuracy, but not too much---estimates are typically within about 0.05 of the true value for related documents, 
 and somewhat worse for random text. 
 
 </p>
 
-<p>The trick is in the compression. A string--say, a paragraph, compressed by itself, looks much like it does when 
-compressed in the middle of a larger document (exactly the same, in fact, except for maybe a few characters at either end.) 
+<p>The trick is in the compression algorithm, which has two notable properties. 
+The first is that it is not reversible. 
+The second is that a compressed string, for instance, a paragraph, compressed by 
+itself, looks the same as it does when compressed in the middle of a larger string, except sometimes for a few characters at either end. 
 Because of this, the signatures of two versions of a document will tend to also look quite similar, unless the changes
 are numerous and fine grained, making the relationship between the LD of the documents and the LD of 
 the signatures quite predictable.
-
-A pair of signatures will thus tend to differ in locations proportional to where their pre-images differ.  
+<p>
+By the same token, the locations of the difference in the signatures will be analogous to the locations 
+where their pre-images differ.  
 For instance, if you compare a document to itself embedded in an HTML page, the signatures will differ mostly at the 
 beginning, where the header is, and in at most a few places elsewhere, where formatting tags have been inserted.  
-
-The LD of equal length sequences of randomly chosen text tends to be slightly less than the length of the text
-by a rather consistent proportion because a few characters will happen to line up, but most will not. 
-This gives a useful benchmark by which related text can be spotted surprisingly accurately.
-Even a small divergence of the LD of a pair of signatures thus signals a relationship between documents even
+<p>
+The LD of equal-length sequences of randomly chosen text will be slightly less than the length of the text
+itself, differing by a fairly consistent proportion. 
+This is because a few of the more common characters (e.g., 'e') will often line up reasonably closely, but most 
+will not.  
+This proportion gives a useful benchmark by which related text can be spotted surprisingly accurately.
+Even a small divergence of the LD of a pair of signatures signals a relationship between documents even
 if they have been extensively changed.
-
-For instance, the signatures two translations of Dante's Inferno done a century apart are still recognizably related, as are
-the same translation alone, and as part of the three volume set, and moreover, the signatures can be compared
-at a rate of several thousand per second. 
-
-</p>
-
-<p>The signatures can also be used to compare documents that are presumed to be similar to see approximately where they differ. Is one signature more or less contained in another? The same will be true of the corresponding documents. Are differences sprinkled throughout? One document is probably an edited version, or perhaps a text document converted to HTML. Etc.</p>
+<p>
+For instance, the signatures two translations of Dante's Inferno done a century apart are still recognizably 
+related despite many differences on every line. 
+Likewise, the same translation and the three volume set are recognizably related.
+The similarities can be spotted thousands of times faster than the documents could be read from disk, let
+alone compared directly. 
+<p>
+The signatures can also be used to compare documents that are presumed to be similar in order to evaluate 
+approximately where they differ. 
+If one signature is more or less contained in the other, the same will be true of the corresponding documents. 
+If many differences are sprinkled throughout the signatures, then one document is probably an edited version
+of the other, or perhaps a text document converted to HTML. Etc.</p>
 
 <p>Other techniques are discussed in <a href="http://hadoopoopadoop.com/2015/11/08/super-fast-estimates-of-levenshtein-distance/">http://hadoopoopadoop.com/2015/11/08/super-fast-estimates-of-levenshtein-distance/</a></p>
 
 <h3>
 <a id="authors-and-contributors" class="anchor" href="#authors-and-contributors" aria-hidden="true"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
 
-<p>This heuristic is original---some of the incidental code has been cribbed from here or there, and is credited. In particular, the algorithm for computing LD, and the algorithm for computing Shannon Entropy are credited in the code.</p>
+<p>This heuristic is was developed by Peter Coates (pcoates@hortonworks.com) but some of the incidental code 
+has been cribbed from here or there, and is credited in the relevant classes. 
+In particular, the algorithm for computing LD, and the algorithm for computing 
+Shannon Entropy are credited in the code.
+</p>
 
 <h3>
 <a id="support-or-contact" class="anchor" href="#support-or-contact" aria-hidden="true"><span class="octicon octicon-link"></span></a>Support or Contact</h3>

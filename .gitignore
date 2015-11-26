@@ -1,0 +1,10 @@
+.DS_Store
+.myeclipse/
+.project
+.settings/
+bin/
+data-bulk/
+data/
+hs_err_pid99092.log
+junk.txt
+target/
