@@ -22,19 +22,49 @@
       <h3>
 <a id="what-is-levenshtein-distance-ld" class="anchor" href="#what-is-levenshtein-distance-ld" aria-hidden="true"><span class="octicon octicon-link"></span></a>What Is Levenshtein Distance (LD)</h3>
 
-<p>LD is a way to express how similar two sequences are. Also called "edit distance," it is the number of single element changes (additions, deletions, etc.) that are needed to turn one sequence into the other. Strings are the most common sequence type we see in programming, but there are many others. In this demo, we'll stick to strings.</p>
+<p>LD is a way to express how similar two sequences are. Also called "edit distance," it is the number of single element 
+changes (additions, deletions, etc.) that are needed to turn one sequence into the other. 
+Strings are the most common sequence type we see in programming, but there are many others. In this demo, we'll stick to strings.</p>
 
 <h3>
-<a id="why-estimate-it" class="anchor" href="#why-estimate-it" aria-hidden="true"><span class="octicon octicon-link"></span></a>Why Estimate It?</h3>
+<a id="why-estimate-it" class="anchor" href="#why-estimate-it" aria-hidden="true"><span class="octicon octicon-link"></span></a>Why Estimate It When You Could Compute The Real Thing?</h3>
 
-<p>The algorithms for LD are quadratic---they take time and space proportional to the length of the two strings (or sequences.) If you're interested in strings of a few hundred characters, fine, use the real LD. But what if you want to look at documents or Web pages that might be 10K up to megabytes? Executing LD on pairs of 20K strings takes several seconds on a fast computer. On 50K strings, a lot of computers can't run it at all because the space required grows at the same rate. Megabytes? Forget it.</p>
+<p>The algorithms for LD are quadratic---they take time and space proportional to the product of the length of the two 
+strings (or sequences.) If you're interested in strings of a few hundred characters, this is fine---go ahead an use the real LD. 
+But what if you want to compare pairs of documents or Web pages that might be anywhere from 10K to megabytes in size? 
+Executing LD on pairs of 20K strings takes several seconds on a fast computer. 
+On 50K strings, a lot of computers can't run it at all because the space required also grows at the same rate. Megabytes? Forget it.
+</p>
 
 <h3>
 <a id="what-does-this-heuristic-do" class="anchor" href="#what-does-this-heuristic-do" aria-hidden="true"><span class="octicon octicon-link"></span></a>What Does This Heuristic Do?</h3>
 
-<p>This heuristic compresses the intput radically (25x to 300X might be typical) and then compares the signatures using LD. This time the quadratic space and time complexity work <strong>for</strong> you, because a 100X compression implies a 10,000X speedup. You sacrifice some accuracy, but not too much---estimates are typically within about 0.05 of the true value for related documents, and somewhat worse for random text. </p>
+<p>This heuristic compresses the intput radically (25x to 300X might be typical) and then compares the signatures using LD. 
+This time the quadratic space and time complexity work <strong>for</strong> you, because a 100X compression implies a 10,000X speedup. 
+You sacrifice some accuracy, but not too much---estimates are typically within about 0.05 of the true value for related documents, 
+and somewhat worse for random text. </p>
 
-<p>The trick is in the compression. A string--say, a paragraph, compressed by itself, looks pretty much like it does when compressed in the middle of a larger document (exactly the same, in fact, except for maybe a few characters at either end.) A pair signatures will tend to differ in locations proportional to where their pre-images differ.  So if you have a document, plus a the same document embedded in an HTML page, the signatures will differ mostly at the beginning, where the header is, and in a few places elsewhere.  The LD of the signatures will be of predictable proportion to the LD of the original files.</p>
+<p>The trick is in the compression. A string--say, a paragraph, compressed by itself, looks much like it does when 
+compressed in the middle of a larger document (exactly the same, in fact, except for maybe a few characters at either end.) 
+Because of this, the signatures of two versions of a document will tend to also look quite similar, unless the changes
+are numerous and fine grained, making the relationship between the LD of the documents and the LD of 
+the signatures quite predictable.
+
+A pair of signatures will thus tend to differ in locations proportional to where their pre-images differ.  
+For instance, if you compare a document to itself embedded in an HTML page, the signatures will differ mostly at the 
+beginning, where the header is, and in at most a few places elsewhere, where formatting tags have been inserted.  
+
+The LD of equal length sequences of randomly chosen text tends to be slightly less than the length of the text
+by a rather consistent proportion because a few characters will happen to line up, but most will not. 
+This gives a useful benchmark by which related text can be spotted surprisingly accurately.
+Even a small divergence of the LD of a pair of signatures thus signals a relationship between documents even
+if they have been extensively changed.
+
+For instance, the signatures two translations of Dante's Inferno done a century apart are still recognizably related, as are
+the same translation alone, and as part of the three volume set, and moreover, the signatures can be compared
+at a rate of several thousand per second. 
+
+</p>
 
 <p>The signatures can also be used to compare documents that are presumed to be similar to see approximately where they differ. Is one signature more or less contained in another? The same will be true of the corresponding documents. Are differences sprinkled throughout? One document is probably an edited version, or perhaps a text document converted to HTML. Etc.</p>
 
