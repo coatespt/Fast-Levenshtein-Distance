@@ -198,47 +198,48 @@ the rate of computation for the estimate, and the normalized error of the estima
 }.
 \vspace {10 mm}
 
-The compression rate was $C=101$ and $n=9$. Notice that the estimates are about 9,300 times faster than computing LD itself,
+The compression rate was $C=101$ and $n=9$. Notice that the estimates are about 9,700 times faster than computing LD itself,
 which is about what would be expected from a compression rate of 101.
 
 \vspace {10 mm}
 \begin {tabular} {|l|l|l|l|l|l|r|} \hline \hline
  f-1  		& f-2 		& LD-orig	&LD/sec		& Est 		& Est/sec	 & Err  	\\ \hline
  \hline
- 24,767 	& 24728  	& 39  		& 0.0954	& 0  	 	& 904 	 	& 0.0016 	\\ \hline
- 24,728 	& 23,624  	& 1192  	& 0.1152	& 1364   	& 1259 	 	& 0.0069 	\\ \hline
- 24,728 	& 23,979  	& 767  		& 0.1253	& 876   	& 1211 	 	& 0.0044 	\\ \hline
- 24,453 	& 22,111  	& 2948  	& 0.1405	& 4236   	& 1307 	 	& 0.0527 	\\ \hline
+ 24,767 	& 24728  	& 39  		& 0.4026	& 0  	 	& 3906 	 	& 0.0016 	\\ \hline
+ 24,728 	& 23,624  	& 1192  	& 0.4013	& 1364   	& 4032 	 	& 0.0069 	\\ \hline
+ 24,728 	& 23,979  	& 767  		& 0.4002	& 876   	& 3898 	 	& 0.0044 	\\ \hline
+ 24,453 	& 22,111  	& 2948  	& 0.4755	& 4236   	& 5277 	 	& 0.0527 	\\ \hline
 \end {tabular}
 \vspace {10 mm}
 
 
 Here is the same table again, with $C=200$.
-Note that the error has increased somewhat,  and the speed has approximately tripled.
+Note that the error has increased somewhat,  and the speed has quadrupled.
 
 \vspace {10 mm}
 \begin {tabular} {|l|l|l|l|l|l|r|} \hline \hline
  f-1  		& f-2 		& LD-orig	&LD/sec		& Est 		& Est/sec	 & Err  	\\ \hline
  \hline
- 24,767 	& 24728  	& 39  		& 0.0949	& 0  	 	& 3448 	 	& 0.0016 	\\ \hline
- 24,728 	& 23,624  	& 1192  	& 0.1003	& 607   	& 1003 	 	& 0.0237 	\\ \hline
- 24,728 	& 23,979  	& 767  		& 0.0987	& 810   	& 3724 	 	& 0.0017 	\\ \hline
- 24,453 	& 22,111  	& 2948  	& 0.1385	& 6162   	& 5305 	 	& 0.1314 	\\ \hline
+ 24,767 	& 24728  	& 39  		& 0.4075	& 0  	 	& 12,738 	 	& 0.0016 	\\ \hline
+ 24,728 	& 23,624  	& 1192  	& 0.4075	& 607   	& 13,422 	 	& 0.0237 	\\ \hline
+ 24,728 	& 23,979  	& 767  		& 0.4523	& 810   	& 16,806 	 	& 0.0017 	\\ \hline
+ 24,453 	& 22,111  	& 2948  	& 0.5128	& 6162   	& 20,408 	 	& 0.1314 	\\ \hline
 \end {tabular}
 \vspace {10 mm}
 
 
 And again, with $C=307$.
-Note that the error rate doesn't seem much worse, but the speed has tripled again again.
+Note that the error rate doesn't seem much worse, but the speed has increased by a factor of 2.6, which is almost
+exactly what you'd expect for a 50\% increase in compression rate (2.25.)
 
 \vspace {10 mm}
 \begin {tabular} {|l|l|l|l|l|l|r|} \hline \hline
  f-1  		& f-2 		& LD-orig	&LD/sec		& Est 		& Est/sec	 & Err  	\\ \hline
  \hline
- 24,767 	& 24728  	& 39  		& 0.0953	& 0  	 	& 6578 	 	 & 0.0016 	\\ \hline
- 24,728 	& 23,624  	& 1192  	& 0.0987	& 1192   	& 10928	 	 & 0.0338 	\\ \hline
- 24,728 	& 23,979  	& 767  		& 0.0996	& 356   	& 9090 	 	 & 0.0166 	\\ \hline
- 24,453 	& 22,111  	& 2948   	& 0.1053	& 4286   	& 11,834 	 & 0.0547 	\\ \hline
+ 24,767 	& 24728  	& 39  		& 0.3891	& 0  	 	& 33,898 	 & 0.0016 	\\ \hline
+ 24,728 	& 23,624  	& 1192  	& 0.4307	& 1192   	& 42,553 	 & 0.0338 	\\ \hline
+ 24,728 	& 23,979  	& 767  		& 0.3942	& 356   	& 44,444  	 & 0.0166 	\\ \hline
+ 24,453 	& 22,111  	& 2948   	& 0.4335	& 4286   	& 46,511 	 & 0.0547 	\\ \hline
 \end {tabular} 
 
 \section{Limitations and Considerations}
@@ -277,7 +278,8 @@ The technique may be useful for:
   			every version\footnote{
  				{\em The National Software Reference Library} (NSRL) provides a repository
  					of MD-5 and SHA-1 file signatures of millions of software files for use
- 					computer forensic investigations. 
+ 					computer forensic investigations. Many trivially different versions of a given file often 
+					exist, differing only by dates or versioning information.
 				}. 
   		}
   		\item{
