@@ -5,10 +5,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
+
 
 //import com.a140.util.file.FileAndTimeUtility;
 import com.levenshtein.leven.ICompressor;
@@ -128,6 +130,7 @@ public class Demo {
 	protected void createSigs(String indir) throws Exception {
 		log.info("createSigs() starting");
 		String firstLine=null;
+		int TEST_ITERATIONS=2000;
 		for(int i=0; i<inputFileList.size(); i++){
 			for(int j=i+1; j<inputFileList.size(); j++){
 				String f1 = inputFileList.get(i);
@@ -140,25 +143,39 @@ public class Demo {
 				int longerOriginal = Math.max(cont1.length(), cont2.length());
 				int shorterOriginal = Math.min(cont1.length(), cont2.length());
 
+				getCompressor().setC(c);
+				getCompressor().setN(n);
 				String sig1 = getCompressor().compress(cont1);
 				String sig2 = getCompressor().compress(cont2);
 				
 				int expectedForRandom = sd.expectedDistance(cont1.length(), cont2.length());
 
 				int est = sd.getLDEst(sig1, sig2, longerOriginal, shorterOriginal);
+				Date start=new Date();
 				int act = sd.getLD(cont1, cont2);
+				Date end=new Date();
+				double ldRateSec = FileAndTimeUtility.rateSec(1, start, end);
+				start=new Date();
+				for(int k=0; k<TEST_ITERATIONS; k++){
+					sd.getLD(sig1, sig2);
+				}
+				end=new Date();
+				double estRateSec = FileAndTimeUtility.rateSec(TEST_ITERATIONS, start, end);
+
 				double actLdToLen=act/(double) longerOriginal;
 				double unscldErrPln=act==0?0:Math.abs(est-act)/(double)act;
 				double scaledErrorPlain=(actLdToLen==0||unscldErrPln==0)?0:(unscldErrPln*actLdToLen); 
 
-				System.out.println(logLine(f1, f2, longerOriginal, shorterOriginal, expectedForRandom, act, est, scaledErrorPlain, firstLine));
+				System.out.println(logLine(f1, f2, longerOriginal, shorterOriginal, expectedForRandom, act, est, scaledErrorPlain, ldRateSec, estRateSec,  firstLine));
 			}
 		}
 		log.info("createSigs() completed");
 	}
 	
-	private String logLine(String f1, String f2, int lgrOrig, int shtrOrig, int expctd, int act, int est, double scdErr, String firstLine){
+	int ct=0;
+	private String logLine(String f1, String f2, int lgrOrig, int shtrOrig, int expctd, int act, int est, double scdErr, double ldRateSec, double estRateSec, String firstLine){
 		StringBuffer sb = new StringBuffer();			
+		sb.append(++ct);
 		sb.append("    f1: ");
 		sb.append(f1);
 		sb.append("\t f2: ");
@@ -177,6 +194,10 @@ public class Demo {
 		sb.append(est);
 		sb.append("\tscld err: ");
 		sb.append(String.format("%.4f",scdErr));
+		sb.append("\tldRateSec/estRateSec: ");
+		sb.append(String.format("%.4f",ldRateSec));
+		sb.append("/");
+		sb.append(String.format("%.4f",estRateSec));
 		sb.append("\tchanges: ");
 		sb.append(firstLine);
 		return sb.toString();
@@ -230,15 +251,17 @@ public class Demo {
 	private String descriptiveMsg(){
 		StringBuffer sb = new StringBuffer();
 		sb.append("App. 99.9 of execution time is spent computed LD of the long strings. Signature comparisons are sub-millisecond.\n");
-		sb.append("\toutput consist of: ");
-		sb.append("\t\tfile names\n");
-		sb.append("\t\tfile lengths\n");
-		sb.append("\t\tdifference in the two file lenghts");
-		sb.append("\t\tlExpected LD for random text of that length.\n");
-		sb.append("\t\tthe actual LD for the files\n");
-		sb.append("\t\tthe estimate by the heuristic\n");
-		sb.append("\t\tthe scaled error, i.e., adjusted by the magnitude of the LD\n");
-		sb.append("\t\tDescriptive comment, if any, from first line of each file.\n");
+		sb.append("Number of pairs to be computed:" + (inputFileList.size() * ((inputFileList.size()-1)/2)));
+		sb.append("\n");
+		sb.append("output consist of:\n");
+		sb.append("\tfile names\n");
+		sb.append("\tfile lengths\n");
+		sb.append("\tdifference in the two file lenghts");
+		sb.append("\tlExpected LD for random text of that length.\n");
+		sb.append("\tthe actual LD for the files\n");
+		sb.append("\tthe estimate by the heuristic\n");
+		sb.append("\tthe scaled error, i.e., adjusted by the magnitude of the LD\n");
+		sb.append("\tDescriptive comment, if any, from first line of each file.\n");
 		return sb.toString();
 	}
 	

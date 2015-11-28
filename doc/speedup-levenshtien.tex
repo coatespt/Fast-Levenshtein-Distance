@@ -7,9 +7,9 @@
 %\documentclass[html]{book}    % Specifies the document style. 
 \usepackage{graphicx}
 
-\title{A Fast Metric of Document Similarity}  % Declares the document's title. 
+\title{Estimating Levenshtein Distance Using Signatures}  % Declares the document's title. 
 \author{Peter Coates}    % Declares the author's name. 
-\date{September 13, 2011}   % Deleting this command produces today's date. 
+\date{November 24, 2015}   % Deleting this command produces today's date. 
 
 % Define numbers with units to use wherever, e.g., picture size
 \def\hpicwidth{1.33in}
@@ -20,173 +20,134 @@
 \maketitle                 % Produces the title. 
 
 { \em \noindent Abstract: 
-This document presents a heuristic for quickly estimating the 
-edit-distance of document pairs, by comparing metadata associated with each
-file.
-Metadata for typical Web pages is from five to twenty bytes in size, 
-and edit-distance for a pair of documents can be estimated in less 
-than $100\mu$ seconds on generic processors.
+This document presents a heuristic that infers an estimate of the Levenshtein Distance of 
+a pair of documents by comparing variable-length document signatures. 
+The size of the signatures is configurable and is typically between 0.003 to 0.01 of the original document size. 
+Using such signatures, the Levenshtein distance of pairs of documents such as Web pages, articles, etc., can be 
+usually be estimated in a few tens of $\mu$-seconds on generic processors.
 
-Locality-sensitive hashing, shingling, and similar heurisics for
-high-speed duplicate detection, tend to excel at making a fast, binary decision
-about whether a document duplicates one that has been seen before, but
-they have relatively high rates of errors of both the first and second kind. 
-
-This heuristic differs from such algorithms in that it gives a flexible
-measurement of the degree of similary of {\em pairs} of texts, with very low
-error rates. 
-Therefore, it is ideally suited for removing type-one errors from the ouput of
-de-duplication algorithms.
-It is also capable of detecting more complex relationships between texts
-than near-duplication.
-For instance, it can be used to recognize that one text embeds another,
-to estimate where and/or how diffuse the differences between two documents are, 
-or to recognize that two files are textually related, despite being very different.
+This function of this heuristic differs from that of locality-sensitive hashing and similar approaches in to way: 
+(1) It gives a numeric estimate of the degree of similary of pairs of texts, rather than a binary classification of related/not-related and
+(2) The locations of differences in the signatures correspond roughly to the locations of the corresponding differnces in 
+the underlying documents.
 }
 
 %
 % Text here goes above the section-one line
 %
 % space the draft notice out a little from the rest of the abstract.
-\section{Introduction}
+\section{Levenshtein Distance}
 
-Determining whether or not two documents are exactly the same is a linear-time
-operation, i.e, two texts can be compared more or less as fast as they 
-can be read. 
+Levenshtein distance ($LD$) is a measure of the similarity of two sequences. 
+It can be applied to any kind of sequence, but in the interest of clarity, we will discuss it in terms of text strings. 
+For strings $S_{1}$ and $S_{2}$, $LD(S_{1},S_{2})$ is their ``edit distance,'' i.e., the number of single-character 
+additions, deletions, or substitutions, required to turn  $S_{1}$ into $S_{2}$. 
 
-If you will be testing the same texts repeatedly, and can tolerate a minute
-possibility of error, you can do much better.
-Texts can be hashed to smaller values, such as 64-bit or 128-bit integers, 
-in linear time. 
-Thereafter, duplicates can be detected by comparing the fixed-size hashed
-metadata. 
-If two documents are identical, the hashes will always be identical too 
-(although there is a vanishingly small chance of a false positive, i.e., that
-non-identical documents will be categorized as identical.)
+Pairs of identical strings have an LD of zero. 
+The upper bound for LD of a pair is the length of the longer string, but this can only be reached in special cases, for instance,
+for pairs of text that have no characters in common, or in which both have length zero, etc.
+The LD of pairs of random texts is otherwise always less than the upper bound, and 
+for documents of the same length, in the same language, the ratio of the LD to the length of the text for 
+random pairs groups fairly tightly around a characteristic mean.
 
-Not only is this technique computationally efficient, once the hashes have been 
-prepared, you no longer need to be in possession of the originals to execute 
-the comparison.
-Moreover, you can structure your metadata collection for efficient search, e.g.,
-by sorting, or by insertion into a hash table or set.
-Unfortunately, this strategy only works for documents that are identical down to
-the last bit.
+LD is useful, but it has two drawbacks: 
+(1) Using it requires that you be in possession of the original texts and 
+(2) It is prohibitively slow for large texts because its performance is quadratic, i.e., it executes in 
+time and space proportional to the product of the lengths of the two inputs ({\em O(mn)}).
 
-Detecting near-duplicates, i.e., pairs of documents that are almost the same, is
-a closely related, but more difficult task. 
-The need for such near-duplicate detection arises in many applications including:
-Web crawling (the Internet is rife with duplicate pages,) merging large 
-document databases, detecting plagiarism and other misuse of textual data, etc.
+The following example illustrates the implications of quadratic performance. 
+A Java implementation of LD executing on a $2.6$ GHZ, 8GB laptop executes LD on pairs of $40$-byte strings at approximately 
+$38,000$ pairs/sec, while strings of roughly $100$ times that length, $4$KB, are processed at only $3.7$ pairs/sec---about 
+$100^{2}=10,000$ times more slowly. 
+Files of length 50K proved too big to process at all because of memory limitations. 
 
-There are numerous techniques for generating metatdata that
-achieve for near-duplicates much of what hashing does for exact 
-duplicate detection; SimHash, shingling and locality-sensitive hashing are examples.
-While these techniques allow incredibly fast detection near duplicates, unlike
-hashing, they tend to suffer from high error rates, both for false-positives and
-for false negatives (a.k.a, errors of precision and recall, or type-1 and type-2 errors.)
-For instance, the duplicate detection algorithm used by Google's Web crawlers,
-which must quickly find duplicates among tens of billions of already-seen Web
-pages, reportedly has about a 25\% error rate for both false postiives and false
-negatives.
+\section{Estimated LD} 
 
-\subsection{Levenshtein Distance}
+Because the ratio of LD to document length varies little, an approximation of the LD of two files can be 
+very useful, for instance, for determining whether two files are near-duplicates, or determining whether it is probable
+that two documents are more distantly related. 
 
-Levenshtein distance ($LD$) is one of many metrics of sequence similarity
-that could in principle be used for accurate near-duplicate detection.
-Most often applied to text strings, LD is the ``edit distance'' between the
-strings.  
-I.e., for strings  $S_{1}$ and $S_{2}$,  $LD(S_{1},S_{2})$ is the number of 
-single-character additions, deletions, or substitutions, that are required to
-convert $S_{1}$ into $S_{2}$. 
-Pairs of identical strings have an LD of zero, and the upper bound for LD is 
-the length of the longer string\footnote{
-	The upper bound is rarely reached unless the files are deliberately constructed
-	to be maximally distant, e.g., texts that have no characters in common, or one
-	text has length zero, etc.
-}.
+We estimate LD from variable-length signatures that are prepared by compressing the inputs in such a way that the LD of the 
+signatures is in proportion to the LD of the two originals.  
+The process need not be reversible, so very high compression rates can be used---anywhere from 25X to 300X 
+would be used for text. 
 
-Edit distance is a great way to define whether two documents are
-near-duplicates, but it has two drawbacks: (1) it is not metadata based, meaning
-you need possession of the original texts, and (2) it is very slow to compute for
-large texts, executing in time and space proportional to the product of the
-lengths of the two inputs ({\em O(m*n)}).
-For example, a simple implementation executing on a $2.6$ GHZ
-laptop processed pairs of $40$-byte strings at approximately $38,000$
-pairs/sec, while strings of roughly $100$ times that length, $4$KB, were processed at 
-only $3.7$ pairs/sec---about $100^{2}=10,000$, times more slowly. 
+As LD is quadratic, shrinking the signatures results in a disproportionately large speedup--roughly the square of the 
+compression rate. 
+At such high compression rates, information is necessarily lost, so the estimate is rarely exact, but compression rates 
+high enough for very fast estimates still give reasonably good results with text. 
+Moreover, the results tend to be better in the cases where the LD is relatively small, which is usually what one is interested in.
 
-\section{Estimating LD} 
+For instance, the text file backing this document is about 20K characters in length, and
+the LD of two unrelated text files of that size should be about $14,666$. 
+If the document's actual LD from a second document is 250, and the estimated LD is 190, 
+this error, $0.76$, normalized by the original file length is only 0.0351, i.e., about 3\%.
+Conversely, if comparison to another file results in an estimated LD that is close to the expected value for random 
+text, the documents are very unlikely to be near duplicates (although they can still be related in other ways.)
 
-Even a rough approximation of LD would be more than enough to determine whether 
-two files are near-duplicates. 
-Surprisingly, in the most useful cases, it is possible make a
-reasonably accurate estimate the LD of pairs of documents very quickly, 
-from a small amount of metadata.
+\section{How It Works} 
+The compression procedure described below produces an average of approximately one character of signature
+for $C$ characters of input text. 
+Text is processed in successive overlapping neighborhoods of size $N$, the size of which limits the amount of the output 
+that can be affected by a local difference in the input.  
 
-The metadata is prepared by compressing the inputs in such a way that the LD of
-the compressed strings is approximately proportional to the LD of the originals. 
-Because we don't need be able to re-inflate the compressed strings, we
-can choose a very lossy algorithm.
+Any size alphabet can be used for the signatures, even binary 0 and 1, but because LD's run-time is dominated by the number of 
+elements in the sequence, the larger the output alphabet, the more efficient the computation.
+The only real limit on that principle is that the neighborhood size must be large enough that all possible characters in the
+alphabet can actually be used.
 
-The compression procedure described below would typically be set to produce
-approximately one bit of metadata\footnote{
-Although the algorithm can use any size alphabet for output, we describe here the 
-use of only two output characters, 0 and 1.
-Two characters are convenient because they are easy to pack into bit-strings,
-and provide the most information per bit of output, which is advantageous for 
-transmission and storage.
-On the other hand, the two-character alphabet is not optimal for processing speed, 
-which is primarily a function of the number of characters in the two strings.
-There is more information per character in a diverse alphabet.
-} for $C$ bytes of text, with $C$
-chosen between 25 and 200\footnote{For text---much higher compression rates can be
-used for binaries.} The main condition is that the files must be large enough
-for the chosen $C$.
+Eight-bit bytes or 16-bit integers are the easiest elements to deal with, because languages and hardware work most 
+naturally in them. 
+Therefore, for purposes of illustration we'll talk in terms of characters, which in some languages are 8-bit, and in others are 16-bit. 
+We will further limit the output to the printable subset of ASCII, so that the output can be inspected. 
 
-A value of C=100, adequate for Web pages, and would yield approximately 100:1
-logical compression, but about 800:1 of physical compression. 
-Therefore, a 10KB Web page would yield about 13 bytes metadata.
+The considerations when choosing $N$ and $C$ in the algorithm described below are that 
+the larger the value of $C$, the smaller is the signature, and the faster the estimate, but the lower the accuracy.
+Choose a $C$ that is small enough to generate a meaningful amount of output, and large enough that the resulting signatures
+can be compared quickly.
 
-The time savings for compression is large, because LD is a quadratic operation.  
-This means that compressed inputs accelerate the computation by the {\em square}
-of the compression factor ($C$).
-For the example above, with $C=100$, pairs of 10KB Web pages, can be compared 
-at a rate of several thousand pairs/second.
+A larger $N$ causes the compression to consider more characters as ``local'' to a given position, which increases the 
+entropy of the hashes that are  used internally, but blurs the results, because a difference in the text affects output corresponding
+to as much as $2n$.  Values of $8$ to $20$ are reasonable.
 
 \section{The Heuristic}
 Two strings $S_{1}$ and $S_{2}$ are processed as follows:
 
 \begin{enumerate}
-  	\item {Choose $c$, a compression factor, say, $c=100$.}
-  	\item {Choose $n$, a neighborhood size, say, $n=10$.}
+  	\item {Choose $c$, a compression factor, e.g., $c=100$.}
+  	\item {Choose $n$, a neighborhood size, e.g., $n=10$.}
 	\item {Compress $S_{1}$ and $S_{2}$ into signatures $Sc_{1}$ and $Sc_{2}$,
 		using the algorithm given below, parameterized by $c$ and $n$.}
 	\item {Execute the standard LD algorithm on results of the previous step, i.e.,
 			$LD(Sc_{1},Sc_{2})$.}
-	\item {Scale the result by muliplying\footnote{
-		When using LD as a metric of gross similarity, it is only the
-		ratio of the calculated LD to the upper bound that we actually care 
-		about, rather than the integer LD score per se. 
-		} by $c$. }
+	\item {Interpret the result. How depends on what you are trying to achieve. 
+		\begin{enumerate}
+			\item{An LD estimate can be computed by adding the difference in the lengths of the signatures, 
+				to the length of the shorter signature, and  multiplying the sum by $C$ and by a ``fudge factor'' which is the expected
+				proportion by which LD of equal-length random strings is smaller than their length.
+			}	
+			\item{ To discover whether two files are related, compare their LD to the value expected for random
+				text of the same lengths.
+				The expected value function will vary by document type and must be determined empirically.
+			}	
+		\end{enumerate}	
+	}
 \end{enumerate}
 
 \subsection{Compression}
 We want a signature string that has the following properties:
 \begin{enumerate}
 	\item {
-		The signature should be a pseudo-random string of bits that is much smaller
-		than the orginal text.
+		The signature should be a pseudo-random string that is much smaller than the orginal text.
 	}
 	\item{
-		If a substring of the input results in an output bit, no change to the
-		input that is more than a fixed number of characters distant should affect
-		it. 
+		The signature output for a given substring of the input should not be affected by any character in the input that
+		is more than a fixed distance away.  
 	}
 	\item{
-		A source string should compress to the same sequence of bits,
-		regardless of whether it is compressed in isolation, or compressed when 
-		embedded in a larger string, except for at most a few bits
-		in at either end.
+		An input string should compress to the same sequence of characters, regardless of whether it is compressed in 
+		isolation, or compressed when embedded in a larger string, except for at most a bounded number of 
+		characters at either end.
 		}
 \end{enumerate}
 
@@ -194,235 +155,137 @@ We want a signature string that has the following properties:
 A compressed signature with these properties can be computed as follows:
 \begin{enumerate}
   	\item {
-  		Choose an integer, $k$, $0\leq k < c$.
+  		Choose an arbitrary integer, $k$, $0\leq k < c$.
 	}
-	\item{Initialize an accumulator variable, $s$, to the sum of the first $n$
-	characters.}
-	\item {
-		Thereafter, starting at the $n$'th position and proceeding from 
-		left to right, one character at a time, until the string is exhausted, 
-		at each position, $p$:
+	\item{For each position, $p$, in the input, from $0$ to {\em input.length-$n$}:
 		\begin{enumerate}
-			\item { Remove the $p-1$'th character from $s$. }
-			\item { Append the the $p+n$'th character to $s$.}
-			\item{  Compute a pseudo-random integer, $i=s \pmod c$, which is 
-				a psuedo-random hash of the current $n$ characters.} 
-			\item { If $i=k \pmod c$, emit a bit that is a function of $i$. }
+			\item {Hash the $n$-length substring starting at position $p$ to a pseudo-random integer, $H_{p}$.}
+			\item { If $k=H_{p}\pmod C$, emit a character that is a pseudo-random function of $H_{p}$. }
 			\item { Otherwise emit nothing.}
 		\end{enumerate}
 	}	
-	\item {The resulting sequence of bits is the compressed string. They would
-	ordinarily be stored in a bit field.}
+	\item {The resulting sequence of characters is signature.}
 \end{enumerate}
 
-At each position in the input, this procedure will emit either a
-pseudo-random bit (app. $1/c$ of the time) or nothing (app. $1-1/c$ of the
+At each position in the input, this procedure will emit either a pseudo-random character (app. $1/c$ of the time) or nothing (app. $1-1/c$ of the
 time.) Thus, on average, we get a signature that is $1/c$ the size of the input.
 
-If $\Sigma$ is the input alphabet, and $\sigma = |\Sigma|$ is the 
-cardinality of the input alphabet, only $\sigma n/c$ distinct sums
-will result in output. 
+The hash function itself can be anything that thoroughly scrambles $n$ characters into a pseudo-random value. 
+For the demo quoted below, for each neighborhood, each of the {\em char} values is successively XOR'd into a long integer, at a position shifting 
+left by eight bits each time, with the position wrapping around if the number of 
+shifts exceeds eight.
 
-For most purposes, in the useful range of $c$ and $n$, both are small enough
-that each of the values in the set, 
-$\lbrace i \quad |\quad 0 \leq i < \sigma n, \quad i \equiv k\pmod c \rbrace$, 
-can be mapped in a look-up table to 1 or 0\footnote{We are using 0 and 1, but
-in general, it can be any alphabet, such as a the set of printable ASCII
-characters.}.
+If the output alphabet is a subset of ASCII, of size $\alpha$, the pseudo-random function to choose an output {\em char} from $H_{p}$ can be implemented as simple 
+array of chars, and the choice made by selecting the value at the index $H_{p}\pmod\alpha$ 
 
-Thus, compression is fast requiring only three
-arithmetic operations and a lookup, per character of input.
-	
-Note that given reasonable values of $n$ and $c$, most small differences 
-between two inputs do not result in {\em any} difference in the 
-corresponding signatures, because the procedure emits a bit on average 
-for only $1/c$ of the character positions in the source.
+Note that given reasonable values of $n$ and $c$, most small differences between two inputs do not result in {\em any} difference in the 
+corresponding signatures, because the procedure emits a character on average for only $1/c$ of the character positions in the source.
 
 \section{Test Results}
-The heuristic was tested primarily on an an earlier version of this \LaTeX \,
-document having 13,508 characters and 315 lines. 
-Corrupted versions of this file, and other files of the same size, but with
-unrelated contents, were also used in some tests.
 
-\subsection{Speed}
-With the text pre-loaded into memory on a on 2.6 GHZ processor, plain LD,
-applied to a pair of uncompressed 13,508 byte test files, executed at $0.87$
-pairs/second.
+Tests were performed on text pre-loaded into memory on a MacBook Pro with 2.6 GHZ processor. 
+All tests were executed on a single thread. 
 
-Similar documents (also preloaded into memory to eliminate file-reading time)
-were compressed (on a single thread) at between 7,700 and 10,000 documents per
-second (104,000,000 to 135,000,000 characters/second,) depending upon compression rate.
+A 4,865 character text string was compressed 10,000 times, at $C=101$, in 3,178 milliseconds, i.e., 3146 {\em file compressions/sec},
+or, 15,308,239 {\em chars/sec}.  The effect of using different values of $c$ on compression is negligible.
 
-Estimaed LD was computed for the same pairs of files, using metadata prepared
-with a range of compression rates, on unrelated 13,508 character text files.
-The table blow gives the resulting signature sizes and computation rates.
+Estimated LD was computed for pairs of versions of the a 27KB text files (from a Gutenberg book) that had been modified in 
+various ways---a few random lines deleted, blocks of lines deleted, random words deleted, etc. 
+The table below gives the original file sizes, the actual LD, the rate  of computation for LD,  the estimated LD, 
+the rate of computation for the estimate, and the normalized error of the estimate\footnote{ 
+	Normalized, in this context, means adjusted for how much of the file was affected---e.g, an estimate of zero, 
+	and an actual LD of 39 is a very small error in a 24K file.
+}.
+\vspace {10 mm}
+
+The compression rate was $C=101$ and $n=9$. Notice that the estimates are about 9,300 times faster than computing LD itself,
+which is about what would be expected from a compression rate of 101.
 
 \vspace {10 mm}
-\begin {tabular} {|l|l|l|l|l|r|} \hline \hline
- $C$ 	& $N$ & Pairs/sec & Metadata-bits & Metadata-bytes \\ \hline
+\begin {tabular} {|l|l|l|l|l|l|r|} \hline \hline
+ f-1  		& f-2 		& LD-orig	&LD/sec		& Est 		& Est/sec	 & Err  	\\ \hline
  \hline
- 
- 50 	& 4  & 1,388		& 316 	& 40 \\ \hline
- 
- 100 	& 4  & 10,000 		& 72 	& 9  \\ \hline
- 
- 200 	& 4  & 20,000 		& 22  	& 3  \\ \hline
- 
-\end {tabular} 
-
-\subsection{Accuracy of Estimation}
-
-To test sensitivity and recall, comparisons were made with a range of
-compression levels, with the original 13,508 character file, modified in several ways:
-
-\begin{itemize}    
-  \item { Random characters were substituted for $1/p$ of the characters in the
-  text, for a range of $p$ from  0.01 to 1.5.}
-  \item { The text was modified by adding from one to ten blocks of 500
-  charaters.}
-  \item { 
-  	The original 13K text was compared to itself with an equal-length document
-  	concatenated onto the beginnning and the end. }
-\end{itemize}    
+ 24,767 	& 24728  	& 39  		& 0.0954	& 0  	 	& 904 	 	& 0.0016 	\\ \hline
+ 24,728 	& 23,624  	& 1192  	& 0.1152	& 1364   	& 1259 	 	& 0.0069 	\\ \hline
+ 24,728 	& 23,979  	& 767  		& 0.1253	& 876   	& 1211 	 	& 0.0044 	\\ \hline
+ 24,453 	& 22,111  	& 2948  	& 0.1405	& 4236   	& 1307 	 	& 0.0527 	\\ \hline
+\end {tabular}
+\vspace {10 mm}
 
 
-
-\subsubsection{Numerous Small Changes}
-The following table shows the results of estimating LD  on pairs of texts that have a 
-range of proportions of single characters changed at random. 
-This test simulates many minor editing differences, light formatting, etc. 
-Results for a range of compression rates are shown.
-
-The fields are: compression rate, neighborhood size, percentage of random chars that differ, 
-the true LD for the documents, the estimated LD, the LD computed for two
-completely unrelated files of this size, and the the estimated LD and the LD of 
-unrelated files of the same size. 
-
-The LD of the two 13,508 character texts, uncompressed, is 12,430. 
-This is a difficult case for estimated LD, because the numerous small changes
-affect a large proportion of the neighborhoods in the sample texts.
+Here is the same table again, with $C=200$.
+Note that the error has increased somewhat,  and the speed has approximately tripled.
 
 \vspace {10 mm}
 \begin {tabular} {|l|l|l|l|l|l|r|} \hline \hline
- $C$ 	& $N$ & \% Chars Subst'd & True LD	& Est'd LD	& Max LD & Error \\
- \hline \hline
- 
- 50 	& 4  & 1 				& 136  		& 333 		& 12,430 &	0.0267	\\ \hline
- 50 	& 4  & 5 				& 777  		& 1,000 	& 12,430 &	0.0864	\\ \hline
- 50 	& 4  & 10 				& 1,438  	& 2,416 	& 12,430 &	0.1943	\\ \hline
- 50 	& 4  & 20 				& 2,689 	& 2,350 	& 12,430 &	0.1890	\\ \hline
- 50 	& 4  & 30 				& 4,083  	& 3,700 	& 12,430 &	0.2976	\\ \hline
- 
- 100 	& 4  & 1 				& 119  		& 66 		& 12,430 &	0.0483	\\ \hline
- 100 	& 4  & 5  				& 764		& 600 		& 12,430 &	0.2976	\\ \hline
- 100 	& 4  & 10 				& 1,451  	& 1,066		& 12,430 &	0.0859	\\ \hline
- 100 	& 4  & 20 				& 2,740  	& 1,666 	& 12,430 &	0.1343	\\ \hline
- 100 	& 4  & 30 				& 3,981  	& 1,833 	& 12,430 &	0.1478	\\ \hline
- 
- 200 	& 4  & 1	 			& 115  		& 66 		& 12,430 &	0.0053	\\ \hline
- 200 	& 4  & 5	 			& 814  		& 200 		& 12,430 &	0.0161	\\ \hline
- 200 	& 4  & 10 				& 1,461  	& 266 		& 12,430 &	0.0322	\\ \hline
- 200 	& 4  & 20 				& 2,841  	& 800 		& 12,430 &	0.0645	\\ \hline
- 
-\end {tabular} 
+ f-1  		& f-2 		& LD-orig	&LD/sec		& Est 		& Est/sec	 & Err  	\\ \hline
+ \hline
+ 24,767 	& 24728  	& 39  		& 0.0949	& 0  	 	& 3448 	 	& 0.0016 	\\ \hline
+ 24,728 	& 23,624  	& 1192  	& 0.1003	& 607   	& 1003 	 	& 0.0237 	\\ \hline
+ 24,728 	& 23,979  	& 767  		& 0.0987	& 810   	& 3724 	 	& 0.0017 	\\ \hline
+ 24,453 	& 22,111  	& 2948  	& 0.1385	& 6162   	& 5305 	 	& 0.1314 	\\ \hline
+\end {tabular}
+\vspace {10 mm}
 
-\subsubsection{A Few Large Changes}
-The following table shows the results of estimating LD  on pairs of texts that have a 
-several large blocks of random text inserted throughout. 
-The original file is 13,508 characters, and the modified files are up to 5000
-characters larger. 
-This test simulates what might be seen when a plain text
-document is converted to one or more HTML page, a Web page is heavily
-modified.
-Results for a range of compression rates are shown.
 
-The fields are: compression rate, neighborhood size, the number of added blocks, 
-the size of the blocks, the actual LD, the estimated LD, 
-and the ratio of the error of the estimate to the LD of the original and a  
-random text document the size of the modified file.
-
-The smaller the value in the last column, the better the LD estimate.
+And again, with $C=307$.
+Note that the error rate doesn't seem much worse, but the speed has tripled again again.
 
 \vspace {10 mm}
 \begin {tabular} {|l|l|l|l|l|l|r|} \hline \hline
- $C$ 	& $N$ & Num-Blocks& Block-Size & True-LD	& Est'd-LD & Est'd-LD/Max \\
- \hline \hline
- 
- 200 	& 4  & 1 	& 500		& 500  		& 200 		& 	0.0274	\\ \hline
- 200 	& 4  & 5 	& 500		& 2,500 	& 2,200 	&	0.0245	\\ \hline
- 200 	& 4  & 10 	& 500		& 5,000  	& 6,000 	&	-0.2401	\\ \hline
- 
- 100 	& 4  & 1 	& 500		& 500  		& 700 		&	-0.0182	\\ \hline
- 100 	& 4  & 5  	& 500		& 2,500		& 2,800 	&	-0.0246	\\ \hline
- 100 	& 4  & 10 	& 500		& 5,000  	& 4,700   	&	-0.0145	\\ \hline
- 
- 50 	& 4  & 1	& 500		& 500  		& 700 		&	-0.0182	\\ \hline
- 50 	& 4  & 5	& 500 		& 2,500  	& 2,100 	&	0.0327	\\ \hline
- 50 	& 4  & 10 	& 500		& 5,000  	& 5,450 	&	-0.0690	\\ \hline
- 
+ f-1  		& f-2 		& LD-orig	&LD/sec		& Est 		& Est/sec	 & Err  	\\ \hline
+ \hline
+ 24,767 	& 24728  	& 39  		& 0.0953	& 0  	 	& 6578 	 	 & 0.0016 	\\ \hline
+ 24,728 	& 23,624  	& 1192  	& 0.0987	& 1192   	& 10928	 	 & 0.0338 	\\ \hline
+ 24,728 	& 23,979  	& 767  		& 0.0996	& 356   	& 9090 	 	 & 0.0166 	\\ \hline
+ 24,453 	& 22,111  	& 2948   	& 0.1053	& 4286   	& 11,834 	 & 0.0547 	\\ \hline
 \end {tabular} 
-
 
 \section{Limitations and Considerations}
 
 \subsection{Unrelated Documents}
 
-LD, whether true or estimated, is not a good measure of similarity for files 
-that are extremely different, because the LD of random text files of the same 
-length is usually far from the theoretical upper bound, which is the length of the 
-longer string. 
-A significant percentage of the characters in real text will almost always
-randomly line up in such a way as to not require an edit operation,or will
-align after an insertionor deletion edit is done elswhere. 
-Therefore, a small amount of similarity is hard to distinguish from 
-background noise.
+A significant percentage of the characters in real text will almost always randomly line up in such a way as to not require an 
+edit operation.  Therefore, a small amount of similarity cannot be distinguished from background noise.
 
-However, either LD or the estimated LD {\em can } be used to determine the fact
-that strings are very different, even though neither effectively measures the amount of 
-difference when it is very large.
+However, either LD or the estimated LD {\em can } be used to determine the fact that strings are very different, even though 
+neither effectively measures the amount of difference when it is very large.
 
 \subsection{Small Differences }
-The majority of small differences between the input files will cause no difference to the output
-(because only $1/c$ of the input character positions result in a  non-null character.) 
-Therefore, if detecting that there is {\em any} difference is also important, a
-separate identity test, such as a cryptographic digest, should be used.
 
-The number of differences, can have a bigger effect on accuracy than the
-cumulative size of the differences, because each difference is surrounded by
-a neighborhood of width $n-1$ characters that can be affected.
+The majority of small differences between the input files will cause no difference to the output (because only $1/c$ of the input 
+character positions result in a  non-null character.) 
+Therefore, if detecting that there is {\em any} difference is also important, a separate identity test, such as comparing
+cryptographic digests, should be used.
+Using both can be useful because estimated LD will usually report that the inputs are the same if they differ only very slightly.
 
-\subsection{Compression Rate}
-The value of $c$ affects both speed and sensitivity.  
-The frequency with which  the procedure misses small differences, and the
-relative effect of the differences that are detected both increase with $c$.
+The number of differences can have a bigger effect on accuracy than the cumulative size of the differences, because 
+$n-1$ positions on either side can be affected.
+Adjusting $N$ and $C$ can help tune the sensitivity.
 
 \section{Applications}
 The technique may be useful for:
 \begin{itemize}
-  \item { De-duplicating: detecting variant Web-pages, text files, etc, and
-  estimating their textual similarity, as well as verifiying and categorizing
-  relationships detected by other duplicate detection algorthms.
+  \item { De-duplicating: detecting variant Web-pages, text files, etc, and estimating their textual similarity, as well as verifiying 
+	and categorizing relationships detected by other duplicate detection algorthms.
   }
   \item {Forensic analysis: speed up searches of disk-drive contents.
 		\begin{itemize}
  		\item{ 
-  			Multiple versions of known, and therefore uninteresting, executables,
-  			system files, or other boiler plate can be identified with a single
-  			signature, sidestepping the need for separate cryptographic digests for 
+  			Multiple versions of known, and therefore uninteresting, executables, system files, or other boiler plate can 
+			be identified with a single signature, sidestepping the need for separate cryptographic digests for 
   			every version\footnote{
- 			{\em The National Software Reference Library} (NSRL) provides a repository
- 			of MD-5 and SHA-1 file signatures of millions of software files for use
- 			computer forensic investigations. }. 
+ 				{\em The National Software Reference Library} (NSRL) provides a repository
+ 					of MD-5 and SHA-1 file signatures of millions of software files for use
+ 					computer forensic investigations. 
+				}. 
   		}
   		\item{
-  			Files including arbitrary fragments of text or other data 
-  			from a target document can be quickly identified\footnote{
-  				As noted elsewhere, if shared fragments of the target 
-  				are small relative to the size of the search document,
-  				they may get lost in the background noise. 
-  				However, a finer resolution can be achieved by breaking large 
-  				files into blocks of some maximum size appropriate to the 
-  				granularity at which the target text is interesting.}. 
+  			Files including arbitrary fragments of text or other data from a target document can be quickly identified\footnote{
+  				As noted elsewhere, if shared fragments of the target are small they may get lost in the background noise.  
+				However, a finer resolution can be achieved by breaking large files into blocks of some maximum size 
+				appropriate to the granularity at which the target text is interesting.
+			}. 
   		}
 		\end{itemize}
   }
@@ -430,43 +293,28 @@ The technique may be useful for:
   	inclusion of target text embedded in other files.  
   	}
   \item{Intellectual property and data security: A remote service can use these
-  		techniques to support double-blind queries concerning whether a significant
-  		fragment of the client's content exists in a remote dataset. 
+  		techniques to support double-blind queries concerning whether a significant fragment of the client's content exists in a remote dataset. 
   		
-  		The party providing the service reveals nothing about what it has, other
-  		than {\em true/false} in response to specific queries about presence.
-  		Likewise, the client reveals nothing about the search target, except,
-  		obviously, in cases where it is found. 
+  		The party providing the service reveals nothing about what it has, other than {\em true/false} in response to specific queries about presence.
+  		Likewise, the client reveals nothing about the search target, except, obviously, in cases where it is found. 
   		
-  		This technique can be used to provide verification to members of the public that 
-  		any specific piece of IP is or is not present, even in partial or modified
-  		form, in a large data set.
+  		This technique can be used to provide verification to members of the public that any specific piece of IP is or is not present, 
+		even in partial or modified form.
   		
-  		The same technique can also be used for data security;
-  		Such a service running in the background on each of an institution's workstations can provide a
-  		means of detecting the unintentional leakage of sensitive or classified
-  		information through cut-and-paste, embedding photos, renaming altered
-  		versions of a document, etc, and can do so without either the workstation or the institution 
-  		side revealing sensitive information in useful form. 
+  		The same technique can also be used for data security; such a service running in the background on each of an institution's workstations can provide a
+  		means of detecting the unintentional leakage of sensitive or classified information through cut-and-paste, embedding photos, renaming altered
+  		versions of a document, etc, and can do so without either the workstation or the institution side revealing sensitive information in useful form. 
   	}
 \end{itemize}
 
 \section{Conclusion}
-After a one-time linear-time pre-processing step, this heuristic estimates the
-true Levenshtein edit-distance of text documents many times larger than would be
-practical to compare using LD alone.
-Estimated LD can be used for detecting near-duplicates, removing false postives,
-and otherwise tightening up the output of other duplicate detection algotrithms,
-and for detecting more distant relationships between text files, such as
-inclusion of one file in another, and highly edited document variants.
+After a one-time linear-time pre-processing step, this heuristic estimates the true Levenshtein edit-distance of text documents up to a few hundred times
+larger than would be practical to compare using LD alone.
 
-The metadata for comparing files is small---half a dozen to a dozen bytes per
-10K of text---and computationally cheap to prepare. 
-Web pages, articles, and similar text documents of a few tens of kilobytes can
-be compared at a rate of many thousands of pairs per second. 
+The technique can be used for detecting near-duplicates, verifying the results of other duplicate detection algorithms, detecting more 
+distant relationships between text files, such as inclusion of one file in another, and highly edited document variants.
 
-When applied to detecting near-duplicates, errors of both the first and second
-kinds are negligible.
+When applied to detecting near-duplicates, errors of both the first and second kinds are negligible.
 
 %\begin{thebibliography}{Purdom-Brown 85}
 % 

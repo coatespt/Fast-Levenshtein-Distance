@@ -43,6 +43,6 @@ so we can coordinate in advance to avoid pain.
 The Demo class gives a comprehensible result--try running that to see what it does.  Other test 
 classes may or many not give useful results pending a cleanup.
 
-
-
-
+See https://github.com/coatespt/Fast-Levenshtein-Distance/tree/gh-pages for code
+See http://hadoopoopadoop.com/2015/11/08/super-fast-estimates-of-levenshtein-distance/#more-535 for Wordpress website
+ http://coatespt.github.io/Fast-Levenshtein-Distance
