@@ -46,3 +46,9 @@ classes may or many not give useful results pending a cleanup.
 See https://github.com/coatespt/Fast-Levenshtein-Distance/tree/gh-pages for code
 See http://hadoopoopadoop.com/2015/11/08/super-fast-estimates-of-levenshtein-distance/#more-535 for Wordpress website
  http://coatespt.github.io/Fast-Levenshtein-Distance
+
+Note, all combinations of values do not work equally well, and some combinations work badly, particularly for certain C's. 
+n=6 works well, and c=101, 199, and 307, rather than 100, 200, and 300.
+
+
+

@@ -121,6 +121,7 @@ public class Demo {
 		return compressor;
 	}
 	
+	
 	/**
 	 * Execute an LD on every pair of files and on the corresponding signature pairs. 
 	 * Print this and the other relevant information.
@@ -131,6 +132,8 @@ public class Demo {
 		log.info("createSigs() starting");
 		String firstLine=null;
 		int TEST_ITERATIONS=2000;
+		double totalScaledError=0;
+		double ct=0;
 		for(int i=0; i<inputFileList.size(); i++){
 			for(int j=i+1; j<inputFileList.size(); j++){
 				String f1 = inputFileList.get(i);
@@ -165,11 +168,13 @@ public class Demo {
 				double actLdToLen=act/(double) longerOriginal;
 				double unscldErrPln=act==0?0:Math.abs(est-act)/(double)act;
 				double scaledErrorPlain=(actLdToLen==0||unscldErrPln==0)?0:(unscldErrPln*actLdToLen); 
-
+				totalScaledError+=scaledErrorPlain;
+				ct++;
 				System.out.println(logLine(f1, f2, longerOriginal, shorterOriginal, expectedForRandom, act, est, scaledErrorPlain, ldRateSec, estRateSec,  firstLine));
 			}
 		}
-		log.info("createSigs() completed");
+		double averageScaledError=totalScaledError/ct;
+		log.info("createSigs() completed. Average error:" + averageScaledError + " for:" + ct + " files");
 	}
 	
 	int ct=0;

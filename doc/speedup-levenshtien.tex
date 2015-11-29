@@ -171,9 +171,13 @@ At each position in the input, this procedure will emit either a pseudo-random c
 time.) Thus, on average, we get a signature that is $1/c$ the size of the input.
 
 The hash function itself can be anything that thoroughly scrambles $n$ characters into a pseudo-random value. 
-For the demo quoted below, for each neighborhood, each of the {\em char} values is successively XOR'd into a long integer, at a position shifting 
-left by eight bits each time, with the position wrapping around if the number of 
-shifts exceeds eight.
+The hash used in the demo referred to here works as follows. 
+Starting at the first position of the input, 
+for each complete neighborhood, 
+a long integer accumulator is intially set to zero, 
+the each of the $n$ characters, in order, 
+is successively XOR'd into the accumulator at a position that shifts 
+left by the bit-size of a character. The position wraps around if the number of shifts exceeds eight.
 
 If the output alphabet is a subset of ASCII, of size $\alpha$, the pseudo-random function to choose an output {\em char} from $H_{p}$ can be implemented as simple 
 array of chars, and the choice made by selecting the value at the index $H_{p}\pmod\alpha$ 

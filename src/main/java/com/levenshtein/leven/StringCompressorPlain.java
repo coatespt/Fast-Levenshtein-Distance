@@ -72,7 +72,8 @@ public class StringCompressorPlain extends ICompressor{
 			// TODO: This keeps shifting by 8. Maybe for each time it wraps around is should increment by 8+1, 8_2, etc. This might scramble better if some value is repeating.
 			for(int i=0; i<n; i++){
 				long val = str.charAt(strPos+i);
-				val<<=i*8%64;
+//				val<<=i*8%64;
+				val<<=i*8%56;
 				curSum^=val;
 			}
 			curSum=Math.abs(curSum);
