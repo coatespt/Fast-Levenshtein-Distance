@@ -9,7 +9,7 @@ import com.levenshtein.parent.TestParent;
 
 
 /**
- * Some simple sanity checking for basic operations
+ * Some simple sanity checking for basic operations of the RollingHash class
  * 
  * @author pcoates
  *

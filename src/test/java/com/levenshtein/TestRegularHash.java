@@ -10,7 +10,7 @@ import com.levenshtein.parent.TestParent;
 
 /**
  * Some simple sanity checking for basic operations
- * 
+ * TODO: Needs some asserts to make this meaningful
  * @author pcoates
  *
  */

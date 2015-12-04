@@ -19,6 +19,8 @@ import com.levenshtein.parent.TestParent;
  * Compare the accuracy of the RollingHash to the original hash.
  * So far it looks like the RollingHash is significantly less accurate
  * 
+ * TODO: This has never been finished. Need a speed comparison to see if RollingHash is even faster.
+ * 
  * @author pcoates
  */
 public class TestCompareAccuracy extends TestParent {

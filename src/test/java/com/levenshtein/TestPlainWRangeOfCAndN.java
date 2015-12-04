@@ -12,6 +12,8 @@ import com.levenshtein.parent.TestAccuracyDriverParent;
  * Tests and measurements for Levenstein distance estimation for a range of C and N
  * with the standard compressor.
  * 
+ * TODO: Needs asserts 
+ * 
  * @author pcoates
  */
 public class TestPlainWRangeOfCAndN extends TestAccuracyDriverParent {

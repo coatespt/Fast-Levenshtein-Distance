@@ -47,7 +47,7 @@ public class TestBasicOperations extends TestParent {
 	}
 
 	/**
-	 * Test squeezing all whitespace sequences down to a single space.
+	 * Test squeezing each whitespace sequences down to a single space.
 	 * Optional in compression. Squeezing whitespace removes a lot of meaningless
 	 * small line changes e.g., MSDOS v Unix.
 	 */
@@ -120,6 +120,8 @@ public class TestBasicOperations extends TestParent {
 		
 	/**
 	 * Test the speed of LD on a pair of big strings
+	 * <p>
+	 * TODO: This needs some kind of assertion of the speedup
 	 * @throws Exception
 	 */
 	@Test
@@ -138,7 +140,9 @@ public class TestBasicOperations extends TestParent {
 		System.out.println("\tLD(S1,S2) in: " + (tAndR.elapsedMS())
 				+ " milliseconds, equivalent to  rate: " + tAndR.rateSecs()
 				+ " pairs/sec");
-		assertTrue(tAndR.rateSecs()>5);
+		double rate = tAndR.rateSecs();
+		log.info("testSpeedOfLDOnLargeFiles() rate per second:" + rate);
+		assertTrue(tAndR.rateSecs()>4);
 		log.info("testSpeedOfLDOnLargeFiles() completed.");
 	}
 
@@ -160,7 +164,7 @@ public class TestBasicOperations extends TestParent {
 	}
 
 	/**
-	 * Test compression performance on big files
+	 * Test that compression of big files is reasonably close to C
 	 * @throws Exception
 	 */
 	@Test
@@ -172,7 +176,11 @@ public class TestBasicOperations extends TestParent {
 		long total = len*COMPRESSIONS;
 		long start = System.currentTimeMillis();
 		for (int i = 0; i < COMPRESSIONS; i++) {
-			getCompressor().compress(longOne);
+			getCompressor().setC(c);
+			getCompressor().setN(n);
+			String result = getCompressor().compress(longOne);
+			// sanity check that the result is reasonably close to that predicted by c.
+			assertTrue(result.length()*c*0.8<longOne.length());
 		}
 		long end = System.currentTimeMillis();
 		double rate = COMPRESSIONS / (double) (end - start) * 1000;
@@ -185,6 +193,9 @@ public class TestBasicOperations extends TestParent {
 	}
 	
 
+	/**
+	 * Test that circular queue overflow throws exception
+	 */
 	@Test
     public static void testCircularQueueOverflow() {
 		log.info("testCircularQueue() starting.");
@@ -204,6 +215,9 @@ public class TestBasicOperations extends TestParent {
 		fail("testCircularQueueOverflow() should have blown up!");
     }
 
+	/**
+	 * Test hat the circular queue underflow is caught.
+	 */
 	@Test
     public static void testCircularQueueUnderflow() {
 		log.info("testCircularQueue() starting.");
@@ -229,6 +243,7 @@ public class TestBasicOperations extends TestParent {
 	
 
 	/**
+	 * Basic test of circular queue to just to see if it fails outright.
 	 */
 	@Test
     public static void testCircularQueue() {

@@ -9,7 +9,11 @@ import com.levenshtein.leven.utility.TimeAndRate;
 import com.levenshtein.parent.TestParent;
 
 /**
- * Run on some combinations of files 4K to 30k range and ensure that 
+ * Run on some combinations of files 4K to 30k range and print out some
+ * results.
+ * <p>
+ * TODO This may no longer be necessary as it repeats stuff done elsewhere.
+ * <p>  
  * @author pcoates
  *
  */

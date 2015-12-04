@@ -36,7 +36,13 @@ import com.levenshtein.parent.TestParent;
 
 
 /**
- * 
+ * Compare every combination of files in a directory, executing LD on the originals, and on a range
+ * of C and N. Print out the results. This program only computes the LD of the originals once, 
+ * but it computes the signatures |C|x|N| times. Nevertheless, almost all of the time is 
+ * spend computing the raw LD.
+ * <p>
+ * It can run for many minutes.
+ *  
  * @author pcoates
  *
  */
@@ -78,7 +84,7 @@ public class TestVaryCandN extends TestParent {
 	public void testAllCAndN() throws Exception{
 		log.info("testAllCAndN() starting");
 		init();
-		createSigs(inputDir);
+		executeXbyYbyCbyN(inputDir);
 		log.info("testAllCAndN() starting");
 	}
 	
@@ -98,13 +104,13 @@ public class TestVaryCandN extends TestParent {
 	/**
 	 * Execute an LD on every pair of raw files and on the corresponding signature pairs
 	 * at a range of values of C and N. 
-	 * Print out the run parameters and the averge error.
+	 * Print out the run parameters and the average error.
 	 * The first set of files takes almost all of the run time, because it only computed the LD of the raw
 	 * files once, and they take thousands of times longer than the signatures.
 	 * 
 	 * @throws Exception
 	 */
-	protected void createSigs(String indir) throws Exception {
+	protected void executeXbyYbyCbyN(String indir) throws Exception {
 		log.info("createSigs() running.");
 		int SPEED_TEST_ITERATIONS=10000;
 		Map<String,Integer> ldMap = new HashMap<String,Integer>();

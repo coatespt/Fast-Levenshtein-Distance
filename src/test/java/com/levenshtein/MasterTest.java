@@ -17,16 +17,17 @@ import org.junit.runners.Suite;
 	@RunWith(Suite.class)
 	@Suite.SuiteClasses( 
 			{ 
-			TestBasicOperations.class,
-			TestRegularHash.class,
-			TestRollingHash.class,
 			TestAccuracyDriverPlain101.class,
 			TestAccuracyDriverRH101.class,
+			TestBasicOperations.class,
 			TestCompareAccuracy.class,
+			//TestMassCompare.class,
+			TestRollingHash.class,
 			TestPlainWRangeOfCAndN.class,
-			TestRegularVRolling101.class,
+			TestRegularHash.class,
+			TestRollingHash.class,
 			TestSpeedForBigFiles.class,
-			//com.levenshtein.TestMassCompare.class,
+			TestRegularVRolling101.class,
 			}
 	)
 	public class MasterTest {

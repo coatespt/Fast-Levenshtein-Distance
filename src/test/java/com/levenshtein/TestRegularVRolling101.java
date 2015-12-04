@@ -10,6 +10,10 @@ import com.levenshtein.leven.StringDistance;
 import com.levenshtein.parent.TestAccuracyDriverParent;
 
 /**
+ * Compute LD for original stings, signatures, plus error rates based on 
+ * the known LD of the strings.
+ * <p>
+ * TODO: This may be merged with TestSpeedForBigFiles or deleted
  * @author pcoates
  */
 public class TestRegularVRolling101 extends TestAccuracyDriverParent {
@@ -56,6 +60,7 @@ public class TestRegularVRolling101 extends TestAccuracyDriverParent {
 		onFiles("Moderately mangled, c=51", infile1, infile2);
 	}
 
+	@Test
 	public void testHeavilyMangledC51() throws Exception {
 		onFiles("Heavily mangled c=51", infile1, infile3);
 	}
