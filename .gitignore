@@ -23,4 +23,6 @@ testSigs.txt
 data-bulk/all32kSigs.txt.backup
 data-bulk/junk.txt
 doc/speedup-levenshtien.log
-
+*.aux
+*.log
+*.pdf

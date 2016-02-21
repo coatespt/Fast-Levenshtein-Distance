@@ -1,0 +1,182 @@
+% This is a sample LaTeX input file.  (Version of 9 April 1986) 
+% 
+% A '%' character causes TeX to ignore all remaining text on the line, 
+% and is used for comments like this one. 
+
+\documentclass[html]{article}    % Specifies the document style. 
+%\documentclass[html]{book}    % Specifies the document style. 
+\usepackage{graphicx}
+\usepackage{xfrac}
+
+\title{The Expected Behavior of Estimated Levenshtein}  % Declares the document's title. 
+\author{Peter Coates}    % Declares the author's name. 
+\date{February 17, 2016}   % Deleting this command produces today's date. 
+
+% Define numbers with units to use wherever, e.g., picture size
+\def\hpicwidth{1.33in}
+\def\hpicheight{4in}
+\def\goedel {Kurt G$\ddot{o}$edel }
+\def\neigh {(p,n)}
+\def\op {O_{pn}}
+\def\opprm {O'_{pn}}
+
+\begin{document}           % End of preamble and beginning of text. 
+
+\maketitle                 % Produces the title. 
+
+
+%
+% Text here goes above the section-one line
+%
+{\em  \noindent This document is personal notes, not even a draft---don't blame me for the contents.}
+
+% space the draft notice out a little from the rest of the abstract.
+
+\vspace{5mm} 
+
+{\em \noindent 
+Abstract: This is where the text of the abstract goes. 
+}
+
+\vspace{10mm} 
+\section{Introduction}
+
+We are applying extreme compression to input strings so that they can be compared quickly using Levenshtein distance. 
+The compression function is applied to each fixed-size neighborhood of the input string yielding
+either a character of output or nothing.  
+Most neighboroods result in no output, but when an output happens, character chosen is a pseudo-random function of the 
+ordered string of characters in the neighborhood.
+
+The compression is extreme because for each neighborhood, the probability of a emitting a character is 
+much smaller than the probability of emitting nothing.
+
+Some questions of interest are:
+\begin{enumerate}
+\item How to characterize the effect on the compressed strings of changes to the input.
+\item If you do many trials that consist of modifying k characters of the input and then computing the LD of the original and
+the modified version, how closely will the LD's of the compressed signatures cluster around the mean.
+\item In real life, it's not usually one character changes that matter---it's word changes and chunks of words.
+\item How do you define a confidence interval around near-duplication or relatedness of documents. 
+\end{enumerate}
+
+The second of these is tricky. It's a Sorites problem---at what point does a modifed string cease to be a version of the original?  
+Even random text will have an LD that is less than the lenght of the strings because some random substrings, particularly
+substrings of length one will almost always happen to line up.
+
+Most text of interest is not random at all, although it may be randomly chosen. The relative frequency of letters and common words 
+in human languages is very predictable, and some words and groups of words are very common.
+
+
+
+
+
+\section{Assumptions}
+
+We assume the following:
+
+\begin{itemize}
+\item Text input of length $l$. 
+\item Input is a text string
+\item A neighborhood of the input of size $n$ at point $p$ is $\neigh$.
+\item Output alphabet $\alpha$ of size $a$ $\lbrace c_{1}, c_{2}, c_{3}, \dots, c_{a} \rbrace $ 
+\item Compressing $\neigh$ yields either an element of $\alpha$ or the null character, $\o$.
+\item Probability that compressing $\neigh$ yields a non-null is $1/c$.
+\item Hash function of $\neigh$ is ideal---even a one bit difference in $\neigh$ randomizes output completely. 
+\item Output for $\neigh$ is $O_{pn}$
+\item Output for $\neigh$ after a change is is $O'_{pn}$
+\item We make $m$ random one-character changes to the input string.
+\end{itemize}
+\vspace{5mm} 
+
+\section{Effect of Modifying the Input Sequence}
+
+There are five different situations relating to the application of compression as seen in Table \ref{cases} that 
+must sum to $1.0$. 
+In two of them, a change to a character in the neighborhood results in a change to the ouptput. 
+The sum of these two probabilities is the probability that a one character change will modify the output. 
+
+\begin{table}[h!]
+\begin{tabular}{|l|l|l|}
+\hline
+Case & Expected Output Chars & Change/No-Change\\ \hline
+$\op=\o \cap \opprm=\o $ & $(1-1/c)^{2}$ & No \\ \hline 
+$\op=\o \cap \opprm \neq \o $ & $\sfrac{(1-1/c)}{c}$ & Yes \\ \hline
+$\op \neq \o \cap \opprm=\o $ & $\sfrac{(1-1/c)}{c}$ & Yes \\ \hline
+$\op \neq \o \cap \opprm \neq \o \cap \op \neq \opprm $ & $\sfrac{(a-1)}{ac^{2}}$ & Yes \\ \hline
+$\op \neq \o \cap \opprm \neq \o \cap \op = \opprm $ & $\sfrac{1}{ac^{2}}$ & No \\ \hline
+\end{tabular}
+\caption{All Ways That Input Change Can Affect Output}
+\label{cases}
+\end{table}
+
+As probability that compressing $\neigh$ will result in a null outcome is 
+\[
+1-1/c
+\]
+
+The expected difference in the output for a single neighborhood and a single change is 
+\[ \frac{2(1-1/c)}{c} + \frac{a-1}{ac^2} \]
+
+
+A single change affects $n$ neighborhoods, so the expected effect of a single change is 
+\[ E_{n,c} = n \left( \frac{2(1-1/c)}{c} + \frac{a-1}{ac^2} \right) \]
+
+
+Multiple changes to $\neigh$ are the same as one change in terms of probability of an output, but 
+except at the beginning and end of the input string, each change affects n neighborhoods.
+Therefore you must discount the effect of collisions of multiple changes in the same neighborhood.
+
+If the input length is $l$ and the number of changes is $m \leq l$ then the proportion of input characters changed is $m/l$
+accross the entire input string.
+Therefore we discount the expected number of ouput characters affected in poroportion. 
+same neighborhood.
+
+\[
+	D_{l,m}=1-((m-1)/l)
+\]
+
+
+The adjusted expected number of characters changed per change to an the input characters is the product of these times
+multiplied by the total number of input characters changed.
+\[
+	mE_{n,c}D_{l,m}
+\]
+
+\subsection{An Empirical Test}
+
+How much effect should a change to the input have on the output? This is not a simple question because
+most inputs of interest natuaral language text, which is not random. 
+Likewise, the differences between two texts are rarely random, especially if they are related, which is the 
+interesting case. Changes at the word and text-block level are more common than randomly changed 
+isolated characters. 
+Even so, we start with the simplest case, which is randomly modified characters.
+
+A Java program was prepared to compute the expected LD of a string and a set of modified versions 
+of itself, each having a random $2\%$ of the characters swapped for other characters that occur in the document.
+
+The test string was $149,734$ characters of English text from one of the Gutenberg books, and  
+of the 500 modified versions had a random $2\%$ of the characters changed for other characters that occur in the document.
+
+The actual LD of the compressed signatures varied from the calculated expected value above by and average
+of $-40.362$ characters (i.e, the values tended to be somewhat smaller than expected) with a standard deviation of 
+$18.5$ charactes, a min of $-110$ and a max of $10$.
+
+An identical test was executed with a string of the same length that was generated using randomly chosen characters 
+from the same set used in the Gutenberg document.
+In this case, the average LD deviated from the expected by $31.6$ characters, 
+with a standard deviation of $17.8$ characters, a min of =22 and a max of 93.
+
+The test is somewhat unnatural because most text is modified by words and groups of words, not random isolated characters.
+
+\subsection{Noes and What Might Be Wrong}
+A couple of things might be wrong with this estimate and need to be checked. 
+First, some of the values are very smal
+
+\subsection{Changes At The Word Level}
+Any two texts in the same language will show a lower LD than will random character sequences of the same length, if
+only because common words like ``the'' are sprinkled throughout both documents.
+
+
+\section{Confidence Interval Around Judgement of Document Relatedness}
+
+\end{document}             % End of document. 
