@@ -27,6 +27,14 @@ public class TestPredictions extends TestParent {
 	int fsize=10000;
 	int m=100;
 
+	@Test
+	public void testCreateBlocks() throws Exception{
+		String fname = big;
+		String longOne = readFile(fname);
+		InputStringProcessor tsp = new InputStringProcessor(longOne);
+		tsp.createBlocks(10000);
+	}
+	
 
 	/**
 	 * Sanity check the values detailed in 

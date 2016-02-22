@@ -9,12 +9,87 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import com.levenshtein.leven.utility.SWOR;
 import com.levenshtein.leven.utility.exception.NoNextValueException;
+import com.levenshtein.parent.TestParent;
 
-public class InputStringProcessor {
+/**
+ * Some utilities for testing Estimated LD, including mutating a string, etc.
+ * @author pcoates
+ *
+ */
+public class InputStringProcessor extends TestParent {
 	private String input = null;
 	private Character [] charSet = null;
+	private List<String> files;
+		static Logger log = Logger.getLogger(InputStringProcessor.class);
+
+	// The files below contain 11,023,266 characters of clean ASCII text from Gutenberg. All the header and trailer
+	// have been deleted. 213,156 lines total. 
+
+	String cleanTextLoc="/Users/pcoates/Workspaces/personal-wkspc/data-gutenberg";
+	String [] cleanFiles1={
+	"tcosb10.txt",
+	"thx0710.txt",
+	"tl41510.txt",
+	"tmrgs10.txt",
+	"tsomh10.txt",
+	"tvsrv10.txt",
+	"utrkj10.txt",
+	"vikrv10.txt",
+	"wldsp10.txt",
+	"teddy10.txt",
+	"thx0810.txt",
+	"tmbrn10.txt",
+	"tmsls10.txt",
+	"tsotm10.txt"
+	};
+	 String [] cleanFiles2={
+	"txohc10.txt",
+	"uusry11.txt",
+	"vlttr10.txt",
+	"wtell10.txt",
+	"theyi10.txt",
+	"thx2010.txt",
+	"tmgot10.txt",
+	"tpnrs10.txt",
+	"ttalk10.txt",
+	"ungst10.txt",
+	"vgmld10.txt",
+	"wassq10.txt",
+	};	
+
+	private List<String> blocks1 = new ArrayList<String>();
+	private List<String> blocks2= new ArrayList<String>();
+
+	/**
+	 * Read all the files and create a set of blocks of the given size.
+	 * @throws Exception 
+	 */
+	public void createBlocks(int blockSize) throws Exception{
+		log.info("createBlocks() runnning");
+		StringBuffer sb1 = new StringBuffer(12000000);
+		StringBuffer sb2 = new StringBuffer(12000000);
+		for(String filename : cleanFiles1){
+			String file=readFile(cleanTextLoc + "/" + filename);
+			sb1.append(file);
+		}
+		for(String filename : cleanFiles2){
+			String file=readFile(cleanTextLoc + "/" + filename);
+			sb2.append(file);
+		}
+		int len = Math.min(sb1.length(), sb2.length());
+		int numPairs = len/blockSize;
+
+
+		log.info("blocks:" + numPairs + " one:" + sb1.length() + " two:" + sb2.length());
+		log.info("createBlocks() completed");
+	}
+	
+	
+	
 
 	/**
 	 * Must be created with a non-null input string.
