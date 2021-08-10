@@ -1,19 +1,17 @@
 package com.levenshtein.parent;
 
+import com.levenshtein.leven.ICompressor;
+import com.levenshtein.leven.IDistance;
+import com.levenshtein.leven.StringCompressorPlain;
+import com.levenshtein.leven.StringDistance;
+import junit.framework.TestCase;
+import org.apache.log4j.Logger;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.HashMap;
 import java.util.Map;
-
-import junit.framework.TestCase;
-
-import org.apache.log4j.Logger;
-
-import com.levenshtein.leven.ICompressor;
-import com.levenshtein.leven.IDistance;
-import com.levenshtein.leven.StringCompressorPlain;
-import com.levenshtein.leven.StringDistance;
 
 public class TestParent  extends TestCase{
 	static Logger log = Logger.getLogger(TestParent.class);

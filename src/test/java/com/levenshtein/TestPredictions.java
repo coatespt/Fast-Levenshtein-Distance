@@ -1,20 +1,14 @@
 package com.levenshtein;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-
-import org.apache.log4j.Logger;
-import org.junit.Test;
-
-import com.a140.util.TimeAndRate;
 import com.levenshtein.leven.StringCompressorPlain;
 import com.levenshtein.leven.StringDistance;
 import com.levenshtein.parent.TestParent;
+import org.apache.log4j.Logger;
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  */
@@ -29,10 +23,13 @@ public class TestPredictions extends TestParent {
 
 	@Test
 	public void testCreateBlocks() throws Exception{
+		System.out.println("testCreateBlocks() entering");
 		String fname = big;
 		String longOne = readFile(fname);
 		InputStringProcessor tsp = new InputStringProcessor(longOne);
+		System.out.println("testCreateBlocks() calling tsp.createBlocks()");
 		tsp.createBlocks(10000);
+		System.out.println("testCreateBlocks() completed");
 	}
 	
 
@@ -129,10 +126,6 @@ public class TestPredictions extends TestParent {
 
 	/**
 	 * Test prediction terms add up to 1.0
-	 * @param len
-	 * @param n
-	 * @param c
-	 * @param m
 	 * @return
 	 */
 	@Test
@@ -169,6 +162,8 @@ public class TestPredictions extends TestParent {
 	 */
 	@Test
 	public void testvals() throws Exception {
+		String currentPath = new java.io.File(".").getCanonicalPath();
+		System.out.println("Current dir:" + currentPath);
 		int smallestN=8;
 		int largestN=20;
 		String fname = big;

@@ -8,6 +8,9 @@ import com.levenshtein.leven.StringCompressorRH;
 import com.levenshtein.leven.StringDistance;
 import com.levenshtein.parent.TestAccuracyDriverParent;
 
+// TODO Need a speed test of the hashes.
+// TODO Need to implement my better hash idea of taking chars in deterministic pseudo-random
+// 	sequence and XOR'ing them into an unsigned integer.
 /**
  * 
  * Drives TestAccuracyDriverParent routines for computing LD raw, LD Signatures, 

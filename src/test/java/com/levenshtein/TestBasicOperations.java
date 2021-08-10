@@ -1,25 +1,21 @@
 package com.levenshtein;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import org.apache.log4j.Logger;
-import org.junit.Test;
-
-import com.a140.util.TimeAndRate;
-import com.levenshtein.leven.ICompressor;
-import com.levenshtein.leven.IDistance;
-import com.levenshtein.leven.RollingHash;
-import com.levenshtein.leven.StringDistance;
-import com.levenshtein.leven.StringCompressorPlain;
+import a140.util.TimeAndRate;
+import com.levenshtein.leven.*;
 import com.levenshtein.leven.utility.CircularQueue;
 import com.levenshtein.leven.utility.exception.QueueEmptyException;
 import com.levenshtein.leven.utility.exception.QueueFullException;
 import com.levenshtein.parent.TestParent;
+import org.apache.log4j.Logger;
+import org.junit.Test;
+
+import java.util.HashSet;
+import java.util.Set;
 
 
 /**
- * Some simple sanity checking for basic operations
+ * Some simple sanity checking for basic operations such as circular-queue
+ * hash values are distinct, speed of compressing, etc.
  * 
  * @author pcoates
  *
@@ -164,13 +160,15 @@ public class TestBasicOperations extends TestParent {
 	}
 
 	/**
-	 * Test that compression of big files is reasonably close to C
+	 * Test compressing a lot of data to see how fast it it.
+	 * TODO This is only done with the default hash function. I bet the proposed one speeds that up a lot.
 	 * @throws Exception
 	 */
 	@Test
 	public void testCompressionOfBigFiles() throws Exception {
-		log.info("testCompressionOfBigFiles()");
+		System.out.println("testCompressionOfBigFiles() 10k big files.");
 		System.out.println("\tcompression speed on " + COMPRESSIONS + " big files with c:" + c + " n:" + n);
+		//String longOne = readFile(big);
 		String longOne = readFile(infile1);
 		int len = longOne.length();
 		long total = len*COMPRESSIONS;

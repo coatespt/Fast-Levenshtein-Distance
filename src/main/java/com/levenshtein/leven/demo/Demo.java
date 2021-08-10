@@ -1,5 +1,11 @@
 package com.levenshtein.leven.demo;
 
+import com.levenshtein.leven.ICompressor;
+import com.levenshtein.leven.ScoreDistance;
+import com.levenshtein.leven.StringCompressorPlain;
+import com.levenshtein.leven.utility.FileAndTimeUtility;
+import org.apache.log4j.Logger;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -9,15 +15,29 @@ import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
-
-
 //import com.a140.util.file.FileAndTimeUtility;
-import com.levenshtein.leven.ICompressor;
-import com.levenshtein.leven.ScoreDistance;
-import com.levenshtein.leven.StringCompressorPlain;
-import com.levenshtein.leven.utility.FileAndTimeUtility;
 
+// TODO: Get this running and document what it does.
+// TODO: Get the automated tests runnning. Looks like code works but many fail because they test data isn't there.
+// TODO: Is rolling hash working?
+// TODO: Figure out which hash you are using and document it.
+// TODO: Figure out if RollingHash works, is relevant, etc.
+// TODO: I have a better hash (I think) See just below.
+/**
+ *  * For a given neighborhood, take some simple function of the n 8-bit values and choose
+ *       a pseudo-random order to take the positions in.
+ *  * Start with an all-zero integer. It could be 8-byte or 4-byte. Does it matter.
+ *  * The first position is 0, the last is n-1 for n-length neighborhood.
+ *  * Read the N values in the order chosen and for each, XOR it with the values in the current position
+ *        The current position will be 8 zero bits for the first 8 positions but will usually be non-0
+ *        for 9, 10, ... ,nth positions.
+ *        Then increment to current position another 8 bits.
+ *   * When all positions have been XOR-d in, interpret the result as a long integer and return it
+ *   	modulo the size of your output character set.
+ *
+ *   Not sure how to test quality. My guess is that real text is probably best. Any of these functions
+ *   are going to give poor results on certain inputs. Hard to see how it could not.
+ */
 
 
 /**

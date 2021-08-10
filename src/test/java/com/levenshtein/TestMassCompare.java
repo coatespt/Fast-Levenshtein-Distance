@@ -1,20 +1,13 @@
 package com.levenshtein;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.log4j.Logger;
-import org.junit.Test;
-
-import com.a140.util.file.CSVLogWriter;
+import a140.util.file.CSVLogWriter;
 import com.levenshtein.leven.utility.EntropyCalc;
 import com.levenshtein.leven.utility.FileAndTimeUtility;
 import com.levenshtein.parent.TestParent;
+import org.apache.log4j.Logger;
+import org.junit.Test;
+
+import java.io.File;
+import java.util.*;
 
 // Snips for extracting filenames in a certain size range and putting them in a file where 
 // the test routine will fine them.
@@ -45,9 +38,7 @@ import com.levenshtein.parent.TestParent;
 	 * @author pcoates
 	 */
 public class TestMassCompare extends TestParent {
-
 		static Logger log = Logger.getLogger(TestMassCompare.class);
-
 		static int N=20;
 		static int C=140;
 		static Integer[] CVals = {50,100,150,200,250,300,350};

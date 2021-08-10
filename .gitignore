@@ -7,6 +7,7 @@ hs_err_pid*.log
 data-bulk/*.txt
 data/unrelated
 /target/
+./data/gutenberg-real/allfiles/*
 all32kSigs.txt
 all32kfiles.txt
 allfilenames.txt

@@ -3,7 +3,7 @@ package com.levenshtein;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
-import com.a140.util.TimeAndRate;
+import a140.util.TimeAndRate;
 import com.levenshtein.leven.StringCompressorPlain;
 import com.levenshtein.parent.TestParent;
 

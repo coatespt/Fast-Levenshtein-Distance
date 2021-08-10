@@ -1,22 +1,15 @@
 package com.levenshtein;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-
-import org.apache.log4j.Logger;
-
 import com.levenshtein.leven.utility.SWOR;
 import com.levenshtein.leven.utility.exception.NoNextValueException;
 import com.levenshtein.parent.TestParent;
+import org.apache.log4j.Logger;
+
+import java.util.*;
 
 /**
  * Some utilities for testing Estimated LD, including mutating a string, etc.
+ * This file contains no tests--just untilities.
  * @author pcoates
  *
  */
@@ -29,7 +22,8 @@ public class InputStringProcessor extends TestParent {
 	// The files below contain 11,023,266 characters of clean ASCII text from Gutenberg. All the header and trailer
 	// have been deleted. 213,156 lines total. 
 
-	String cleanTextLoc="/Users/pcoates/Workspaces/personal-wkspc/data-gutenberg";
+	//String cleanTextLoc="/Users/pcoates/Workspaces/personal-wkspc/data-gutenberg";
+	String cleanTextLoc="./data/allfiles/";
 	String [] cleanFiles1={
 	"tcosb10.txt",
 	"thx0710.txt",

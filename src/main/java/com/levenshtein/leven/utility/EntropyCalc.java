@@ -1,11 +1,10 @@
 package com.levenshtein.leven.utility;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
- * TODO: This is cribbed from somewhere! Where?
+ * TODO: I think this was from somewhere! Where?  find our or rewrite.
  *
  * Compute the Shannon entropy of a large input string.
  * 

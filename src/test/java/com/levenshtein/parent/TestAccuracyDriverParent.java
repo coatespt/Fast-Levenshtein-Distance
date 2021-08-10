@@ -1,16 +1,26 @@
 package com.levenshtein.parent;
 
-import java.util.Date;
-
-import org.apache.log4j.Logger;
-
 import com.levenshtein.leven.ICompressor;
 import com.levenshtein.leven.IDistance;
 import com.levenshtein.leven.ScoreDistance;
+import org.apache.log4j.Logger;
+
+import java.util.Date;
 
 /**
  * Abstract test class that requires concrete classes to implement getCompressor() and getDistance() 
  * methods. This is so they can share the driver method onFiles(String comment, String f1, String f2).
+ *
+ * The onFiles() method is called with the path/names of a pair of files and computes a number of
+ * statistics: Exp'd speedup, LD computation rate for the raw files of that size,
+ * rate to compute the signatures, LD for the signatures (pairs/sec), actual speed increase,
+ *  file-lengths, signature-lengths, Actual LD, LD of the signatures, Estimated LD
+ * 	LD(compressed1,compressed2)/length(longer(compressed1,compressed2),
+ * 	LD(uncompressed1,uncompressed2)/length(longer(uncompressesd1, uncompressed2),
+ * 	Unscaled error, Scaled error, unscaled fudged error, Scaled fudged error:0.1545,
+ * 	ScoreDistance error:0.1490
+ *
+ * 	Most of the time in this routine is spent computing the true LD of the files.
  * 
  * @author pcoates
  *
@@ -42,7 +52,7 @@ public abstract class TestAccuracyDriverParent extends TestParent{
 				StringBuffer sb = new StringBuffer();
 				sb.append("\t");
 				sb.append(str);
-				sb.append(" \tExp'd speedup: ");
+				sb.append(" \n\tExp'd speedup: ");
 				sb.append(Math.pow(getC(), 2));
 				sb.append("\n");
 
@@ -72,7 +82,6 @@ public abstract class TestAccuracyDriverParent extends TestParent{
 				start = new Date();
 				int distUnCompressed=d.LD(f1Str, f2Str);
 				double rateUncompressed = 1.0d / (double) ((new Date()).getTime()-start.getTime()) * 1000;
-			
 				sb.append("\tLD rate raw files: "); 
 				sb.append(String.format("%.4f",rateUncompressed)); 
 				sb.append(" files/sec"); 
@@ -119,7 +128,9 @@ public abstract class TestAccuracyDriverParent extends TestParent{
 			}
 
 	/**
-	 * Yikes! This really works.
+	 * The result is not simply scaled by the inverse of the compression. The following scales it more
+	 * accurately.
+	 *
 	 * Ratio of signature-LD/signature-length is greater than the ratio of whole-file-LD/whole-file-length. 
 	 * This method corrects for that. 
 	 * 

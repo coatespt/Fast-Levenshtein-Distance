@@ -1,14 +1,9 @@
 package com.levenshtein.leven;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-
+import com.levenshtein.leven.utility.CircularQueue;
 import org.apache.log4j.Logger;
 
-import com.levenshtein.leven.utility.CircularQueue;
+import java.util.*;
 
 
 /**

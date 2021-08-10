@@ -1,28 +1,19 @@
 package com.levenshtein.leven.utility;
 
+import org.apache.log4j.Logger;
+
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
+import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.zip.GZIPOutputStream;
-
-import org.apache.log4j.Logger;
-
-import java.util.StringTokenizer;
 
 /**
  * Utility methods borrowed form some other project---many are unused.
