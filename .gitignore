@@ -6,6 +6,8 @@ hs_err_pid*.log
 .settings/org.eclipse.m2e.core.prefs
 data-bulk/*.txt
 data/unrelated
+data/allfiles/
+data/many/
 /target/
 ./data/gutenberg-real/allfiles/*
 all32kSigs.txt
