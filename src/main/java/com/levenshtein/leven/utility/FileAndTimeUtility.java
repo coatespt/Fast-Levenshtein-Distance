@@ -1,6 +1,6 @@
 package com.levenshtein.leven.utility;
 
-import org.apache.log4j.Logger;
+//import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -189,8 +189,7 @@ public class FileAndTimeUtility {
 	 * name. This fixes whether the path terminates with "/" or not, whether it
 	 * is implicitly in "." etc.
 	 */
-	public static String fullPathnameForFilename(String file, String path,
-			Logger log) {
+	public static String fullPathnameForFilename(String file, String path) {
 		if (path != null) {
 			path = path.trim();
 		} else {
@@ -200,9 +199,7 @@ public class FileAndTimeUtility {
 			path = path.substring(0, path.length() - 2);
 		}
 		String filename = path + "/" + file.trim();
-		if (log != null) {
-			log.info("\n\tCreated pathname:" + filename);
-		}
+		System.out.println("\n\tCreated pathname:" + filename);
 		return filename;
 	}
 
@@ -262,7 +259,7 @@ public class FileAndTimeUtility {
 	 * @throws Exception
 	 */
 	public static List<String> getFilesInDirectory(String path,
-			String filebase, Logger log) throws Exception {
+			String filebase) throws Exception {
 		List<String> strings = new ArrayList<String>();
 		File dir = new File(path);
 
@@ -270,19 +267,13 @@ public class FileAndTimeUtility {
 		if (children == null) {
 			String err = "There seems to be either no such directory as:"
 					+ path + " or no files with base:" + filebase;
-			if (log != null) {
-				log.error(err);
-			}
+			System.err.println(err);
 			throw new Exception(err);
 		} else {
 			for (int i = 0; i < children.length; i++) {
 				String f = children[i];
-				if (matchFileName(f, filebase, log)) {
+				if (matchFileName(f, filebase)) {
 					strings.add(f);
-					if (log != null) {
-						log.debug("FOUND MATCHING FILE:" + f + " in directory:"
-								+ path);
-					}
 				}
 			}
 		}
@@ -325,7 +316,7 @@ public class FileAndTimeUtility {
 //		return true;
 //	}
 
-	public static boolean matchFileName(String f, String filebase, Logger log) {
+	public static boolean matchFileName(String f, String filebase) {
 
 		Pattern pattern = Pattern.compile(filebase);
 		Matcher matcher = pattern.matcher(f);
@@ -344,7 +335,7 @@ public class FileAndTimeUtility {
 	 * @param file
 	 * @return
 	 */
-	public static String fullPathnameForFilename(String p, String file) {
+	public static String fullPathnameForFilenameXXX(String p, String file) {
 		if (p != null) {
 			p = p.trim();
 		} else {

@@ -1,5 +1,6 @@
 package com.levenshtein;
 
+import com.levenshtein.leven.utility.XORHash;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
@@ -19,14 +20,59 @@ public class TestRegularHash extends TestParent {
 	public static boolean MINIMAL_OUPUT=true;
 
 	/**
+	 * TODO Should this go in its own class? Or rename this class appropriately.
+	 * TODO This and the regular hash function should both have the same stats tests.
+	 * TODO: Capture performance output.
+	 *
+	 * Test compression for regularity of output in terms whether it uses all or most of the output chars,
+	 * min and max most frequent chars are of reasonable counts, etc.
+	 *
+	 * @throws Exception
+	 */
+	@Test
+	public void xorHashRunManyTimes(){
+		System.out.format("testXORHashFunctionBasic() starting.\n");
+
+		System.out.format("testXORHashFunctionBasic() ended.\n");
+	}
+	@Test
+	public void testXORHashFunctionBasic() throws Exception {
+		System.out.format("testXORHashFunctionBasic() starting.\n");
+		XORHash compressor = new XORHash(12,31, outputChars);
+		StringBuffer sig = new StringBuffer(300);
+		String input = readFile(big);
+		int max = input.length()-n;
+		for (int i=0; i<max; i++){
+			int r = compressor.map(input,i);
+			if (r != -1) {
+				sig.append((char) r);
+			}
+		}
+		String s = sig.toString();
+		int lenS = s.length();
+		int lenO = input.length();
+		System.out.format("Original len: %d  signature len: %d ", lenS, lenO,"\n");
+		System.out.format(" sig: %s", s, "\n");
+		System.out.format("\ntestXORHashFunctionBasic() ending.\n");
+	}
+
+	// TODO: Repetition for the XOR hash with different compressions and neighborhoods.
+	// TODO: Speed tests for the two kinds of hashes. Characters per minute at various compressions.
+	// TODO: Occasionally a compression rate seems to result in pathological behavior for the regular hash. Why?
+
+	/**
 	 * Test compression for regularity of output in terms whether it uses all or most of the output chars, 
 	 * min and max most frequent chars are of reasonable counts, etc.
-	 * 
+	 *
+	 *  TODO: Need to do some statistics on the results.  Scanning by eye suggests that some signatures
+	 *  	are poor and non-random
+	 *
 	 * @throws Exception
 	 */
 	@Test
 	public static void testCompressionRegular() throws Exception {
 		log.info("testCompressionRegular() starting.");
+		//String input=readFile(big);
 		for(int i=1; i<100; i+=2){
 			_testCompression(big,24 + i, 8);
 		}
@@ -73,11 +119,12 @@ public class TestRegularHash extends TestParent {
 		System.out.println(sb.toString());
 		System.out.println("\tCompressed string:" + compressed);
 		}
+		// Actual/nominal is actual compression rate divided by C.
+		//
 		if(MINIMAL_OUPUT){
-			System.out.println("_testCompression() "+ minMax(compressed)+"\tc:"+ c + "\tactual/nominal:" + String.format("%.4f",ratio) + "\terror:" + String.format("%.4f",error) + "\tsig:" + compressed);
+			System.out.println("_testCompression() "+ minMax(compressed)+"\tc:"+
+					c + "\tactual/nominal:" + String.format("%.4f",ratio) +
+					"\terror:" + String.format("%.4f",error) + "\tsig:" + compressed);
 		}
 	}
-
-
-
 }

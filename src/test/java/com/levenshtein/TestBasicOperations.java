@@ -6,7 +6,7 @@ import com.levenshtein.leven.utility.CircularQueue;
 import com.levenshtein.leven.utility.exception.QueueEmptyException;
 import com.levenshtein.leven.utility.exception.QueueFullException;
 import com.levenshtein.parent.TestParent;
-import org.apache.log4j.Logger;
+//import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import java.util.HashSet;
@@ -21,7 +21,7 @@ import java.util.Set;
  *
  */
 public class TestBasicOperations extends TestParent {
-	static Logger log = Logger.getLogger(TestBasicOperations.class);
+	//static Logger log = Logger.getLogger(TestBasicOperations.class);
 
 	static int ALPHA_SIZE=256;
 	static int MIN_BITS=28;
@@ -49,17 +49,17 @@ public class TestBasicOperations extends TestParent {
 	 */
 	@Test
 	public static void testWhitespaceKiller(){
-		log.info("testWhiteSpace() squeezing white space.");
+		System.out.println("testWhiteSpace() squeezing white space.");
 		String one = "this    is     a string     with    \t\t  too\t\tmuch white   space.  ";
 		StringCompressorPlain sc = new StringCompressorPlain();
 		String squeezed = sc.squeezeWhite(one);
 		assertTrue(squeezed.length()<one.length());
-		log.info("testWhiteSpace()   started with:[" + one + "]");
-		log.info("testWhiteSpace()   unsqueezed size:" + one.length());
-		log.info("testWhiteSpace() squeezed it to:[" + squeezed + "]");
-		log.info("testWhiteSpace() squeezed size:" + squeezed.length());
+		System.out.println("testWhiteSpace()   started with:[" + one + "]");
+		System.out.println("testWhiteSpace()   unsqueezed size:" + one.length());
+		System.out.println("testWhiteSpace() squeezed it to:[" + squeezed + "]");
+		System.out.println("testWhiteSpace() squeezed size:" + squeezed.length());
 		assertTrue(squeezed.length()==43);
-		log.info("testWhiteSpace() completed.");
+		System.out.println("testWhiteSpace() completed.");
 	}
 
 	/**
@@ -70,7 +70,7 @@ public class TestBasicOperations extends TestParent {
 	 */
 	@Test
 	public static void testLDSpeedOnSmallStrings() throws Exception {
-		log.info("testLDSpeedOnSmallStrings() LD on "+ ITERATIONS+" pairs of small uncompressed strings.");
+		System.out.println("testLDSpeedOnSmallStrings() LD on "+ ITERATIONS+" pairs of small uncompressed strings.");
 		StringDistance d = new StringDistance();
 		@SuppressWarnings("unused")
 		int t = 0;
@@ -80,12 +80,12 @@ public class TestBasicOperations extends TestParent {
 			t = d.LD(t1, t2);
 		}
 		tAndR.compute();
-		log.info("\n\tLD applied to " + ITERATIONS
+		System.out.println("\n\tLD applied to " + ITERATIONS
 				+ " strings of length: " + t2.length()
 				+ " bytes\n\telapsed ms: " + (tAndR.elapsedMS()) + " rate:"
 				+ String.format("%.2f",tAndR.rateSecs()) + " pairs/sec");
 		assertTrue(tAndR.rateSecs()>10000);
-		log.info("testLDSpeedOnSmallStrings() completed");
+		System.out.println("testLDSpeedOnSmallStrings() completed");
 	}		
 	
 	/**
@@ -95,7 +95,7 @@ public class TestBasicOperations extends TestParent {
 	 */
 	@Test
 	public static void testDistinctHashVals(){
-		log.info("testDistinctHashVals() starting.");
+		System.out.println("testDistinctHashVals() starting.");
 		longs=RollingHash.createLongs(MIN_BITS,MAX_BITS,12345);
 		Set<Long> set = new HashSet<Long>();
 		for(int i=0; i<longs.length; i++){
@@ -108,10 +108,10 @@ public class TestBasicOperations extends TestParent {
 			assertTrue(bits<=MAX_BITS);
 			assertTrue(bits>=MIN_BITS);
 		}
-		log.info("testDistinctHashVals() set size:" + set.size() + " array:" + longs.length);
+		System.out.println("testDistinctHashVals() set size:" + set.size() + " array:" + longs.length);
 		assertTrue(set.size()==longs.length);
 		assertTrue(set.size()==ALPHA_SIZE);
-		log.info("testDistinctHashVals() completed.");
+		System.out.println("testDistinctHashVals() completed.");
 	}
 		
 	/**
@@ -122,7 +122,7 @@ public class TestBasicOperations extends TestParent {
 	 */
 	@Test
 	public static void testSpeedOfLDOnLargeFiles() throws Exception {
-		log.info("testSpeedOfLDOnLargeFiles() ");
+		System.out.println("testSpeedOfLDOnLargeFiles() ");
 		System.out.println("\tSpeed of LD on a pair of 7k uncompressed strings");
 		StringDistance d = new StringDistance();
 		String longOne = readFile(infile1);
@@ -137,9 +137,9 @@ public class TestBasicOperations extends TestParent {
 				+ " milliseconds, equivalent to  rate: " + tAndR.rateSecs()
 				+ " pairs/sec");
 		double rate = tAndR.rateSecs();
-		log.info("testSpeedOfLDOnLargeFiles() rate per second:" + rate);
+		System.out.println("testSpeedOfLDOnLargeFiles() rate per second:" + rate);
 		assertTrue(tAndR.rateSecs()>4);
-		log.info("testSpeedOfLDOnLargeFiles() completed.");
+		System.out.println("testSpeedOfLDOnLargeFiles() completed.");
 	}
 
 	private ICompressor compressor=null;
@@ -196,7 +196,7 @@ public class TestBasicOperations extends TestParent {
 	 */
 	@Test
     public static void testCircularQueueOverflow() {
-		log.info("testCircularQueue() starting.");
+		System.out.println("testCircularQueue() starting.");
 		int LEN=5;
         CircularQueue<Integer> circularQueue = new CircularQueue<Integer>(LEN);
         for(int i=0; i<LEN; i++){
@@ -207,7 +207,7 @@ public class TestBasicOperations extends TestParent {
 			circularQueue.enqueue(11);
 		}
 		catch(QueueFullException qfx){
-			log.info("testCircularQueue() overflowed as planned.");
+			System.out.println("testCircularQueue() overflowed as planned.");
 			return;
 		}
 		fail("testCircularQueueOverflow() should have blown up!");
@@ -218,7 +218,7 @@ public class TestBasicOperations extends TestParent {
 	 */
 	@Test
     public static void testCircularQueueUnderflow() {
-		log.info("testCircularQueue() starting.");
+		System.out.println("testCircularQueue() starting.");
 		int LEN=5;
         CircularQueue<Integer> circularQueue = new CircularQueue<Integer>(LEN);
         for(int i=0; i<LEN; i++){
@@ -233,7 +233,7 @@ public class TestBasicOperations extends TestParent {
 			int val = circularQueue.dequeue();
 		}
 		catch(QueueEmptyException qfx){
-			log.info("testCircularQueue() failed to return non-existent value as planned.");
+			System.out.println("testCircularQueue() failed to return non-existent value as planned.");
 			return;
 		}
 		fail("testCircularQueueUnderflow() should have blown up!");
@@ -245,7 +245,7 @@ public class TestBasicOperations extends TestParent {
 	 */
 	@Test
     public static void testCircularQueue() {
-		log.info("testCircularQueue() starting.");
+		System.out.println("testCircularQueue() starting.");
         CircularQueue<Integer> circularQueue = new CircularQueue<Integer>(5);
         circularQueue.enqueue(11);
         circularQueue.enqueue(21);
@@ -254,13 +254,13 @@ public class TestBasicOperations extends TestParent {
         circularQueue.enqueue(61);
 		assertTrue(circularQueue.isEmpty()==false);
 		assertTrue(circularQueue.isFull()==true);
-        log.info("Elements deQueued from circular Queue: ");
+        System.out.println("Elements deQueued from circular Queue: ");
         System.out.print(circularQueue.dequeue()+" ");
         System.out.print(circularQueue.dequeue()+" ");
         System.out.print(circularQueue.dequeue()+" ");
         System.out.print(circularQueue.dequeue()+" ");
         System.out.print(circularQueue.dequeue()+" ");
-		log.info("testCircularQueue() ended.");
+		System.out.println("testCircularQueue() ended.");
 		assertTrue(circularQueue.isEmpty()==true);
     }
 	

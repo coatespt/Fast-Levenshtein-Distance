@@ -3,7 +3,7 @@ import a140.util.file.CSVLogWriter;
 import com.levenshtein.leven.utility.EntropyCalc;
 import com.levenshtein.leven.utility.FileAndTimeUtility;
 import com.levenshtein.parent.TestParent;
-import org.apache.log4j.Logger;
+//import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import java.io.File;
@@ -38,7 +38,7 @@ import java.util.*;
 	 * @author pcoates
 	 */
 public class TestMassCompare extends TestParent {
-		static Logger log = Logger.getLogger(TestMassCompare.class);
+		//static Logger log = Logger.getLogger(TestMassCompare.class);
 		static int N=20;
 		static int C=140;
 		static Integer[] CVals = {50,100,150,200,250,300,350};
@@ -58,9 +58,9 @@ public class TestMassCompare extends TestParent {
 		static String EntropyOut = "./data-bulk/32kEntropy.txt";
 		
 // BEWARE this takes a couple of hours
-//		@Test
+// @Test
 		public void create32kSigs() throws Exception {
-			log.info("testCreateSignatures()");
+			System.out.println("testCreateSignatures()");
 			_testCreateSignatures(All32KSigs, All32KFiles);
 		}
 
@@ -71,7 +71,7 @@ public class TestMassCompare extends TestParent {
 		 */
 //		@Test
 		public void createSignatures() throws Exception {
-			log.info("testCreateSignatures()");
+			System.out.println("testCreateSignatures()");
 			_testCreateSignatures(TestSigFile, TestFiles);
 			_testCreateSignatures(SigFile, FilesFile);
 		}
@@ -92,7 +92,7 @@ public class TestMassCompare extends TestParent {
 		 */
 //		@Test
 //		public void testSigCompare() throws Exception {
-//			log.info("testSigCompare()");
+//			System.out.println("testSigCompare()");
 //			int sig200Index=5;
 //			List<String> targetList = FileAndTimeUtility.readListFromFile(TestSigFile);
 //			List<String> testList = FileAndTimeUtility.readListFromFile(SigFile);
@@ -134,7 +134,7 @@ public class TestMassCompare extends TestParent {
 
 		@Test
 		public void testEntropy() throws Exception {
-			log.info("testEntropy()");
+			System.out.println("testEntropy()");
 			int bufLen=200;
 			List<String> targetList = FileAndTimeUtility.readListFromFile(All32KSigs);
 			long files=0;
@@ -162,7 +162,7 @@ public class TestMassCompare extends TestParent {
 				sb.append("\t");
 				// file contents
 				if(!fileExists(targFile)){
-						log.error("file not found! " + targFile);
+						System.out.println("file not found! " + targFile);
 						continue;
 				};
 				String tFileContent=FileAndTimeUtility.getFileContents(targFile);
@@ -186,7 +186,7 @@ public class TestMassCompare extends TestParent {
 					int c = Integer.parseInt(cStr);
 					String sig = targFields.get(2+j*2+1);
 					if(sig==null){
-						log.error("signature null for file " + targFile);
+						System.out.println("signature null for file " + targFile);
 						continue;
 					}
 					double sigEntropy=computeEntropy(sig);
@@ -356,13 +356,13 @@ public class TestMassCompare extends TestParent {
 		 */
 		public void _testCreateSignatures(String sigFileName, String inFileList) throws Exception {
 			clearCompressStats();
-			log.info("_testCreateSignatures()");
+			System.out.println("_testCreateSignatures()");
 			System.out.println("\tDropping signature file:" + sigFileName);
 			dropFile(sigFileName);
 			System.out.println("_testCreateSignatures()");
 			CSVLogWriter csvLog = new CSVLogWriter(sigFileName);
 			List<String> list = FileAndTimeUtility.readListFromFile(inFileList);
-			log.info("Got " + list.size() + " filenames.");
+			System.out.println("Got " + list.size() + " filenames.");
 			Date start = new Date();
 			int sigsComputed=0;
 			int ctProcessed=0;
@@ -391,7 +391,7 @@ public class TestMassCompare extends TestParent {
 						}
 					}
 					catch(Exception x){
-						log.warn("Exception thrown for file:" + s + " Ex:" + x.getMessage());
+						System.out.println("Exception thrown for file:" + s + " Ex:" + x.getMessage());
 						x.printStackTrace();
 					}
 				}

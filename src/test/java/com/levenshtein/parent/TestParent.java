@@ -5,7 +5,7 @@ import com.levenshtein.leven.IDistance;
 import com.levenshtein.leven.StringCompressorPlain;
 import com.levenshtein.leven.StringDistance;
 import junit.framework.TestCase;
-import org.apache.log4j.Logger;
+// import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -13,13 +13,13 @@ import java.io.FileReader;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TestParent  extends TestCase{
-	static Logger log = Logger.getLogger(TestParent.class);
+public class TestParent  extends TestCase {
+	//static Logger log = Logger.getLogger(TestParent.class);
 	public int n = 12;
 	public int c = 25;
 	public static int copies = 100;
 	// 5000
-	public static String infile1 = "./data/infile1.txt"; 
+	public static String infile1 = "./data/infile1.txt";
 	// 4936
 	public static String infile2 = "./data/infile2.txt";
 	// 2500
@@ -39,11 +39,24 @@ public class TestParent  extends TestCase{
 
 	// qbf-1
 	public static String t1 = "The quick brown fox jumped over the very lazy dog,."
-				+ " and each time the fox jumped he scared the zebra.";
+			+ " and each time the fox jumped he scared the zebra.";
 	// qbf-2
 	public static String t2 = "The quick brown fox jumped over the fat dog,"
-				+ " and each time the fox jumped he scared the zebra.";
-	
+			+ " and each time the fox jumped he scared the zebra.";
+	// 44 25.6K files "split" from two unrelated 1MB Gutenberg books by different authors.
+	// All leading and trailing boilerplate removed from because it is very similar for all works.
+	// One book is a history of china the other is a Jules Verne novel.
+	protected String [] fileSet={
+			"xab", "xad", "xaf", "xah", "xaj", "xal", "xan", "xap", "xar",
+			"xat", "xav", "xax", "xaz", "xbb", "xbd", "xbf", "xbh", "xbj",
+			"xbl", "xbn", "xbp", "xbr", "xaa", "xac", "xae", "xag", "xai",
+			"xak", "xam", "xao", "xaq", "xas", "xau", "xaw", "xay", "xba",
+			"xbc", "xbe", "xbg", "xbi", "xbk", "xbm", "xbo", "xbq"
+	};
+	protected String loc="./data/many/";
+	protected String set1path=loc + "china/";
+	protected String set2path=loc + "verne/";
+
 
 	public int getN() {
 		return n;
@@ -61,31 +74,34 @@ public class TestParent  extends TestCase{
 		this.c = c;
 	}
 
-	private ICompressor compressor=null;
+	private ICompressor compressor = null;
+
 	/**
 	 * Get the standard compressor (plain)
 	 */
-	protected ICompressor getCompressor(){
-		if(compressor==null){
+	protected ICompressor getCompressor() {
+		if (compressor == null) {
 			compressor = new StringCompressorPlain();
 		}
 		compressor.setC(c);
 		compressor.setN(n);
 		return compressor;
 	}
-	
+
 	private IDistance distance = null;
+
 	/**
 	 * Get the standard distance compute object.
+	 *
 	 * @return
 	 */
-	protected IDistance getDistance(){
-		if(distance==null){
+	protected IDistance getDistance() {
+		if (distance == null) {
 			distance = new StringDistance();
 		}
 		return distance;
 	}
-	
+
 	public static int ITERATIONS = 100000;
 	/**
 	 * Maximum compression to test in test grid
@@ -104,7 +120,7 @@ public class TestParent  extends TestCase{
 	 */
 	protected static int N_INC = 3;
 	/**
-	 * Number of compression cycles to execute for compression tests 
+	 * Number of compression cycles to execute for compression tests
 	 * on big files.
 	 */
 	public static int COMPRESSIONS = 10000;
@@ -112,7 +128,7 @@ public class TestParent  extends TestCase{
 
 	/**
 	 * Utility method to read a file into a string.
-	 * 
+	 *
 	 * @param filename
 	 * @return
 	 * @throws Exception
@@ -132,7 +148,7 @@ public class TestParent  extends TestCase{
 
 	/**
 	 * Utility method to return the length of the longer of two strings.
-	 * 
+	 *
 	 * @param one
 	 * @param two
 	 * @return
@@ -147,7 +163,7 @@ public class TestParent  extends TestCase{
 
 	/**
 	 * Utility method to return the size of a given file in bytes.
-	 * 
+	 *
 	 * @param fname
 	 * @return
 	 * @throws Exception
@@ -160,25 +176,27 @@ public class TestParent  extends TestCase{
 
 	/**
 	 * Utility method to drop a file
+	 *
 	 * @param fileName
 	 */
 	protected void dropFile(String fileName) {
 		File file = new File(fileName);
-		if(file.exists()){
+		if (file.exists()) {
 			file.delete();
 		}
 	}
 
 	/**
 	 * Utility method to get the length of a file.
+	 *
 	 * @param fileName
 	 * @return
 	 */
 	protected long fileLen(String fileName) {
 		File file = new File(fileName);
-		long len=-1;
-		if(file.exists()){
-			len=file.length();
+		long len = -1;
+		if (file.exists()) {
+			len = file.length();
 		}
 		return len;
 	}
@@ -189,12 +207,13 @@ public class TestParent  extends TestCase{
 	 * @return
 	 * @throws Exception
 	protected String getFileConents(String fpath) throws Exception {
-		return FileAndTimeUtility.getFileContents(fpath);
+	return FileAndTimeUtility.getFileContents(fpath);
 	}
 	 */
 
 	/**
 	 * Chop off the path and return just the file name
+	 *
 	 * @param pathname
 	 * @return
 	 */
@@ -206,6 +225,7 @@ public class TestParent  extends TestCase{
 	/**
 	 * Convenience method to create signature for a file.
 	 * Compress the specified input file to level c with neighborhood size n.
+	 *
 	 * @param c
 	 * @param n
 	 * @param infile
@@ -214,68 +234,126 @@ public class TestParent  extends TestCase{
 	 */
 	protected String compressToC(int c, int n, String infile)
 			throws Exception {
-				StringCompressorPlain comp = new StringCompressorPlain();
-				String longOne = readFile(infile);
-				totalCharsRead+=longOne.length();
-				if(!CToSigTotal.containsKey(c)){
-					CToSigTotal.put(c, 0L);
-				}
-				if(!CToReadTotal.containsKey(c)){
-					CToReadTotal.put(c, 0L);
-				}
-				if(!CallsForC.containsKey(c)){
-					CallsForC.put(c, 0L);
-				}
-				CallsForC.put(c, (CallsForC.get(c)+1));
-				CToReadTotal.put(c, (CToReadTotal.get(c)+longOne.length()));
-				String sig = comp.compress(longOne);
-				CToSigTotal.put(c, (CToSigTotal.get(c)+sig.length()));
-				totalSigsProduced+=sig.length();
-				return sig;
-			}
+		StringCompressorPlain comp = new StringCompressorPlain();
+		String longOne = readFile(infile);
+		totalCharsRead += longOne.length();
+		if (!CToSigTotal.containsKey(c)) {
+			CToSigTotal.put(c, 0L);
+		}
+		if (!CToReadTotal.containsKey(c)) {
+			CToReadTotal.put(c, 0L);
+		}
+		if (!CallsForC.containsKey(c)) {
+			CallsForC.put(c, 0L);
+		}
+		CallsForC.put(c, (CallsForC.get(c) + 1));
+		CToReadTotal.put(c, (CToReadTotal.get(c) + longOne.length()));
+		String sig = comp.compress(longOne);
+		CToSigTotal.put(c, (CToSigTotal.get(c) + sig.length()));
+		totalSigsProduced += sig.length();
+		return sig;
+	}
+
 	/**
-	 * The LD of two random strings of equal length is 
-	 * almost always smaller than the strings because some chars will just happen 
+	 * The LD of two random strings of equal length is
+	 * almost always smaller than the strings because some chars will just happen
 	 * to line up. In practice, only very non-random strings will have an LD equal to their length.
-	 * 
+	 * <p>
 	 * This fudge factor is meant to account for this.  It is situationally dependent
 	 * because of word usage patterns, boiler plate such as HTML header junk, etc.
-	 * In the gutenberg books it can be large because they have pages and pages of 
+	 * In the gutenberg books it can be large because they have pages and pages of
 	 * junk that is fairly standard.
-	 * 
-	 * 
+	 *
 	 * @param expected
 	 * @return
 	 */
 	protected static double fudge(double expected) {
-				double fudge = 0.87d;
+		double fudge = 0.87d;
 		return expected * fudge;
 	}
 
-	protected static long totalCharsRead=0;
-	protected static long totalSigsProduced=0;
-	static Map <Integer,Long> CToSigTotal = new HashMap<Integer,Long>();
-	static Map <Integer,Long> CToReadTotal = new HashMap<Integer,Long>();
-	static Map <Integer,Long> CallsForC = new HashMap<Integer,Long>();
-	
+	protected static long totalCharsRead = 0;
+	protected static long totalSigsProduced = 0;
+	static Map<Integer, Long> CToSigTotal = new HashMap<Integer, Long>();
+	static Map<Integer, Long> CToReadTotal = new HashMap<Integer, Long>();
+	static Map<Integer, Long> CallsForC = new HashMap<Integer, Long>();
+
 	protected static double compRateForSigs(int c) {
-		double actualCompress=CToReadTotal.get(c)/CToSigTotal.get(c);
+		double actualCompress = CToReadTotal.get(c) / CToSigTotal.get(c);
 		return actualCompress;
 	}
 
-	protected static void clearCompressStats(){
-		totalCharsRead=0;
-		totalSigsProduced=0;
+	protected static void clearCompressStats() {
+		totalCharsRead = 0;
+		totalSigsProduced = 0;
 		CToReadTotal.clear();
 		CToReadTotal.clear();
 	}
 
-	/**
-	 * String with inputsize/cardinality-of-outputchars, actual average per char in output, least char ct, greates char ct  
-	 * @param s
-	 * @return
-	 */
 	protected static String minMax(String s) {
+		Map<Character, Integer> map = new HashMap<Character, Integer>();
+		for (int i = 0; i < s.length(); i++) {
+			Character c = s.charAt(i);
+			if (!map.containsKey(c)) {
+				map.put(c, 0);
+			}
+			map.put(c, map.get(c) + 1);
+		}
+		int min = Integer.MAX_VALUE;
+		int max = Integer.MIN_VALUE;
+		Character minChar = null;
+		Character maxChar = null;
+		for (Character c : map.keySet()) {
+			int ct = map.get(c);
+			if (min > ct) {
+				min = ct;
+				minChar = c;
+			}
+			if (max < ct) {
+				max = ct;
+				maxChar = c;
+			}
+		}
+		return "distinct:" + map.size() + "\tcharset: " + outputChars.length +
+				"\tmin reps:" + minChar + "\tct:" + map.get(minChar) +
+				"\tmax reps:" + maxChar + "\tct:" + map.get(maxChar);
+	}
+
+	public Map<Integer,Double> meanStdevForDict(Map<Character,Integer> cts ){
+		int total = 0;
+		Map<Integer,Double> ret = new HashMap<Integer,Double>();
+		for(Character c : cts.keySet()){
+			total = total + cts.get(c);
+		}
+		double mean = total/cts.size();
+		double ssd = 0;
+		for(Character c : cts.keySet()){
+			int diff = (int) (mean - cts.get(c));
+			ssd = ssd + (diff * diff);
+		}
+		double var = ssd/cts.size();
+		ret.put(MEAN_COUNT,mean);
+		ret.put(VARIANCE_COUNT,var);
+		ret.put(STDEV_COUNT,Math.sqrt(var));
+		return ret;
+	}
+
+	static public Integer DISTINCT_CHARS = 1;
+	static public Integer OUTPUT_CARD= 2;
+	static public Integer LEAST_FREQUENT = 3;
+	static public Integer LEAST_FREQUENT_COUNT = 4;
+	static public Integer MOST_FREQUENT = 5;
+	static public Integer MOST_FREQUENT_COUNT = 6;
+	static public Integer MEAN_COUNT = 7;
+	static public Integer VARIANCE_COUNT = 8;
+	static public Integer STDEV_COUNT = 9;
+	/**
+	 *
+	 * @param s A signature
+	 * @return Map of some statistics useful for verification.
+	**/
+	protected static Map<Integer, Integer> minMaxDictionary(String s) {
+		Map<Integer,Integer> retMap = new HashMap<Integer,Integer>();
 		Map<Character, Integer> map = new HashMap<Character,Integer>();
 		for(int i=0; i<s.length();i++){
 			Character c=s.charAt(i);
@@ -299,22 +377,28 @@ public class TestParent  extends TestCase{
 				maxChar=c;
 			}
 		}
-		int actual=s.length()/map.size();
-		return " distinct:" + map.size()+ "\texpected: "+ (s.length()/outputChars.length) + "\tactual:" + actual + "\tmin-max:" + minChar + "/" + maxChar + " ct:" + map.get(minChar) + "/" + map.get(maxChar); 
+		retMap.put(DISTINCT_CHARS,map.size());
+		retMap.put(OUTPUT_CARD,outputChars.length);
+		retMap.put(LEAST_FREQUENT,Character.getNumericValue(minChar));
+		retMap.put(LEAST_FREQUENT_COUNT,map.get(minChar));
+		retMap.put(MOST_FREQUENT,Character.getNumericValue(maxChar));
+		retMap.put(MOST_FREQUENT_COUNT,map.get(maxChar));
+		return retMap;
 	}
-	
 
+	// TODO This string could have more characters. This is only 62. You could add in puctuation, etc.
+	// TODO Might be useful to make it setable.
 	protected static String outputCharString = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 	protected static ICompressor comp = null;
 	protected static char [] outputChars=null;
 	protected static int MINBITS=31;
 	protected static int MAXBITS=33;
 	protected static int SEED=12345;
+
 	static {
 		outputChars=new char[outputCharString.length()];
 		for(int i=0; i<outputCharString.length(); i++){
 			outputChars[i]=outputCharString.charAt(i);
 		}
 	}
-
 }

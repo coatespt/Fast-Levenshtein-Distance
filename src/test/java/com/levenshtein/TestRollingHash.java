@@ -1,6 +1,6 @@
 package com.levenshtein;
 
-import org.apache.log4j.Logger;
+//import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import com.levenshtein.leven.StringCompressorRH;
@@ -16,7 +16,7 @@ import com.levenshtein.parent.TestParent;
  */
 public class TestRollingHash extends TestParent {
 
-	static Logger log = Logger.getLogger(TestRollingHash.class);
+	//static Logger log = Logger.getLogger(TestRollingHash.class);
 	public static boolean MINIMAL_OUPUT=true;
 
 	/**
@@ -26,7 +26,7 @@ public class TestRollingHash extends TestParent {
 	 */
 	@Test
 	public void testCompressionRH() throws Exception {
-		log.info("testCompressionRH() starting.");
+		System.out.println("testCompressionRH() starting.");
 		int N=8;
 		double eps=0.2d;
 		int fsize=fileSize(big);
@@ -37,14 +37,14 @@ public class TestRollingHash extends TestParent {
 			assertTrue(ratio<i+(i/10.0d));
 			assertTrue(ratio>i-(i/10.0d));
 		}
-		log.info("testCompressionRH() ending.");
+		System.out.println("testCompressionRH() ending.");
 	}
 
 	
 
 	public int _testCompressionRH(String fname, int c, int n) throws Exception {
 		if(!MINIMAL_OUPUT){
-			log.info("_testCompressionRH()  Testing compression on a large string with c:" + c + " n: " + n);
+			System.out.println("_testCompressionRH()  Testing compression on a large string with c:" + c + " n: " + n);
 		}
 		comp=new StringCompressorRH(n, c, outputChars, MINBITS, MAXBITS, SEED);
 		String longOne = readFile(fname);

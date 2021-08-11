@@ -3,7 +3,7 @@ package com.levenshtein;
 import com.levenshtein.leven.StringCompressorPlain;
 import com.levenshtein.leven.StringDistance;
 import com.levenshtein.parent.TestParent;
-import org.apache.log4j.Logger;
+//import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ import java.util.Map;
 /**
  */
 public class TestPredictions extends TestParent {
-	Logger log = Logger.getLogger(TestAccuracyDriverPlain101.class);
+	//Logger log = Logger.getLogger(TestAccuracyDriverPlain101.class);
 
 	int c=100;
 	int n=12;
@@ -80,7 +80,7 @@ public class TestPredictions extends TestParent {
 		sb.append(Pd);
 		sb.append("\n\tPe");
 		sb.append(Pe);
-		log.info(sb.toString());
+		System.out.println(sb.toString());
 
 		// show modified raw expected outputs Epn
 		sb = new StringBuffer();
@@ -96,7 +96,7 @@ public class TestPredictions extends TestParent {
 		// adjusted modified output for all changes.
 		sb.append(adjustedAllChgs);
 		
-		log.info(sb.toString());
+		System.out.println(sb.toString());
 	}
 	
 	public int predictLD(int len, int n, int c, int m){
@@ -130,7 +130,7 @@ public class TestPredictions extends TestParent {
 	 */
 	@Test
 	public void testPredictions(){
-		log.info("testPredicitons() starting");
+		System.out.println("testPredicitons() starting");
 		int c=100;
 		int a=64;
 		// prob that compressing a neighborhood results in null
@@ -147,9 +147,9 @@ public class TestPredictions extends TestParent {
 		double Pe = (1.0d)/((double)a*c*c);
 		// aggregate cases where there is a change to a neighborhood
 		double allProbs=Pa+Pb+Pc+Pd+Pe;
-		log.info("Sum of probabilities Pa + Pb + Pc + Pd + Pe = " + allProbs);
+		System.out.println("Sum of probabilities Pa + Pb + Pc + Pd + Pe = " + allProbs);
 		assert(allProbs==1.0d);
-		log.info("testPredicitons() ending");
+		System.out.println("testPredicitons() ending");
 		
 	}
 	
@@ -185,7 +185,7 @@ public class TestPredictions extends TestParent {
 			int predicted = predictLD(longOne.length(), n, c, isp.numMutated());
 			int offBy = predicted - ld;
 			double ratio = predicted / (double) ld;
-			log.info("n:" + n + " c: " + c + " mut:" + isp.numMutated() + " LD:" + ld
+			System.out.println("n:" + n + " c: " + c + " mut:" + isp.numMutated() + " LD:" + ld
 					+ " predicted LD:" + predicted + " off by:" + offBy
 					+ " ratio: " + ratio);
 		}
@@ -198,7 +198,7 @@ public class TestPredictions extends TestParent {
 
 	@Test
 	public void testCentralTendency() throws Exception {
-		log.info("testCentralTendency() started.");
+		System.out.println("testCentralTendency() started.");
 		String fname = big;
 		String longOne = readFile(fname);
 		int n = STDEV_N;
@@ -206,7 +206,7 @@ public class TestPredictions extends TestParent {
 		int mutFactor = STDEV_MOD_FACTOR;
 		int mutateChars = longOne.length() / mutFactor;
 		centralTendency(longOne, n, c, mutateChars, STDEV_ITER);
-		log.info("testCentralTendency() ended.");
+		System.out.println("testCentralTendency() ended.");
 	}
 
 	/**
@@ -217,7 +217,7 @@ public class TestPredictions extends TestParent {
 	 */
 	@Test
 	public void testCentralTendencyRnd() throws Exception {
-		log.info("testCentralTendencyRnd() starting.");
+		System.out.println("testCentralTendencyRnd() starting.");
 		String fname = big;
 		String longOne = readFile(fname);
 		int n = STDEV_N;
@@ -227,7 +227,7 @@ public class TestPredictions extends TestParent {
 		InputStringProcessor isp = new InputStringProcessor(longOne);
 		String inStr=isp.generateRandomString();
 		centralTendency(inStr, n, c, mutateChars, STDEV_ITER);
-		log.info("testCentralTendencyRnd() ended.");
+		System.out.println("testCentralTendencyRnd() ended.");
 	}
 	
 	
@@ -262,7 +262,7 @@ public class TestPredictions extends TestParent {
 			discrepancy.add(offBy);
 			double ratio = predicted / (double) ld;
 			if(VERBOSE){
-			log.info("n:" + n + " c: " + c + " mut:" + isp.numMutated() + " LD:" + ld
+			System.out.println("n:" + n + " c: " + c + " mut:" + isp.numMutated() + " LD:" + ld
 					+ " predicted LD:" + predicted + " off by:" + offBy
 					+ " ratio: " + ratio);
 			}

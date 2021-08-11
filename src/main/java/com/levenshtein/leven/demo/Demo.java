@@ -23,6 +23,7 @@ import java.util.Properties;
 // TODO: Figure out which hash you are using and document it.
 // TODO: Figure out if RollingHash works, is relevant, etc.
 // TODO: I have a better hash (I think) See just below.
+
 /**
  *  * For a given neighborhood, take some simple function of the n 8-bit values and choose
  *       a pseudo-random order to take the positions in.
@@ -254,7 +255,7 @@ public class Demo {
 			flag=(String)props.get("comment-flag");
 			log.info("getProps() comment-flag:" + flag);
 
-			List<String>inputFiles= FileAndTimeUtility.getFilesInDirectory(inputDir, "x", log);
+			List<String>inputFiles= FileAndTimeUtility.getFilesInDirectory(inputDir, "x");
 			inputFileList=new ArrayList<String>();
 			for(String f : inputFiles){
 				String fullPath = inputDir + File.separator + f;

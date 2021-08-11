@@ -1,7 +1,5 @@
 package com.levenshtein;
 
-import org.apache.log4j.Logger;
-
 import com.levenshtein.leven.ICompressor;
 import com.levenshtein.leven.IDistance;
 import com.levenshtein.leven.StringCompressorRH;
@@ -24,7 +22,7 @@ import com.levenshtein.parent.TestAccuracyDriverParent;
  * @author pcoates
  */
 public class TestAccuracyDriverRH101 extends TestAccuracyDriverParent {
-	Logger log = Logger.getLogger(TestAccuracyDriverRH101.class);
+	//Logger log = Logger.getLogger(TestAccuracyDriverRH101.class);
 
 	/**
 	 *  The alphabet of characters for the output.

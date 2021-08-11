@@ -3,7 +3,7 @@ package com.levenshtein;
 import com.levenshtein.leven.*;
 import com.levenshtein.leven.utility.FileAndTimeUtility;
 import com.levenshtein.parent.TestParent;
-import org.apache.log4j.Logger;
+////import org.apache.log4j.Logger;
 import org.junit.Test;
 import java.util.ArrayList;
 import java.util.Date;
@@ -20,7 +20,7 @@ import java.util.List;
  * @author pcoates
  */
 public class TestCompareAccuracy extends TestParent {
-	Logger log = Logger.getLogger(TestCompareAccuracy.class);
+	//Logger log = Logger.getLogger(TestCompareAccuracy.class);
 
 	static String outputAlphaString = "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "1234567890";
 	static int MIN_BITS=28;
@@ -167,24 +167,8 @@ public class TestCompareAccuracy extends TestParent {
 //				System.out.println(result);
 //			}
 //		}
-//		log.info("testAllAgainstAll101() neigher:" + neither + " plain:" + plainBetter + " rh:" + rhBetter);
+//		log.info("testAllAgainstAll101() neither:" + neither + " plain:" + plainBetter + " rh:" + rhBetter);
 //	}
-
-	// 44 25.6K files "split" from two unrelated 1MB Gutenberg books by different authors.
-	// All leading and trailing boilerplate removed from because it is very similar for all works.
-	// One book is a history of china the other is a Jules Verne novel.
-	private String [] fileSet={
-			"xab", "xad", "xaf", "xah", "xaj", "xal", "xan", "xap", "xar",
-			"xat", "xav", "xax", "xaz", "xbb", "xbd", "xbf", "xbh", "xbj",
-			"xbl", "xbn", "xbp", "xbr", "xaa", "xac", "xae", "xag", "xai",
-			"xak", "xam", "xao", "xaq", "xas", "xau", "xaw", "xay", "xba",
-			"xbc", "xbe", "xbg", "xbi", "xbk", "xbm", "xbo", "xbq"
-	};
-
-	// TODO This should not be hard coded!
- 	String loc="./data/many/";
-	private String set1path=loc + "china/";
-	private String set2path=loc + "verne/";
 
 	/**
 	 * Statistics on the LD estimate variance on random text files of equal length.
@@ -224,7 +208,7 @@ public class TestCompareAccuracy extends TestParent {
 	 */
 	@Test
 	public void testAverageLD() throws Exception{
-		log.info("testAllAgainstAll101() starting.");
+		//log.info("testAllAgainstAll101() starting.");
 		long total = 0;
 		long totalSig = 0;
 		int minLenFile=Integer.MAX_VALUE;
@@ -379,7 +363,7 @@ public class TestCompareAccuracy extends TestParent {
 	 */
 	@Test
 	public void testAllAgainstAllRange() throws Exception{
-		log.info("testAllAgainstAll101() starting.");
+		//log.info("testAllAgainstAll101() starting.");
 		int c=C;
 		for(int i=1; i<10; i++){
 		clearCompressors();

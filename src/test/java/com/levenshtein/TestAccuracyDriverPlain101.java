@@ -6,7 +6,7 @@ import com.levenshtein.leven.IDistance;
 import com.levenshtein.leven.StringCompressorPlain;
 import com.levenshtein.leven.StringDistance;
 import com.levenshtein.parent.TestAccuracyDriverParent;
-import org.apache.log4j.Logger;
+//import org.apache./log4j.Logger;
 import org.junit.Test;
 
 /**
@@ -20,7 +20,7 @@ import org.junit.Test;
  * @author pcoates
  */
 public class TestAccuracyDriverPlain101 extends TestAccuracyDriverParent {
-	Logger log = Logger.getLogger(TestAccuracyDriverPlain101.class);
+	//Logger log = Logger.getLogger(TestAccuracyDriverPlain101.class);
 
 	public String[] files = {infile1, infile1, infile3, infile4, infile5, infile6, infile7, infile8};
 

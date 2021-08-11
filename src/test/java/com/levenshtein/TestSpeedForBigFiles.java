@@ -1,6 +1,6 @@
 package com.levenshtein;
 
-import org.apache.log4j.Logger;
+//import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import com.levenshtein.leven.StringDistance;
@@ -19,53 +19,53 @@ import com.levenshtein.parent.TestParent;
  */
 public class TestSpeedForBigFiles extends TestParent {
 
-	static Logger log = Logger.getLogger(TestSpeedForBigFiles.class);
+	//static Logger log = Logger.getLogger(TestSpeedForBigFiles.class);
 
 	@Test
 	public static void testSpeedForBigCompressedFiles25() throws Exception {
-		log.info("testSpeedForBigCompressedFiles25()");
+		System.out.println("testSpeedForBigCompressedFiles25()");
 		speedForBigCompressedFiles(25, 8, infile1, infile2);
 	}
 
 	@Test
 	public static void testSpeedForBigCompressedFiles25Long() throws Exception {
-		log.info("testSpeedForBigCompressedFiles25Long()");
+		System.out.println("testSpeedForBigCompressedFiles25Long()");
 		speedForBigCompressedFiles(25, 8, infile6, infile7);
 	}
 
 	@Test
 	public static void testSpeedForBigCompressedFiles50() throws Exception {
-		log.info("testSpeedForBigCompressedFiles50()");
+		System.out.println("testSpeedForBigCompressedFiles50()");
 		speedForBigCompressedFiles(50, 8, infile1, infile2);
 	}
 
 	@Test
 	public static void testSpeedForBigCompressedFiles50Long() throws Exception {
-		log.info("testSpeedForBigCompressedFiles50Long()");
+		System.out.println("testSpeedForBigCompressedFiles50Long()");
 		speedForBigCompressedFiles(50, 8, infile6, infile7);
 	}
 
 	@Test
 	public static void testSpeedForBigCompressedFiles100() throws Exception {
-		log.info("testSpeedForBigCompressedFiles100()");
+		System.out.println("testSpeedForBigCompressedFiles100()");
 		speedForBigCompressedFiles(100, 8, infile1, infile2);
 	}
 
 	@Test
 	public static void testSpeedForBigCompressedFiles100Long() throws Exception {
-		log.info("testSpeedForBigCompressedFiles100Long()");
+		System.out.println("testSpeedForBigCompressedFiles100Long()");
 		speedForBigCompressedFiles(100, 8, infile6, infile7);
 	}
 
 	@Test
 	public static void testSpeedForBigCompressedFiles200() throws Exception {
-		log.info("testSpeedForBigCompressedFiles200()");
+		System.out.println("testSpeedForBigCompressedFiles200()");
 		speedForBigCompressedFiles(200, 8, infile1, infile2);
 	}
 
 	@Test
 	public static void testSpeedForBigCompressedFiles200Long() throws Exception {
-		log.info("testSpeedForBigCompressedFiles200Long()");
+		System.out.println("testSpeedForBigCompressedFiles200Long()");
 		speedForBigCompressedFiles(200, 8, infile6, infile7);
 	}
 

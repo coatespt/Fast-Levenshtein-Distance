@@ -1,6 +1,6 @@
 package com.levenshtein;
 
-import org.apache.log4j.Logger;
+//import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import com.levenshtein.leven.ICompressor;
@@ -17,7 +17,7 @@ import com.levenshtein.parent.TestAccuracyDriverParent;
  * @author pcoates
  */
 public class TestRegularVRolling101 extends TestAccuracyDriverParent {
-	Logger log = Logger.getLogger(TestRegularVRolling101.class);
+	//Logger log = Logger.getLogger(TestRegularVRolling101.class);
 
 	static String outputAlphaString = 
 			  "abcdefghijklmnopqrstuvwxyz"

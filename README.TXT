@@ -10,7 +10,7 @@ This is an Eclipse java project that can be built with maven on the command line
 
 The demo assumes you have pulled down the git repo with some test files. If you want an up to date copy, 
 
-Go to your usuall working directory where you keep projects. e.g. /home/peter/workingdir
+Go to your usual working directory where you keep projects. e.g. /home/peter/workingdir
 
 Execute the following on the command line.
 

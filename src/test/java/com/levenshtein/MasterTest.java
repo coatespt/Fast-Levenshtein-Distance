@@ -1,6 +1,6 @@
 package com.levenshtein;
 
-import org.apache.log4j.Logger;
+//import org.apache.log4j.Logger;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
@@ -32,6 +32,6 @@ import org.junit.runners.Suite;
 	)
 	public class MasterTest {
 
-		Logger log = Logger.getLogger(MasterTest.class);
+		//Logger log = Logger.getLogger(MasterTest.class);
 	}
 
