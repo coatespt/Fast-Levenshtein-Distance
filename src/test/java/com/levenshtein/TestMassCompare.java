@@ -1,9 +1,9 @@
 package com.levenshtein;
+
 import a140.util.file.CSVLogWriter;
 import com.levenshtein.leven.utility.EntropyCalc;
 import com.levenshtein.leven.utility.FileAndTimeUtility;
 import com.levenshtein.parent.TestParent;
-//import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import java.io.File;
@@ -17,6 +17,20 @@ import java.util.*;
 // cat allfilenames.txt | xargs wc > allfilenames.wc
 // cat allfilenames.wc | awk '{if($1>10000 && $1<10100){print "\""$4" "$5" "$6" "$7"\""}}' > biggerthatn10k.txt
 //
+// New procedure to get files in a range
+// cd to a directory below where the files are.
+// export LOW=10000
+// export HIGH=20000
+// The following creates a list of the file names.
+// find ./allfiles -name "*.txt" | awk '{print  $0 }' > allfiles.txt
+// The following creates a stream of file word-counts.
+// cat allfiles.txt | xargs wc > allfiles.wc
+// Result is a list of relative path names of files in the length range
+// Note how the filename is concatenated. It's the variables in the quotes, not the strings.
+// cat allfiles.wc | awk -v low=$LOW -v high=$HIGH '{ if($3>low && $3<high){print $4}}' > file_"$LOW"_"$HIGH".txt
+
+// TODO Figure out what these files are supposted to look like
+//All32KSigs
 // use on the output of testEntropyCompare
 // cat junk.txt | awk 'BEGIN{} {print $27 " " $28 " " $29 " " $30}' | awk 'BEGIN{FS=":";} {for(i=1;i<=NF;i++){str=str ( $i " ")}; print str; str=""}' | awk 'BEGIN{}{d=$6-$8;d=d<0?d*-1:d; print $6 " " $8 " " d}' | awk '{sum1+=$1; sum2+=$2; sum3+=$3;}END{print sum1/NR " " sum2/NR " " sum3/NR}'
 // cat 32kEntropy.txt | awk '{}{raw+=$3; fifty+=$5; hunert+=$7; onefity+=$9; two+=$11; twofity+=$13; three+=$15; threefity+=$17;}END{print raw/NR " " fifty/NR " " hunert/NR " " onefity/NR " " two/NR " " twofity/NR " " three/NR " " threefity/NR}'
@@ -34,7 +48,7 @@ import java.util.*;
 	 * some of them were placed in testSigs.txt.
 	 * 
 	 * The other test routine testSigCompare() runs every signature in the testSigs.txt against every signature in the signatures.txt file.
-	 *  
+	 * TODO Fix me! All tests in this file break because the test data is missing.
 	 * @author pcoates
 	 */
 public class TestMassCompare extends TestParent {
@@ -43,37 +57,41 @@ public class TestMassCompare extends TestParent {
 		static int C=140;
 		static Integer[] CVals = {50,100,150,200,250,300,350};
 
-		/** Bigger of the two filename lists */
-		static String FilesFile="./data-bulk/searchFiles.txt";
+		// TODO This should all be in a properties file
+		// The location of the bulk gutenberg data files.
+		// There are about 18k of them.	It looks like the 8-bit files are separated out.
+		// THis needs to be in .gitignore--too much to inline in the project!
+
+		/** Bigger of the two filename lists. These are relative path names of all 18k books*/
+		static String FilesFile="./data/allfiles.txt";
+
 		/** Signatures corresponding to searchFiles */
-		static String SigFile="./data-bulk/searchSigs.txt";
+		static String SigFile="./data/allfiles-sigs.txt";
 
 		/** Smaller of two filename lists */
-		static String TestFiles="./data-bulk/testFiles.txt";
+		static String TestFiles="./data/testfiles.txt";
+
 		/** signatures corresponding to testFiles*/
-		static String TestSigFile="./data-bulk/testSigs.txt";
+		static String TestSigFile="./data/testfile-sigs.txt";
 		
-		static String All32KFiles = "./data-bulk/all32kfiles.txt";
-		static String All32KSigs = "./data-bulk/all32kSigs.txt";
-		static String EntropyOut = "./data-bulk/32kEntropy.txt";
+		static String EntropyOut = "./data/allfiles-entropy.txt";
 		
 // BEWARE this takes a couple of hours
-// @Test
-		public void create32kSigs() throws Exception {
+		@Test
+		public void create18k() throws Exception {
 			System.out.println("testCreateSignatures()");
-			_testCreateSignatures(All32KSigs, All32KFiles);
+			_testCreateSignatures(SigFile,FilesFile);
 		}
 
 		/**
 		 * Create two files of signatures according to the contents of the 
 		 *  TestFiles and FilesFile listings of input files.
-		 *  This isn't really a test so much as to prepare the data for the tests.
+		 *  This isn't really a test--it just prepares the data for the tests.
 		 */
-//		@Test
-		public void createSignatures() throws Exception {
+		@Test
+		public void create50Signatures() throws Exception {
 			System.out.println("testCreateSignatures()");
 			_testCreateSignatures(TestSigFile, TestFiles);
-			_testCreateSignatures(SigFile, FilesFile);
 		}
 		
 		/**
@@ -136,7 +154,7 @@ public class TestMassCompare extends TestParent {
 		public void testEntropy() throws Exception {
 			System.out.println("testEntropy()");
 			int bufLen=200;
-			List<String> targetList = FileAndTimeUtility.readListFromFile(All32KSigs);
+			List<String> targetList = FileAndTimeUtility.readListFromFile(SigFile);
 			long files=0;
 			long chars=0;
 			Map<Integer,Long>sigCounts=new HashMap<Integer,Long>();
