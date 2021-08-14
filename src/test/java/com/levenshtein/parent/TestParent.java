@@ -235,6 +235,8 @@ public class TestParent  extends TestCase {
 	protected String compressToC(int c, int n, String infile)
 			throws Exception {
 		StringCompressorPlain comp = new StringCompressorPlain();
+		comp.setC(c);
+		comp.setN(n);
 		String longOne = readFile(infile);
 		totalCharsRead += longOne.length();
 		if (!CToSigTotal.containsKey(c)) {

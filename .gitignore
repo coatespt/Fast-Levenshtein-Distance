@@ -10,6 +10,7 @@ data/allfiles/
 data/many/
 /target/
 ./data/gutenberg-real/allfiles/*
+./data/allfiles/*
 all32kSigs.txt
 all32kfiles.txt
 allfilenames.txt
@@ -26,6 +27,8 @@ testSigs.txt
 data-bulk/all32kSigs.txt.backup
 data-bulk/junk.txt
 doc/speedup-levenshtien.log
+data/allfiles-sigs.txt
+data/testfile-sigs.txt
 *.aux
 *.log
 *.pdf

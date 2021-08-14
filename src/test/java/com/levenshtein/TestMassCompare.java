@@ -75,10 +75,10 @@ public class TestMassCompare extends TestParent {
 		static String TestSigFile="./data/testfile-sigs.txt";
 		
 		static String EntropyOut = "./data/allfiles-entropy.txt";
-		
+
 // BEWARE this takes a couple of hours
 		@Test
-		public void create18k() throws Exception {
+		public void testCreate18k() throws Exception {
 			System.out.println("testCreateSignatures()");
 			_testCreateSignatures(SigFile,FilesFile);
 		}
@@ -89,7 +89,7 @@ public class TestMassCompare extends TestParent {
 		 *  This isn't really a test--it just prepares the data for the tests.
 		 */
 		@Test
-		public void create50Signatures() throws Exception {
+		public void testCreate50Signatures() throws Exception {
 			System.out.println("testCreateSignatures()");
 			_testCreateSignatures(TestSigFile, TestFiles);
 		}
@@ -150,8 +150,8 @@ public class TestMassCompare extends TestParent {
 			return f.exists();
 		}
 
-		@Test
-		public void testEntropy() throws Exception {
+//		@Test
+		public void ttttestEntropy() throws Exception {
 			System.out.println("testEntropy()");
 			int bufLen=200;
 			List<String> targetList = FileAndTimeUtility.readListFromFile(SigFile);
@@ -389,7 +389,7 @@ public class TestMassCompare extends TestParent {
 			for(String s : list){
 				ctProcessed++;
 				StringBuffer sb = new StringBuffer();
-				String str = s.substring(1,s.length()-1);
+				String str = s.substring(0,s.length());
 				long len = fileLen(str);
 				sb.append(str);
 				sb.append("|");

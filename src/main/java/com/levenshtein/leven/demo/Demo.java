@@ -17,50 +17,51 @@ import java.util.Properties;
 
 //import com.a140.util.file.FileAndTimeUtility;
 
-// TODO: Get this running and document what it does.
-// TODO: Get the automated tests runnning. Looks like code works but many fail because they test data isn't there.
-// TODO: Is rolling hash working?
-// TODO: Figure out which hash you are using and document it.
-// TODO: Figure out if RollingHash works, is relevant, etc.
-// TODO: I have a better hash (I think) See just below.
-
-/**
- *  * For a given neighborhood, take some simple function of the n 8-bit values and choose
- *       a pseudo-random order to take the positions in.
- *  * Start with an all-zero integer. It could be 8-byte or 4-byte. Does it matter.
- *  * The first position is 0, the last is n-1 for n-length neighborhood.
- *  * Read the N values in the order chosen and for each, XOR it with the values in the current position
- *        The current position will be 8 zero bits for the first 8 positions but will usually be non-0
- *        for 9, 10, ... ,nth positions.
- *        Then increment to current position another 8 bits.
- *   * When all positions have been XOR-d in, interpret the result as a long integer and return it
- *   	modulo the size of your output character set.
- *
- *   Not sure how to test quality. My guess is that real text is probably best. Any of these functions
- *   are going to give poor results on certain inputs. Hard to see how it could not.
- */
+// TODO: Lost track of which hash this uses. Figure it out.
+// TODO: Try this same test against original, rolling, and xor hash.
+//
 
 
 /**
- * Simple demo class compares does pair-wise comparison of all the files in 
- * the specified directory, computing both an estimate of LD and the actual LD 
- * for each pair.
+ * Demo class does pair-wise LD v estimated LD for all files in
+ * the specified directory. * for each pair.
  * <p>
- * Optional invoke with full path name of a property file in which you can
- * specify different file sets, compression rates, etc.
+ * Default files are all versions of file xaa and are named xaa-1, xaa-2, etc.
+ * The differences of each file from xaa are described in a leading comment line.
+ * Comments for each pair of files are given in the output line printed for the pair.
+ * e.g. changes: "Deleted every 10th line | Deleted last 20 non blank lines."
+ * The base file, xaa, has no comment.
  * <p>
- * The files supplied are clipped out of Gutenberg books and are about 25KB each.
- * Almost all of the demo time is spent on computing LD of the raw files, which 
+ * Optionally, you can invoke this Demo with full path name of a property file in
+ * which you can specify a different file directory, compression rate, n, etc.
+ * The default file is demo.properties but I have included demo.properties.101, to 301
+ * as well.
+ * <p>
+ * The default files supplied are clipped out of Gutenberg books and are about 25KB each.
+ * <p>
+ * Note that almost all of the demo time is spent on computing LD of the raw files for
+ * purposes of comparison.
  * takes a few seconds per pair. Compressing them into signatures only takes 
- * a blink,and computing the estimate on the signatures takes well 
- * under a millisecond.
+ * a blink,and computing the estimate on the signatures takes well * under a millisecond.
  * <p>
  * All run parameters are set in ./config/demo.properties, but you can clone the config file 
  * for variations with different file sets, n and c values, etc.
- * 
- * Beware that 25KB is a pretty big file for LD---50KB is beyond what I can do on 
- * a Mac.  However, if you are not computing the real LD, the max size is several hundreds of
- * time bigger---several thousand KB files should not present a problem for estimates.
+ *
+ * The point of the heuristic is that you can estimate for files C times
+ * bigger than  are practical with the real LD but there's no good way to TEST beyond
+ * a certain size.
+ *
+ * The files in the default set are about 25.5KB each, which is close to the practical
+ * size limit for desktop or laptop. It takes about two seconds to compute LD for each pair
+ * on a fast Linux laptop. A more powerful machine wouldn't get you much farther as memory
+ * and time increase quadratically. 50KB is beyond the pale on my machine.
+ *
+ * What is scaled error? The error has to be normalized to the file-sizes to make sense.
+ * Why? Consider a pair of 25k text files (about 500 lines of text) that differ only a
+ * 10 added, deleted, or changed characters. If the estimated LD=100 and the real LD=10,
+ * the raw LD would be off by a factor of 10x, which sounds terrible, while fact,
+ * an estimate off by 90 chars over a pair of 25k files is very good.
+ *
  * <p>
  * Demo creates signatures for every file in the input-file-dir 
  * <p>
@@ -141,12 +142,12 @@ public class Demo {
 		}
 		return compressor;
 	}
-	
-	
+
 	/**
-	 * Execute an LD on every pair of files and on the corresponding signature pairs. 
+	 * Execute an LD on every pair of files * (not including file-x against file-x)
+	 * and on the * corresponding signature pairs.
+	 *
 	 * Print this and the other relevant information.
-	 * The last column is the error rate
 	 * @throws Exception
 	 */
 	protected void createSigs(String indir) throws Exception {
@@ -195,7 +196,8 @@ public class Demo {
 			}
 		}
 		double averageScaledError=totalScaledError/ct;
-		log.info("createSigs() completed. Average error:" + averageScaledError + " for:" + ct + " files");
+		System.out.println("\ncreateSigs() completed. Average error:" + averageScaledError +
+				" for:" + ct + " file pairs");
 	}
 	
 	int ct=0;
@@ -212,18 +214,20 @@ public class Demo {
 		sb.append(shtrOrig);
 		sb.append("\tdiff: ");
 		sb.append(lgrOrig-shtrOrig);
-		sb.append("\texp'd: ");
+		sb.append("\texp'd LD: ");
 		sb.append(expctd);
-		sb.append("\tactual: ");
+		sb.append("\tactual LD: ");
 		sb.append(act);
-		sb.append("\test: ");
+		sb.append("\test: LD ");
 		sb.append(est);
 		sb.append("\tscld err: ");
 		sb.append(String.format("%.4f",scdErr));
 		sb.append("\tldRateSec/estRateSec: ");
 		sb.append(String.format("%.4f",ldRateSec));
 		sb.append("/");
+		float speedup=(float) estRateSec/(float)ldRateSec;
 		sb.append(String.format("%.4f",estRateSec));
+		sb.append(String.format(" speedup %.2f",speedup));
 		sb.append("\tchanges: ");
 		sb.append(firstLine);
 		return sb.toString();
@@ -276,18 +280,22 @@ public class Demo {
 	 */
 	private String descriptiveMsg(){
 		StringBuffer sb = new StringBuffer();
-		sb.append("App. 99.9 of execution time is spent computed LD of the long strings. Signature comparisons are sub-millisecond.\n");
+		sb.append("App. 99.9 of execution time is spent computed LD of the long strings. " +
+				"\nSignature comparisons are take tens of microseconds.\n");
 		sb.append("Number of pairs to be computed:" + (inputFileList.size() * ((inputFileList.size()-1)/2)));
 		sb.append("\n");
-		sb.append("output consist of:\n");
-		sb.append("\tfile names\n");
-		sb.append("\tfile lengths\n");
-		sb.append("\tdifference in the two file lenghts");
-		sb.append("\tlExpected LD for random text of that length.\n");
-		sb.append("\tthe actual LD for the files\n");
-		sb.append("\tthe estimate by the heuristic\n");
-		sb.append("\tthe scaled error, i.e., adjusted by the magnitude of the LD\n");
-		sb.append("\tDescriptive comment, if any, from first line of each file.\n");
+		sb.append("The output consists of:\n");
+		sb.append("\tFile name 1\n");
+		sb.append("\tFile name 2\n");
+		sb.append("\tFile length 1 / file length 1\n");
+		sb.append("\tDifference of file lengths\n");
+		sb.append("\tExpected LD for random text pairs of that length.\n");
+		sb.append("\tActual LD for the file pair\n");
+		sb.append("\tEstimate LD for the file pair\n");
+		sb.append("\tScaled error, i.e., adjusted for file size\n");
+		sb.append("\tLD computations per second / Estimate computations per second \n");
+		sb.append("\tSpeedup factor for LD v estimate\n");
+		sb.append("\tDescriptive comments, if any, for each file.\n");
 		return sb.toString();
 	}
 	
