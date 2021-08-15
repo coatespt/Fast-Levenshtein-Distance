@@ -84,25 +84,4 @@ public class CircularQueue<E> {
     }
  
 
-//	public static long [] createLongs(int minbits, int maxbits, int seed){
-//		long [] longs = new long[256];
-//		Set<Long> set = new HashSet<Long>();
-//		Random rand = new Random(seed);
-//		longs = new long[256];
-//		for(int i=0; i<256; i++){
-//			long x = rand.nextLong();
-//			int numBits=CircularQueue.countSetBits(x);
-//			while(numBits<minbits || numBits>maxbits){
-//				x=rand.nextLong();
-//				numBits=CircularQueue.countSetBits(x);
-//				if(set.contains(x)){
-//					log.error("createLongs() Collision!? This is one in trillions event....");
-//					numBits=0;
-//				}
-//			}
-//			set.add(x);
-//			longs[i]=x;
-//		}
-//		return longs;
-//	}
 }

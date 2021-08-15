@@ -37,4 +37,15 @@ public abstract class ICompressor {
 	}	
 	
 	public abstract String compress(String str);
+
+	public static String chars ="qrZ126stucRSTHfgmnoPQJKLIdeM345UVhvwxDEFGWXY7ij890NOakyzABClbp";
+	// Convert a string to an array of characters.
+	//
+	public static char[] StringToCharArray(String str){
+		char [] tmp =new char[chars.length()];
+		for(int i=0; i<chars.length(); i++){
+			tmp[i]=chars.charAt(i);
+		}
+		return tmp;
+	}
 }

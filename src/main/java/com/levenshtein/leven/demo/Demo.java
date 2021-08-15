@@ -2,7 +2,7 @@ package com.levenshtein.leven.demo;
 
 import com.levenshtein.leven.ICompressor;
 import com.levenshtein.leven.ScoreDistance;
-import com.levenshtein.leven.StringCompressorPlain;
+import com.levenshtein.leven.StringCompressorRH;
 import com.levenshtein.leven.utility.FileAndTimeUtility;
 import org.apache.log4j.Logger;
 
@@ -135,7 +135,14 @@ public class Demo {
 	protected ICompressor compressor = null;
 	protected ICompressor getCompressor(){
 		if(compressor==null){
-			ICompressor ic = new StringCompressorPlain();
+			// This is the one that is demonstrated to work
+			// and is page one of the spreadsheet relating to N
+			//ICompressor ic = new StringCompressorPlain();
+
+			// August 14 2021 Trying this one out.
+			ICompressor ic = new StringCompressorRH(n,c,
+					StringCompressorRH.StringToCharArray(StringCompressorRH.chars),
+					20, 44, 12345);
 			ic.setN(n);
 			ic.setC(c);
 			compressor=ic;
@@ -156,6 +163,7 @@ public class Demo {
 		int TEST_ITERATIONS=2000;
 		double totalScaledError=0;
 		double ct=0;
+		System.out.println(logHeaders());
 		for(int i=0; i<inputFileList.size(); i++){
 			for(int j=i+1; j<inputFileList.size(); j++){
 				String f1 = inputFileList.get(i);
@@ -170,6 +178,7 @@ public class Demo {
 
 				getCompressor().setC(c);
 				getCompressor().setN(n);
+
 				String sig1 = getCompressor().compress(cont1);
 				String sig2 = getCompressor().compress(cont2);
 				
@@ -186,29 +195,160 @@ public class Demo {
 				}
 				end=new Date();
 				double estRateSec = FileAndTimeUtility.rateSec(TEST_ITERATIONS, start, end);
-
 				double actLdToLen=act/(double) longerOriginal;
 				double unscldErrPln=act==0?0:Math.abs(est-act)/(double)act;
-				double scaledErrorPlain=(actLdToLen==0||unscldErrPln==0)?0:(unscldErrPln*actLdToLen); 
-				totalScaledError+=scaledErrorPlain;
+				double corrected = est/1.7d;
+				double unscldErrCorrected=act==0?0:Math.abs(corrected-act)/(double)act;
+				double correctedScaled = (actLdToLen==0||corrected==0)?0:(unscldErrCorrected*actLdToLen);
+				double scaledErrorPlain=(actLdToLen==0||unscldErrPln==0)?0:(unscldErrPln*actLdToLen);
 				ct++;
-				System.out.println(logLine(f1, f2, longerOriginal, shorterOriginal, expectedForRandom, act, est, scaledErrorPlain, ldRateSec, estRateSec,  firstLine));
+				//System.out.println(logLine(f1, f2, longerOriginal, shorterOriginal,
+				//		expectedForRandom, act, est, scaledErrorPlain, ldRateSec,
+				//		estRateSec,  firstLine));
+				System.out.println(logLine(f1, f2, longerOriginal, shorterOriginal,
+						expectedForRandom, act, est, (int) corrected,
+						unscldErrPln, scaledErrorPlain, correctedScaled,
+						ldRateSec, estRateSec,  firstLine));
 			}
 		}
-		double averageScaledError=totalScaledError/ct;
-		System.out.println("\ncreateSigs() completed. Average error:" + averageScaledError +
-				" for:" + ct + " file pairs");
 	}
-	
+
+	private String logHeaders(){
+		StringBuffer sb = new StringBuffer();
+		sb.append("FILE 1,\t");
+		sb.append("FILE 2,\t");
+		sb.append("FLEN 1,\t");
+		sb.append("FLEN 2,\t");
+		sb.append("FLEN DIFF,\t");
+		sb.append("EXPECTED LD,\t");
+		sb.append("CALC'D LD,\t");
+		sb.append("RAW EST,\t");
+		sb.append("CORRECTED EST,\t");
+		sb.append("RAW ERR,\t");
+		sb.append("CORRECTED ERR,\t");
+		sb.append("SCALED ERR,\t");
+		sb.append("COR'TD SCALED ERR,\t");
+		sb.append("ACTUAL LD/sec,\t");
+		sb.append("EST LD/sec,\t");
+		sb.append("SPEEDUP,\t");
+		sb.append("FILE CHANGES");
+		return sb.toString();
+	}
+
 	int ct=0;
+	private String logLine(String f1, String f2, int lgrOrig, int shtrOrig,
+						   int expctd, int act, int est, int correctedEst,
+						   double unscaledErrPln, double scdErr, double correctedScaled,
+						   double ldRateSec, double estRateSec, String firstLine) {
+		StringBuffer sb = new StringBuffer();
+		sb.append(++ct);
+		sb.append("");
+		// File 1
+		sb.append(f1.substring(20, f1.length()));
+		sb.append(",\t");
+		// file 2
+		sb.append(f2.substring(20, f2.length()));
+		sb.append(",\t");
+		// Longer file len
+		sb.append(lgrOrig);
+		sb.append(",\t");
+		// Shorter file len
+		sb.append(shtrOrig);
+		sb.append(",\t");
+		// Difference between file lengths
+		sb.append(lgrOrig - shtrOrig);
+		sb.append(",\t\t");
+		// Expected LD for random files of these lengths
+		sb.append(expctd);
+		sb.append(",\t\t\t");
+		// Actual calculated LD
+		sb.append(act);
+		sb.append(",\t\t");
+		// RAW LD Estimate uncorrected, not scaled to file sizes
+		sb.append(est);
+		sb.append(",\t\t");
+		// Corrected LD Estimate
+		sb.append(correctedEst);
+		sb.append(",\t\t\t");
+		// Raw error -- uncorrected estimate over actual
+		sb.append(Math.round(((double) (est + 1) / act)*1000)/1000.0);
+		sb.append(",\t\t");
+		// corrected error -- corrected estimate/actual
+		double v = (double) (correctedEst + 1) / act;
+		v = Math.round(v * 1000) / 1000.0;
+		sb.append(v);
+		sb.append(",\t\t\t");
+		// scaled raw error
+		sb.append(Math.round(scdErr*1000.0)/1000.0);
+		sb.append(",\t\t");
+		// scaled corrected error
+		sb.append(Math.round(correctedScaled*1000.0)/1000.0);
+		sb.append(",\t\t\t\t");
+		// LD Comparisons for rhe real files, per second
+		sb.append(Math.round(ldRateSec*1000.0)/1000.0);
+		sb.append(",\t\t\t");
+		// LD Estimates from signatures, per second
+		sb.append(Math.round(estRateSec*1000.0)/1000.0);
+		sb.append(",\t");
+		sb.append(Math.round(((double)estRateSec/(double)ldRateSec)*1000.0)/1000.0);
+		sb.append(",\t");
+		// Descriptions of file changes
+		sb.append(firstLine.replaceAll(","," "));
+		return sb.toString();
+	}
+
+	private String logLineWTags(String f1, String f2, int lgrOrig, int shtrOrig,
+						   int expctd, int act, int est, int correctedEst,
+						   double unscaledErrPln, double scdErr, double correctedScaled,
+						   double ldRateSec, double estRateSec, String firstLine) {
+		StringBuffer sb = new StringBuffer();
+		sb.append(++ct);
+		sb.append("    f1: ");
+		sb.append(f1.substring(20, f1.length()));
+		sb.append("\t f2: ");
+		sb.append(f2.substring(20, f2.length()));
+		sb.append("\tf-lens: ");
+		sb.append(lgrOrig);
+		sb.append(" ");
+		sb.append(shtrOrig);
+		sb.append("\tdiff: ");
+		sb.append(lgrOrig - shtrOrig);
+		sb.append("\texp'd LD: ");
+		sb.append(expctd);
+		sb.append("\ttrue LD: ");
+		sb.append(act);
+		sb.append("\traw estimate: ");
+		sb.append(est);
+		sb.append("\tcorrected estimate: ");
+		sb.append(correctedEst);
+		sb.append("\tuncorrected raw err: ");
+		sb.append(Math.round(((double) (est + 1) / act)*1000)/1000.0);
+		sb.append("\tcorrected raw err: ");
+		double v = (double) (correctedEst + 1) / act;
+		v = Math.round(v * 1000) / 1000.0;
+		sb.append(v);
+		sb.append("\tscaled err: ");
+		sb.append(Math.round(scdErr*1000.0)/1000.0);
+		sb.append("\tcorrected scaled: ");
+		// TODO ?WTF?
+		sb.append(Math.round(correctedScaled*1000.0)/1000.0);
+		sb.append("\tLD/second: ");
+		sb.append(Math.round(ldRateSec*1000.0)/1000.0);
+		sb.append("\testimate/second: ");
+		sb.append(Math.round(estRateSec*1000.0)/1000.0);
+		sb.append("\tfile diffs: ");
+		sb.append(firstLine);
+		return sb.toString();
+	}
+
 	private String logLine(String f1, String f2, int lgrOrig, int shtrOrig, int expctd, int act, int est, double scdErr, double ldRateSec, double estRateSec, String firstLine){
 		StringBuffer sb = new StringBuffer();			
 		sb.append(++ct);
 		sb.append("    f1: ");
-		sb.append(f1);
+		sb.append(f1.substring(20,f1.length()));
 		sb.append("\t f2: ");
-		sb.append(f2);
-		sb.append("\tlngr/shrtr: ");
+		sb.append(f2.substring(20,f2.length()));
+		sb.append("\tlengths: ");
 		sb.append(lgrOrig);
 		sb.append("/");
 		sb.append(shtrOrig);
@@ -218,17 +358,49 @@ public class Demo {
 		sb.append(expctd);
 		sb.append("\tactual LD: ");
 		sb.append(act);
-		sb.append("\test: LD ");
+		sb.append("\testimated LD: ");
 		sb.append(est);
-		sb.append("\tscld err: ");
+		sb.append("\traw err factor: ");
+		sb.append((double)(est+1)/act);
+		sb.append("\tscaled err: ");
 		sb.append(String.format("%.4f",scdErr));
-		sb.append("\tldRateSec/estRateSec: ");
+		sb.append("\tld rates: ");
 		sb.append(String.format("%.4f",ldRateSec));
 		sb.append("/");
 		float speedup=(float) estRateSec/(float)ldRateSec;
 		sb.append(String.format("%.4f",estRateSec));
-		sb.append(String.format(" speedup %.2f",speedup));
-		sb.append("\tchanges: ");
+		sb.append(String.format(" est speedup %.2f",speedup));
+		sb.append("\tfile diffs: ");
+		sb.append(firstLine);
+		return sb.toString();
+	}
+	private String logLineCSV(String f1, String f2, int lgrOrig, int shtrOrig, int expctd, int act, int est, double scdErr, double ldRateSec, double estRateSec, String firstLine){
+		StringBuffer sb = new StringBuffer();
+		sb.append(f1);
+		sb.append(", ");
+		sb.append(f2);
+		sb.append(", ");
+		sb.append(lgrOrig);
+		sb.append(", ");
+		sb.append(shtrOrig);
+		sb.append(",");
+		sb.append(lgrOrig-shtrOrig);
+		sb.append(",");
+		sb.append(expctd);
+		sb.append(",");
+		sb.append(act);
+		sb.append(",");
+		sb.append(est);
+		sb.append(",");
+		sb.append(String.format("%.4f",scdErr));
+		sb.append(",");
+		sb.append(String.format("%.4f",ldRateSec));
+		sb.append(",");
+		float speedup=(float) estRateSec/(float)ldRateSec;
+		sb.append(String.format("%.4f",estRateSec));
+		sb.append(",");
+		sb.append(String.format("%.2f",speedup));
+		sb.append(",");
 		sb.append(firstLine);
 		return sb.toString();
 	}
@@ -280,22 +452,48 @@ public class Demo {
 	 */
 	private String descriptiveMsg(){
 		StringBuffer sb = new StringBuffer();
-		sb.append("App. 99.9 of execution time is spent computed LD of the long strings. " +
-				"\nSignature comparisons are take tens of microseconds.\n");
+		sb.append("Most of the execution time is spent computing LD of the original strings.");
+		sb.append("\n");
+		sb.append("A large fraction of a second for real LD v a few tens of microseconds for an estimate.");
+		sb.append("\n");
 		sb.append("Number of pairs to be computed:" + (inputFileList.size() * ((inputFileList.size()-1)/2)));
 		sb.append("\n");
-		sb.append("The output consists of:\n");
-		sb.append("\tFile name 1\n");
-		sb.append("\tFile name 2\n");
-		sb.append("\tFile length 1 / file length 1\n");
-		sb.append("\tDifference of file lengths\n");
-		sb.append("\tExpected LD for random text pairs of that length.\n");
-		sb.append("\tActual LD for the file pair\n");
-		sb.append("\tEstimate LD for the file pair\n");
-		sb.append("\tScaled error, i.e., adjusted for file size\n");
-		sb.append("\tLD computations per second / Estimate computations per second \n");
-		sb.append("\tSpeedup factor for LD v estimate\n");
-		sb.append("\tDescriptive comments, if any, for each file.\n");
+		sb.append("The output fields.");
+		sb.append("\n");
+		sb.append("\t\t[FILE 1] First file name 1.");
+		sb.append("\n");
+		sb.append("\t\t[FILE 2] Second file name 2.");
+		sb.append("\n");
+		sb.append("\t\t[FLEN 1] File length 1.");
+		sb.append("\n");
+		sb.append("\t\t[FLEN 2] File length 2.");
+		sb.append("\n");
+		sb.append("\t\t[FLEN DIFF] Difference of file lengths.");
+		sb.append("\n");
+		sb.append("\t\t[EXPECTED LD] Expected LD for random text pairs of comparable lengths.");
+		sb.append("\n");
+		sb.append("\t\t[CALC'D LD]\tComputed LD for the file pair.");
+		sb.append("\n");
+		sb.append("\t\t[RAW EST]\tRaw estimated LD for the file pair--the LD of the signatures.");
+		sb.append("\n");
+		sb.append("\t\t[CORRECTED EST]\tCorrected LD estimate for the file pair. There are three scaling factors.");
+		sb.append("\n");
+		sb.append("\t\t[RAW ERR]\tRaw error--signature LD multiplied by C.");
+		sb.append("\n");
+		sb.append("\t\t[CORRECTED ERR]\tA constant applied to the results");
+		sb.append("\n");
+		sb.append("\t\t[SCALED ERR]\tError scaled to file sizes.");
+		sb.append("\n");
+		sb.append("\t\t[COR'TD SCALED ERR]\tError both corrected and scaled.");
+		sb.append("\n");
+		sb.append("\t\t[ACTUAL LD/sec]\tNumber of 25K LD computations/second (It's < 1)");
+		sb.append("\n");
+		sb.append("\t\t[EST LD/sec]\testimate computations per second.");
+		sb.append("\n");
+		sb.append("\t\t[SPEEDUP]\tSpeedup factor for estimate v full LD computation.");
+		sb.append("\n");
+		sb.append("\t\t[FILE CHANGES]\tPlain English description of how the files differ from the original.");
+		sb.append("\n");
 		return sb.toString();
 	}
 	

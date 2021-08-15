@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 
 /**
  * Super-simple signature generator for text input and printable ASCII output.
+ * We xor all values from P to P+n into a positive long.
  * 
  * TODO: This seems to work well, but how it works is obscure. Cleanup, document, and verify that it actually does a good job.
  * 
@@ -16,19 +17,33 @@ public class StringCompressorPlain extends ICompressor{
 	static Logger log = Logger.getLogger(StringCompressorPlain.class);
 	public boolean PRINT_DIAGNOSTICS=false;
 	private static char[] indexSet;
-	static String chars ="qrZ126stucRSTHfgmnoPQJKLIdeM345UVhvwxDEFGWXY7ij890NOakyzABClbp";
 
-	static{
+
+	// TODO use the function.
+	static {
 		/**
-		 * Create the a table of numeric character values;
+		 * Create the table of numeric character values;
 		 */
-		indexSet=new char[chars.length()];
-		for(int i=0; i<chars.length(); i++){
-			indexSet[i]=chars.charAt(i);
+		indexSet = new char[chars.length()];
+		for (int i = 0; i < chars.length(); i++) {
+			indexSet[i] = chars.charAt(i);
 		}
 	}
-	
-	
+
+
+	/**
+	 * Squeeze a string down to about 1/c of its starting size
+	 * using neighborhood size n.
+	 *
+	 * @param String The input string to compress.
+	 * @param int the neighborhood size for each hash
+	 * @param int The comprssion factor
+	 * @return String a compressed signature string
+	 */
+	public String compress(String str){
+		return compressAlt(str, getN(), getC());
+	}
+
 	/**
 	 * Squeeze a string down to about 1/c of its starting size
 	 * using neighborhood size n.
@@ -37,13 +52,15 @@ public class StringCompressorPlain extends ICompressor{
 	 * @param int the neighborhood size for each hash
 	 * @param int The comprssion factor
 	 * @return String a compressed signature string
-	 */
 	public String compress(String str){
 		return compressAlt(str, getN(), getC());
 	}
-	
+	 */
+
 	/**
-	 * TODO Revisit this. It looks correct, but it takes n steps at each position. 
+	 * TODO Revisit this. It looks correct, but it takes n steps at each position.
+	 * This version does nk operations for a neighborhood of n.
+	 * You can do a constant number.
 	 * 
 	 * @param str
 	 * @param n
@@ -54,6 +71,7 @@ public class StringCompressorPlain extends ICompressor{
 		// Over-allocate the string buffer from the start so it doesn't have to grow repeatedly
 		StringBuffer sb = new StringBuffer((int)((str.length()/(double)c)*1.5d));
 		int strPos=0;
+		// Eliminate all redundant white space.
 		if(SQUEEZE_WHITE){
 			str=squeezeWhite(str);
 		}
@@ -62,21 +80,21 @@ public class StringCompressorPlain extends ICompressor{
 		if(strLen==0){
 			return "";
 		}
-		// accumulate a value for each position that included an entire neighborhood. 
+		// accumulate a value for each position that is included an entire neighborhood.
 		while(strPos+n<strLen){
 			long curSum = 0;
 			// Starting with no bits set in an accumulator
-			// for each element in the neighborhood 
-			// XOR in the element at a fresh position. Wrap around and keep going if n is long enough to 
-			// exhaust the 64 bits in a long.
-			// TODO: This keeps shifting by 8. Maybe for each time it wraps around is should increment by 8+1, 8_2, etc. This might scramble better if some value is repeating.
+			// XOR in each element of the neighborhood at the next byte position
+			// modulo 7. Result is a very scrambled string of bits.
 			for(int i=0; i<n; i++){
 				long val = str.charAt(strPos+i);
-//				val<<=i*8%64;
 				val<<=i*8%56;
 				curSum^=val;
 			}
+			// TODO: It should be positive anyway because it's modulo 7. Can I drop this?
 			curSum=Math.abs(curSum);
+			// Taking only the subset that is congruent to 0 modulo C.  It doesn't have to
+			// be 0. Any value between 0 and c-1 would do (right?).
 			if(curSum%c==0){
 				int indx=(int)(curSum%indexSet.length);
 				char outChar = indexSet[indx];
@@ -86,9 +104,6 @@ public class StringCompressorPlain extends ICompressor{
 				sb.append(outChar);
 			}
 			strPos++;
-		}
-		if(PRINT_DIAGNOSTICS){
-			System.out.println();
 		}
 		return sb.toString();
 	}

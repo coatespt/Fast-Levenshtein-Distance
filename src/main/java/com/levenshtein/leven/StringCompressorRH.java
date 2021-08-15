@@ -9,10 +9,11 @@ import org.apache.log4j.Logger;
  * Signature generator for ASCII data.
  * 
  * A candidate for replacing the original hashing algorithm.
- * This has the virtue that it's clear how it works. It has the drawback of apparently not working as well as the original.
- * 
- * It seems not to work as well as the plain. TestCompareAccuracy shows consistently worse accuracy when
- * the run on the same files at varying values of C.
+ * It should be the same except that it XOR's the P-Nth value out and
+ * XOR's the P value in.
+ *
+ * It seems not to work as well as the plain! Why? It should.TestCompareAccuracy shows
+ * consistently worse accuracy when the run on the same files at varying values of C.
  * 
  * @author peter
  *
@@ -34,8 +35,8 @@ public class StringCompressorRH extends ICompressor{
 	public StringCompressorRH(int n, int c, char[] outputChars, int minBits, int maxBits, int seed){
 		rh=new RollingHash(n,c,outputChars,minBits,maxBits,seed);
 	}
-	
-	
+
+
 	/**
 	 * Compress input string into a hashed signature;
 	 */
@@ -88,8 +89,6 @@ public class StringCompressorRH extends ICompressor{
 	public String squeezeWhite(String value){
 			return value.replaceAll("\\s+", " ");
 	}
-	
-	
 }
 
 
