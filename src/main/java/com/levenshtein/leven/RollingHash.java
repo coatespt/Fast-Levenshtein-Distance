@@ -118,7 +118,8 @@ public class RollingHash {
 	}	
 
 	/**
-	 * Create the set of pseudo-random longs that input chars will be mapped to.
+	 * Called once to create the static set of pseudo-random longs that input chars
+	 * will be mapped to.
 	 * The only not-pseudo-random part is that they number of set bits is constrained
 	 * to a range.
 	 *
@@ -153,10 +154,14 @@ public class RollingHash {
 	}
 
 	/**
-	 * Call with each successive character of input.
+	 * This is called for each successive character of input that you want to compress.
+	 * The accumulator is static, so it survives across calls.
+	 *
 	 * For a given character, it XOR's the character that is ageing out
 	 * of the neighborhood and XOR's in the pseudo-random long that maps to
 	 * the current character, c.
+	 *
+	 * Note that it is a constant number of operations for each
 	 *
 	 * Returns either null (most of the time) a randomized character based on the last N inputs.
 	 * @param c A character of input.
@@ -166,9 +171,10 @@ public class RollingHash {
 	public Character forChar(Character ch) throws Exception {
 		long lng = 0;
 		charCt++;
+		// get a deterministic pseudo-random long the character of input.
 		try{
 			if(!charsToLongs.containsKey(ch)){
-				String error="WTF?! This is supposed to function with all 16 bit values";
+				String error="What?! This is supposed to function with all 16 bit values";
 				log.error(error);
 				throw new Exception(error);
 			}
@@ -180,27 +186,25 @@ public class RollingHash {
 			x.printStackTrace();
 			throw x;
 		}
-		// XOR the long for the new character in.
-		// Folding a 64 bit long into a 64 bit long accumulator.
-		// todo: verify that lng uses the whole long, not just a byte.
-		// 	and that it doesn't start 0 each call.
 		xorProduct^=lng;
-		//xorProduct^=((long)ch<<(charCt%7));
-		// XOR the oldest character out
-		// TODO Verify that this is the character n behind.
 		if(charCt>n){
 			Long dec = circularQueue.dequeue();
 			xorProduct^=dec;
 		}
-		// enqueue the newest character
 		circularQueue.enqueue(lng);
+		// We never return a non-null until we're a full neighborhood in.
 		if(charCt>n){
+			// We interpret the bits as a number between 0 and the compression factor -1.
+			// If this number happens to be 0 (any constant would do) we look up the
+			// corresponding output character and return it.
 			long hval = Math.abs(xorProduct);
 			int index = (int) hval%compFactor;
 			if(index%compFactor==0){
 				return chars[(int) (hval % (long)chars.length)];
 			}
 		}
+		// if we have not read n characters yet or the accumulator value
+		// modulo C wasn't 0, we return null.
 		return null;
 	}
 	

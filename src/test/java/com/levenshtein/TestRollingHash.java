@@ -44,7 +44,8 @@ public class TestRollingHash extends TestParent {
 
 	public int _testCompressionRH(String fname, int c, int n) throws Exception {
 		if(!MINIMAL_OUPUT){
-			System.out.println("_testCompressionRH()  Testing compression on a large string with c:" + c + " n: " + n);
+			System.out.println("_testCompressionRH()  Testing compression on a large " +
+					"string with c:" + c + " n: " + n);
 		}
 		comp=new StringCompressorRH(n, c, outputChars, MINBITS, MAXBITS, SEED);
 		String longOne = readFile(fname);

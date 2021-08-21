@@ -3,7 +3,7 @@
  */
 package a140.util;
 
-import org.apache.log4j.Logger;
+//import org.apache.log4j.Logger;
 
 import java.util.Date;
 
@@ -12,7 +12,7 @@ import java.util.Date;
  * 
  */
 public class TimeAndRate {
-	Logger log = Logger.getLogger(TimeAndRate.class);
+	//Logger log = Logger.getLogger(TimeAndRate.class);
 	private Date start = new Date();
 	private Date end = new Date();
 	private long elapsedMillis = 0;

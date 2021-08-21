@@ -1,10 +1,9 @@
 package a140.util.json;
 
-import org.apache.log4j.Logger;
-
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.util.logging.Logger;
 
 public class FormatJSON {
 

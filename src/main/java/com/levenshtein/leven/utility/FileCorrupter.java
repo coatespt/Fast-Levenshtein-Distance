@@ -1,8 +1,8 @@
 package com.levenshtein.leven.utility;
 
-import java.util.Random;
-
 import org.apache.log4j.Logger;
+
+import java.util.Random;
 
 /**
  * Class to prepare strings corrupted or modified in various ways for testing and calibrating
@@ -44,28 +44,28 @@ public class FileCorrupter {
 			return chars[(rand.nextInt(chars.length-1))];
 		}
 	public static void main(String[] args){
-		log.info("main() executing corrupt random chars.");
+		System.out.println("main() executing corrupt random chars.");
 		String s;
 		s = corruptRandomChars(TestString, 0.01d);
-		log.info(s);
+		System.out.println(s);
 		s = corruptRandomChars(TestString, 0.05d);
-		log.info(s);
+		System.out.println(s);
 		s = corruptRandomChars(TestString, 0.1d);
-		log.info(s);
+		System.out.println(s);
 		s = corruptRandomChars(TestString, 0.2d);
-		log.info(s);
+		System.out.println(s);
 		
 		s=corruptWithNBlocksOfCChars(TestString, 0, 10);
-		log.info(s);
+		System.out.println(s);
 		s=corruptWithNBlocksOfCChars(TestString, 1, 10);
-		log.info(s);
+		System.out.println(s);
 		s=corruptWithNBlocksOfCChars(TestString, 2, 10);
-		log.info(s);
+		System.out.println(s);
 		s=corruptWithNBlocksOfCChars(TestString, 3, 10);
-		log.info(s);
+		System.out.println(s);
 		s=corruptWithNBlocksOfCChars(TestString, 4, 10);
-		log.info(s);
-		log.info("main() completed");
+		System.out.println(s);
+		System.out.println("main() completed");
 	}
 		
 	/**
