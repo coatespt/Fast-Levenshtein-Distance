@@ -69,7 +69,7 @@ public class StringToIntHashMap {
 	 * spare the need for N hashes of the same value when N of these tables (for
 	 * the partitions) are checked for the same word.
 	 * 
-	 * @param key
+	 * @param hashVal
 	 *            A long corresponding to a string key (word)
 	 * @return True or false, as the underlying table contains an entry for this
 	 *         word
@@ -93,7 +93,6 @@ public class StringToIntHashMap {
 	 * 
 	 * @param key
 	 * @param val
-	 * @param currentTotal
 	 * @return
 	 */
 	public void accumulate(String key, int val) {
