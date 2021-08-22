@@ -3,12 +3,13 @@ package com.levenshtein;
 import com.levenshtein.leven.ICompressor;
 import com.levenshtein.leven.ScoreDistance;
 import com.levenshtein.leven.StringCompressorPlain;
-import com.levenshtein.leven.utility.FileAndTimeUtility;
 import com.levenshtein.parent.TestParent;
 import org.junit.Test;
+import utilities.file.FileAndTimeUtility;
 
 import java.io.File;
 import java.util.*;
+
 
 //import com.a140.util.file.FileAndTimeUtility;
 

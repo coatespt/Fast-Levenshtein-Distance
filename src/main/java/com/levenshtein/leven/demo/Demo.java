@@ -3,8 +3,8 @@ package com.levenshtein.leven.demo;
 import com.levenshtein.leven.ICompressor;
 import com.levenshtein.leven.ScoreDistance;
 import com.levenshtein.leven.StringCompressorRH;
-import com.levenshtein.leven.utility.FileAndTimeUtility;
 import org.apache.log4j.Logger;
+import utilities.file.FileAndTimeUtility;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -168,7 +168,7 @@ public class Demo {
 			for(int j=i+1; j<inputFileList.size(); j++){
 				String f1 = inputFileList.get(i);
 				String f2 = inputFileList.get(j);
-				firstLine=FileAndTimeUtility.getFirstLineFlagged(f1,f2, flag);
+				firstLine= FileAndTimeUtility.getFirstLineFlagged(f1,f2, flag);
 
 				String cont1 = FileAndTimeUtility.getFileContents(f1);
 				String cont2 = FileAndTimeUtility.getFileContents(f2);
@@ -242,7 +242,7 @@ public class Demo {
 						   double ldRateSec, double estRateSec, String firstLine) {
 		StringBuffer sb = new StringBuffer();
 		sb.append(++ct);
-		sb.append("");
+		sb.append(", ");
 		// File 1
 		sb.append(f1.substring(20, f1.length()));
 		sb.append(",\t");

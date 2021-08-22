@@ -1,12 +1,14 @@
 package com.levenshtein;
 
-import com.levenshtein.leven.utility.XORHash;
+import com.levenshtein.leven.StringCompressorPlain;
+import utilities.mechanic.TimeAndRate;
+import com.levenshtein.leven.XORHash;
+import com.levenshtein.parent.TestParent;
+
+
+
 import org.apache.log4j.Logger;
 import org.junit.Test;
-
-import a140.util.TimeAndRate;
-import com.levenshtein.leven.StringCompressorPlain;
-import com.levenshtein.parent.TestParent;
 
 
 /**

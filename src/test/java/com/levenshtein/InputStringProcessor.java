@@ -1,7 +1,7 @@
 package com.levenshtein;
 
-import com.levenshtein.leven.utility.SWOR;
-import com.levenshtein.leven.utility.exception.NoNextValueException;
+import utilities.mechanic.SWOR;
+import utilities.exception.NoNextValueException;
 import com.levenshtein.parent.TestParent;
 import org.apache.log4j.Logger;
 

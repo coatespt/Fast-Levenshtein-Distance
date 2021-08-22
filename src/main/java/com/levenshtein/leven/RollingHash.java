@@ -1,6 +1,6 @@
 package com.levenshtein.leven;
 
-import com.levenshtein.leven.utility.CircularQueue;
+import utilities.mechanic.CircularQueue;
 import org.apache.log4j.Logger;
 
 import java.util.*;

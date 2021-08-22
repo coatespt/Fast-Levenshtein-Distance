@@ -9,6 +9,8 @@ data/unrelated
 data/allfiles/
 data/many/
 /target/
+./stash/*
+stash
 ./data/gutenberg-real/allfiles/*
 ./data/allfiles/*
 all32kSigs.txt

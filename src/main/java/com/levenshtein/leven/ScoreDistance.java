@@ -1,7 +1,8 @@
 package com.levenshtein.leven;
 
-import org.apache.log4j.Logger;
-import com.levenshtein.leven.utility.FileAndTimeUtility;
+import utilities.file.FileAndTimeUtility;
+
+import java.util.logging.Logger;
 
 /**
  * Packages up the computation of LD estimates, plus some other convenience methods.
@@ -10,7 +11,7 @@ import com.levenshtein.leven.utility.FileAndTimeUtility;
  *
  */
 public class ScoreDistance {
-	private Logger log = Logger.getLogger(ScoreDistance.class);
+	private Logger log = Logger.getLogger(String.valueOf(ScoreDistance.class));
 
 	public ScoreDistance(){ }
 

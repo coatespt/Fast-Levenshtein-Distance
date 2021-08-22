@@ -1,13 +1,12 @@
 package com.levenshtein;
 
-import a140.util.TimeAndRate;
 import com.levenshtein.leven.*;
-import com.levenshtein.leven.utility.CircularQueue;
-import com.levenshtein.leven.utility.exception.QueueEmptyException;
-import com.levenshtein.leven.utility.exception.QueueFullException;
+import utilities.mechanic.TimeAndRate;
 import com.levenshtein.parent.TestParent;
-//import org.apache.log4j.Logger;
 import org.junit.Test;
+import utilities.exception.QueueEmptyException;
+import utilities.exception.QueueFullException;
+import utilities.mechanic.CircularQueue;
 
 import java.util.HashSet;
 import java.util.Set;

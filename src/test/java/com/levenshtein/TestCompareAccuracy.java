@@ -1,15 +1,14 @@
 package com.levenshtein;
 
 import com.levenshtein.leven.*;
-import com.levenshtein.leven.utility.FileAndTimeUtility;
 import com.levenshtein.parent.TestParent;
-////import org.apache.log4j.Logger;
 import org.junit.Test;
+import utilities.file.FileAndTimeUtility;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-//import com.a140.util.file.FileAndTimeUtility;
 
 /**
  * Compare the accuracy of the RollingHash to the original hash.

@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import com.levenshtein.leven.StringDistance;
 import com.levenshtein.leven.StringCompressorPlain;
-import com.levenshtein.leven.utility.TimeAndRate;
+import utilities.mechanic.TimeAndRate;
 import com.levenshtein.parent.TestParent;
 
 /**

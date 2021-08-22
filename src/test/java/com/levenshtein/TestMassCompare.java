@@ -1,8 +1,8 @@
 package com.levenshtein;
 
-import a140.util.file.CSVLogWriter;
-import com.levenshtein.leven.utility.EntropyCalc;
-import com.levenshtein.leven.utility.FileAndTimeUtility;
+import utilities.file.CSVLogWriter;
+import utilities.mechanic.EntropyCalc;
+import utilities.file.FileAndTimeUtility;
 import com.levenshtein.parent.TestParent;
 import org.junit.Test;
 
