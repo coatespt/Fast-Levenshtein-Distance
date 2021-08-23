@@ -19,8 +19,8 @@ import utilities.exception.QueueFullException;
 public class CircularQueue<E> {
 
 	static Logger log = Logger.getLogger(CircularQueue.class); 
-    private E[] circularQueueAr;
-    private int maxSize;   //Maximum Size of Circular Queue
+    private final E[] circularQueueAr;
+    private final int maxSize;   //Maximum Size of Circular Queue
    
     private int rear;//elements will be added/queued at rear.
     private int front;   //elements will be removed/dequeued from front      

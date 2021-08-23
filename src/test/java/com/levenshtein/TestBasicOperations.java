@@ -95,7 +95,7 @@ public class TestBasicOperations extends TestParent {
 	@Test
 	public static void testDistinctHashVals(){
 		System.out.println("testDistinctHashVals() starting.");
-		longs=RollingHash.createLongs(MIN_BITS,MAX_BITS,12345);
+		longs=RollingHash.createLongs(MIN_BITS,MAX_BITS);
 		Set<Long> set = new HashSet<Long>();
 		for(int i=0; i<longs.length; i++){
 			long v = longs[i];

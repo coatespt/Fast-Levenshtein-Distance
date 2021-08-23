@@ -36,7 +36,7 @@ public class StringDistance implements IDistance {
 	 * @return int  The Levenshtein distance of the strings.
 	 */
 	public int LD(String s, String t) {
-		int d[][]; // matrix
+		int[][] d; // matrix
 		int n; // length of s
 		int m; // length of t
 		int i; // iterates through s

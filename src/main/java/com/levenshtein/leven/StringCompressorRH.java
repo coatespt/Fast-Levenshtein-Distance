@@ -76,7 +76,7 @@ public class StringCompressorRH extends ICompressor{
 			}
 		}
 		if(PRINT_DIAGNOSTICS){
-			System.out.println(sb.toString());
+			System.out.println(sb);
 		}
 		return sb.toString();
 	}

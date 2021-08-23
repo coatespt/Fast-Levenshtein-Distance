@@ -28,17 +28,14 @@ import java.util.*;
  *
  * Thus it takes a constant number of computationally cheap operations
  * for each hash regardless of the size of the neighborhood: one lookup from a circular
- * queue, two table lookups, and two XOR operations.
+ * queue, two table lookups, and two XOR operations. Once you have read n characters,
+ * each additional character incurs a constant number of instructions.
  *
  * Contrast this with a typical String hash algorithm, e.g., the Java String.hashcode(),
  * which does an one integer multiplications by 31, one addition, plus one array lookup for
- * each character in the string. This is approximately N times as many operations
- * for an N-length string.
+ * each character in the string.
  *
- * We are able to do this in this special case because successive neighborhoods differ
- * by only the leading * and trailing characters.
- *
- * A discussion of Java String.hascode() cna be found here:
+ * A discussion of Java String.hashcode() cna be found here:
  *  https://animeshgaitonde.medium.com/the-curious-case-of-java-string-hashcode-6d98c734a313
  *
  * TODO: TestCompareAccuracy says RH signatures are bigger!
@@ -49,12 +46,18 @@ import java.util.*;
  */
 public class RollingHash {
 	static Logger log = Logger.getLogger(RollingHash.class);
-	private static int NUM_CHARS=65536;
+	// The number of possible 16-bit values 0x to FFFFx.
+	private static final int NUM_CHARS=65536;
+	// how to store the last n longs corresponding to the input characters
     private CircularQueue<Long> circularQueue = null;
+    // accumulator
     private long xorProduct=0;
     private static Random rand;
+    // n the neighborhood size
     private int n;
+    // c, the compression factor
     private int compFactor;
+    // chars read
     private long charCt=0;
 
     private Map<Character,Long> charsToLongs=null;
@@ -78,18 +81,14 @@ public class RollingHash {
 	 * It also initializes an initially-empty circular queue the length of the neighborhood.
 	 * This will be used to age-out characters in order.
 	 * <p>
-	 * TODO: Is the minimum/maximum bits to optimize the entropy of the result? Verify.
-	 * TODO: This looks like it is only valid for ASCII data--if so, it sould be
-	 * 	generalized for arbitrary input data. At least for all 16bit values.
-	 * 	Alternatively values greater than 8bits could be XORed into an 8 bit which
-	 * 	gives you the parity of all the Nth bits.
+	 * TODO: The minimum/maximum bits is there so you don't get mostly 0 or mostly 1 to keep things well mixed up.
+	 * 	  Is that even necessary?
 	 *
 	 * @param n int Neighborhood size, e.g., 20
 	 * @param c int Compression rate, e.g. 150
 	 * @param chars Character[] The alphabet of output characters
 	 * @param minBits int The minimum number of set bits in one of the randomized longs used to build the XOR string, e.g. 30
 	 * @param maxBits int The maximimum number of set bits in one of the randomized longs used to build the XOR string, e.g, 34
-	 * @param seed int Random number generator seed.
 	 */
 	public RollingHash(int n, int c, char [] chars, int minBits, int maxBits, int seed){
 		this.n=n;
@@ -97,7 +96,7 @@ public class RollingHash {
 		this.chars=chars;
 		rand=new Random(seed);
         circularQueue = new CircularQueue<Long>(n);
-		long[] longs=createLongs(minBits,maxBits,seed);
+		long[] longs=createLongs(minBits,maxBits);
 		charsToLongs = new HashMap<Character,Long>();
 		for(int j=0;j<NUM_CHARS;j++){
 			Character aChar = new Character((char)j);
@@ -105,8 +104,10 @@ public class RollingHash {
 		}
 	}
 
-	/* Function to get number of set bits in binary
-	   representation of argument. Algorithm from K&R. */
+	/** Function to get number of set bits in binary
+	   representation of argument. Algorithm from K&R.
+		@param n the number we wish to count the bits in.
+	*/
 	public static int countSetBits(long n)
 	{
 	    int ct = 0;
@@ -123,14 +124,12 @@ public class RollingHash {
 	 * The only not-pseudo-random part is that they number of set bits is constrained
 	 * to a range.
 	 *
-	 * TODO: This ignores the seed value. Why do you even care about a settable seed as
-	 * 	long as the value never changes?
 	 * @param minbits
 	 * @param maxbits
 	 * @param seed
 	 * @return
 	 */
-	public static long [] createLongs(int minbits, int maxbits, int seed){
+	public static long [] createLongs(int minbits, int maxbits){
 		long [] longs = new long[NUM_CHARS];
 		if(rand==null){
 			rand=new Random(12345);
@@ -154,11 +153,13 @@ public class RollingHash {
 	}
 
 	/**
-	 * This is called for each successive character of input that you want to compress.
-	 * The accumulator is static, so it survives across calls.
+	 * The most important method. Called for each successive character of input that
+	 * you want to compress.
+	 *
+	 * The accumulator is static, so that it will survive across calls.
 	 *
 	 * For a given character, it XOR's the character that is ageing out
-	 * of the neighborhood and XOR's in the pseudo-random long that maps to
+	 * of the neighborhood and XOR's in the pseudo-random lng that maps to
 	 * the current character, c.
 	 *
 	 * Note that it is a constant number of operations for each

@@ -1,10 +1,11 @@
 package com.levenshtein.leven;
 
 /**
- * Contract for a string compressor. This produces the signatures that are compared by
+ * Contract for a string compressor. Implementors produce the signatures that are compared by
  * LD to derive an estimate. Typical compression rate 25X to 300X depending on application.
- * C=101 and N=8 for string in size range of a few K to a few 100K.
- * 
+ *
+ * TODO: Need a careful test of how performance changes with compression rate and neighborhood size
+ *
  * @author pcoates
  *
  */

@@ -11,7 +11,7 @@ import java.util.logging.Logger;
  *
  */
 public class ScoreDistance {
-	private Logger log = Logger.getLogger(String.valueOf(ScoreDistance.class));
+	private final Logger log = Logger.getLogger(String.valueOf(ScoreDistance.class));
 
 	public ScoreDistance(){ }
 
@@ -121,7 +121,7 @@ public class ScoreDistance {
 		int longer=Math.max(sig1.length(), sig2.length());
 		int ld = getDistance().LD(sig1,sig2);
 		double computedLenRatioPlain = ld/(double)longer;
-		double estimatedUnadjusted = (double) (computedLenRatioPlain * longerUnCompressed);
+		double estimatedUnadjusted = computedLenRatioPlain * longerUnCompressed;
 		return (int) fudgeFactor(estimatedUnadjusted); 
 	}
 

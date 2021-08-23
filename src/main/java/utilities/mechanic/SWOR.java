@@ -10,12 +10,14 @@ import java.util.Random;
  * Create the class with a range. A series of next() calls will
  * return a random distinct element of the set.
  * This algorithm exhibits constant time, with space equal to the number of units * size of an int.
+ *
+ * Used only in tests.
  * 
  * @author peterc
  *
  */
 public class SWOR {
-	private int [] valueSet;
+	private final int [] valueSet;
 	private int range;
 	private Random rand=new Random();
 	static Logger log = Logger.getLogger(SWOR.class);

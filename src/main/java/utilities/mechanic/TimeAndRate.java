@@ -22,7 +22,7 @@ public class TimeAndRate {
 	private boolean frozen = false;
 	private int eventsPerTic = 10000;
 	private int ticsPerLine = 100;
-	private int eventsPerLine = eventsPerTic * ticsPerLine;
+	private final int eventsPerLine = eventsPerTic * ticsPerLine;
 	private boolean printTics = false;
 
 	/**

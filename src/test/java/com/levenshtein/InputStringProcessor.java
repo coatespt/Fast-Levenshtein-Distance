@@ -55,8 +55,8 @@ public class InputStringProcessor extends TestParent {
 	"wassq10.txt",
 	};	
 
-	private List<String> blocks1 = new ArrayList<String>();
-	private List<String> blocks2= new ArrayList<String>();
+	private final List<String> blocks1 = new ArrayList<String>();
+	private final List<String> blocks2= new ArrayList<String>();
 
 	/**
 	 * Read all the files and create a set of blocks of the given size.
@@ -129,10 +129,7 @@ public class InputStringProcessor extends TestParent {
 	 * @return boolean t/f with stated probability
 	 */
 	private boolean trueOrFalse(double prob){
-		if(rand.nextDouble() < prob){
-			return true;
-		}
-		return false;
+		return rand.nextDouble() < prob;
 	}	
 
 	private Random rand = new Random();

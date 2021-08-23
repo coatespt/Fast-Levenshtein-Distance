@@ -16,7 +16,7 @@ import org.apache.log4j.Logger;
 public class StringCompressorPlain extends ICompressor{
 	static Logger log = Logger.getLogger(StringCompressorPlain.class);
 	public boolean PRINT_DIAGNOSTICS=false;
-	private static char[] indexSet;
+	private static final char[] indexSet;
 
 
 	// TODO use the function.

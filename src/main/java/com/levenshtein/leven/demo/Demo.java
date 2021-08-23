@@ -82,7 +82,7 @@ public class Demo {
 	private String flag = null;
 	private int c=0;
 	private int n=0;
-	private String inputDir=null;
+	private final String inputDir=null;
 	private List<String> inputFileList=null;
 	private String sigsDir=null;
 	private ScoreDistance sd = null;
@@ -244,10 +244,10 @@ public class Demo {
 		sb.append(++ct);
 		sb.append(", ");
 		// File 1
-		sb.append(f1.substring(20, f1.length()));
+		sb.append(f1.substring(20));
 		sb.append(",\t");
 		// file 2
-		sb.append(f2.substring(20, f2.length()));
+		sb.append(f2.substring(20));
 		sb.append(",\t");
 		// Longer file len
 		sb.append(lgrOrig);
@@ -290,7 +290,7 @@ public class Demo {
 		// LD Estimates from signatures, per second
 		sb.append(Math.round(estRateSec*1000.0)/1000.0);
 		sb.append(",\t");
-		sb.append(Math.round(((double)estRateSec/(double)ldRateSec)*1000.0)/1000.0);
+		sb.append(Math.round((estRateSec / ldRateSec)*1000.0)/1000.0);
 		sb.append(",\t");
 		// Descriptions of file changes
 		sb.append(firstLine.replaceAll(","," "));
@@ -304,9 +304,9 @@ public class Demo {
 		StringBuffer sb = new StringBuffer();
 		sb.append(++ct);
 		sb.append("    f1: ");
-		sb.append(f1.substring(20, f1.length()));
+		sb.append(f1.substring(20));
 		sb.append("\t f2: ");
-		sb.append(f2.substring(20, f2.length()));
+		sb.append(f2.substring(20));
 		sb.append("\tf-lens: ");
 		sb.append(lgrOrig);
 		sb.append(" ");
@@ -345,9 +345,9 @@ public class Demo {
 		StringBuffer sb = new StringBuffer();			
 		sb.append(++ct);
 		sb.append("    f1: ");
-		sb.append(f1.substring(20,f1.length()));
+		sb.append(f1.substring(20));
 		sb.append("\t f2: ");
-		sb.append(f2.substring(20,f2.length()));
+		sb.append(f2.substring(20));
 		sb.append("\tlengths: ");
 		sb.append(lgrOrig);
 		sb.append("/");

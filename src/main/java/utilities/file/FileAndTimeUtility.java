@@ -466,10 +466,7 @@ public class FileAndTimeUtility {
 		Pattern pattern = Pattern.compile(filebase);
 		Matcher matcher = pattern.matcher(f);
 
-		if (!matcher.find()) {
-			return false;
-		}
-		return true;
+		return matcher.find();
 	}
 
 	/**
@@ -1072,9 +1069,6 @@ public class FileAndTimeUtility {
 		Pattern pattern = Pattern.compile(filebase);
 		Matcher matcher = pattern.matcher(f);
 
-		if (!matcher.find()) {
-			return false;
-		}
-		return true;
+		return matcher.find();
 	}
 }
