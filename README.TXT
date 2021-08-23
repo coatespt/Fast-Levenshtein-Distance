@@ -6,17 +6,24 @@ The chief limitation is it works only on fairly large strings--several KB and up
 
 You can read about it in http://hadoopoopadoop.com/2015/11/08/super-fast-estimates-of-levenshtein-distance/
 
-This is an Eclipse java project that can be built with maven on the command line as well.
+To build an executable jar file, execute the following from the project directory. It will build a jar in ./target.
+ mvn assembly:assembly -DdescriptorId=jar-with-dependencies -Dmaven.test.skip=true
 
-The demo assumes you have pulled down the git repo with some test files. If you want an up to date copy, 
+If you leave out the -Dmaven.test.skip=true it will execute a huge number of
+tests, all of which must pass, before creating the jar.
 
-Go to your usual working directory where you keep projects. e.g. /home/peter/workingdir
+The main() in the jar is Demo.java which reads the properties file in the config directory.
+    java -jar target/Fast-Levenshtein-Distance-0.0.1-SNAPSHOT-jar-with-dependencies.jar
 
-Execute the following on the command line.
+The demo assumes you have the test files in the right place.
 
-git clone git@github.com:coatespt/Fast-Levenshtein-Distance.git
+To get the code
 
-This will build /home/peter/workingdir/Fast-Levenshtein-Distance
+* Go to your usual working directory where you keep projects. e.g. /home/peter/workingdir
+* Execute the following on the command line.
+    git clone git@github.com:coatespt/Fast-Levenshtein-Distance.git
+
+This will build /home/project-dir/workingdir/Fast-Levenshtein-Distance
 
 Building and/or executing the demo assume you are in <yourworkingdir>/Fast-Levenshtein-Distance because the config directory and
 data files are relative to that directory, but you can set it up otherways if you want.

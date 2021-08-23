@@ -2,7 +2,8 @@ package com.levenshtein.leven;
 
 /**
  * Contract for a LD Distance compute object.  It's just one method--compute the LD of two strings.
- * 
+ * This is heavily used in tests.
+ *
  * TODO: This should be templated so that it could handle sequences of arbitrary type.
  * 
  * @author pcoates

@@ -34,7 +34,8 @@ public class TestAccuracyDriverPlain101 extends TestAccuracyDriverParent {
 	 * @author pcoates
 	 */
 	public void testAllAgainstAll101() throws Exception {
-		System.out.println("testAllAgainstAll101() Measure estimate quality for modified versions of files of lengths in low-thousands. ");
+		System.out.println("testAllAgainstAll101() Measure estimate quality for modified versions of files of " +
+				"lengths in low-thousands. ");
 		setN(8);
 		setC(101);
 		for (int i = 0; i < files.length; i++) {

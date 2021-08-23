@@ -1,6 +1,5 @@
 package com.levenshtein;
 
-import utilities.file.CSVLogWriter;
 import utilities.mechanic.EntropyCalc;
 import utilities.file.FileAndTimeUtility;
 import com.levenshtein.parent.TestParent;
@@ -150,97 +149,6 @@ public class TestMassCompare extends TestParent {
 			return f.exists();
 		}
 
-//		@Test
-		public void ttttestEntropy() throws Exception {
-			System.out.println("testEntropy()");
-			int bufLen=200;
-			List<String> targetList = FileAndTimeUtility.readListFromFile(SigFile);
-			long files=0;
-			long chars=0;
-			Map<Integer,Long>sigCounts=new HashMap<Integer,Long>();
-			Map<Integer,Long>sigMin=new HashMap<Integer,Long>();
-			Map<Integer,Long>sigMax=new HashMap<Integer,Long>();
-			sigCounts.put(0,0L);
-			sigMin.put(0,Long.MAX_VALUE);
-			sigMax.put(0,Long.MIN_VALUE);
-			CSVLogWriter csvlw = new CSVLogWriter(EntropyOut);
-			for(String targetLine : targetList){
-				StringBuffer sb = new StringBuffer(bufLen);
-				List<String> targFields = FileAndTimeUtility.getTokenListFromString(targetLine, '|', 16);
-				// fname
-				String targFile = targFields.get(0);
-				sb.append(justFileName(targFile));
-				sb.append("\t");
-				// filesize
-				long targSize = Long.parseLong(targFields.get(1));
-				if(targSize<10000){
-					continue;
-				}
-				sb.append(targSize);
-				sb.append("\t");
-				// file contents
-				if(!fileExists(targFile)){
-						System.out.println("file not found! " + targFile);
-						continue;
-				};
-				String tFileContent=FileAndTimeUtility.getFileContents(targFile);
-				// entropy
-				chars+=tFileContent.length();
-				files++;
-				double fileEnt=computeEntropy(tFileContent);
-				sb.append(String.format("%.4f",fileEnt));
-				sb.append("\t");
-				sigCounts.put(0, sigCounts.get(0)+tFileContent.length());
-				if(sigMin.get(0)>tFileContent.length()){
-					sigMin.put(0,(long) tFileContent.length());
-				}
-				if(sigMax.get(0)<tFileContent.length()){
-					sigMax.put(0,(long) tFileContent.length());
-				}
-				sigCounts.put(0, sigCounts.get(0)+tFileContent.length());
-				sigCounts.put(0, sigCounts.get(0)+tFileContent.length());
-				for(int j=0; j<CVals.length; j++){
-					String cStr = targFields.get(2+j*2);
-					int c = Integer.parseInt(cStr);
-					String sig = targFields.get(2+j*2+1);
-					if(sig==null){
-						System.out.println("signature null for file " + targFile);
-						continue;
-					}
-					double sigEntropy=computeEntropy(sig);
-					if(!sigCounts.containsKey(c)){
-						sigCounts.put(c, 0L);
-						sigMin.put(c, Long.MAX_VALUE);
-						sigMax.put(c, Long.MIN_VALUE);
-					}
-					sigCounts.put(c, sigCounts.get(c)+sig.length());
-					if(sigMin.get(c)>sig.length()){
-						sigMin.put(c,(long) sig.length());
-					}
-					if(sigMax.get(c)<sig.length()){
-						sigMax.put(c,(long) sig.length());
-					}
-					sb.append(c);
-					sb.append("\t");
-					sb.append(String.format("%.4f",sigEntropy));
-					sb.append("\t");
-				}
-				System.out.println(sb.toString());
-				csvlw.writeNL(sb.toString());
-			}
-			csvlw.close();
-			System.out.println("processed:" + files);
-			StringBuffer sb = new StringBuffer();
-			sb.append("files:");
-			sb.append(files);
-			sb.append("\tchars read:");
-			sb.append(chars);
-			sb.append("\tC,min,max,average");
-			sb.append(forSig(files,sigCounts,sigMin,sigMax));
-			System.out.println(sb.toString());
-		}
-		
-		
 		private String forSig(long files, Map<Integer,Long> ct, Map<Integer,Long> min, Map<Integer,Long> max){
 			StringBuffer sb = new StringBuffer();
 			Set<Integer> keys = ct.keySet();
@@ -378,7 +286,6 @@ public class TestMassCompare extends TestParent {
 			System.out.println("\tDropping signature file:" + sigFileName);
 			dropFile(sigFileName);
 			System.out.println("_testCreateSignatures()");
-			CSVLogWriter csvLog = new CSVLogWriter(sigFileName);
 			List<String> list = FileAndTimeUtility.readListFromFile(inFileList);
 			System.out.println("Got " + list.size() + " filenames.");
 			Date start = new Date();
@@ -413,7 +320,7 @@ public class TestMassCompare extends TestParent {
 						x.printStackTrace();
 					}
 				}
-				csvLog.writeNL(sb.toString());
+				System.out.println(sb.toString());
 			}
 			Date end = new Date();
 			long elapsedSecs = FileAndTimeUtility.elapsedSec(start, end);
@@ -445,7 +352,7 @@ public class TestMassCompare extends TestParent {
 				sb.append(String.format("%.4f",compRateForSigs(c)));
 			}
 			System.out.println(sb.toString());
-			csvLog.close();
+		//	csvLog.close();
 		}
 
 }

@@ -4,7 +4,7 @@
 package utilities.util;
 
 import utilities.exception.BadValueException;
-import utilities.file.CSVLogWriter;
+// import utilities.file.CSVLogWriter;
 import org.apache.log4j.Logger;
 
 import java.text.DecimalFormat;
@@ -175,7 +175,6 @@ public class Utility {
 	 * @param map
 	 * @param fname
 	 * @throws Exception
-	 */
 	public static void writeIntegerMapToFile(Map<Integer, Set<Integer>> map,
 			String fname) throws Exception {
 		CSVLogWriter csvlog = new CSVLogWriter(fname);
@@ -215,6 +214,7 @@ public class Utility {
 			csvlog.writeNL(sb.toString());
 		}
 	}
+	 */
 
 	/**
 	 * Print out the statistics for a full Map-file run.
