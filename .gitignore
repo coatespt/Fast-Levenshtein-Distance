@@ -34,3 +34,4 @@ data/testfile-sigs.txt
 *.aux
 *.log
 *.pdf
+*.swp

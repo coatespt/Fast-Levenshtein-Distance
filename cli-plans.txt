@@ -1,0 +1,108 @@
+
+This is my stab at the functionality of the  CLI. Think of it as a straw 
+man--a place to start. If you have a different idea I shall not feel injured.
+
+I was imagining two modes. 
+	(1) Compression: compress a set of files into signatures.
+	(2) Matching: 
+		Read in a set if signatures (like those produced above.) 
+		Look for matches to a given input signature among them.	 
+		
+	Matching is somewhat subtle even in the simplest case. The LD
+	of unrelated equal-length texts in a given language will exhibit 
+	a fairly tight distribution around a mean.
+
+	Because of that, you also predict quite closely what the LD of 
+	unrelated files of different lengths will be. The expected LD of
+	files of different lengths is the expected of the shorter one and 
+	the same amount of the longer one, plus their difference in lengths.
+
+	Matching means computing the LD of two signatures and comparing 
+	the result to what you'd expect to see if the files were unrelated.
+
+	The estimated LD of two files does not have to be very far from 
+	the expected LD for random text of those lengths for it to be 
+	highly significant. 
+
+	How similar they have to be to call it a match is application  
+	dependent.  
+
+	I think how we define matching will probably be the
+	most important thing we have to work out. 
+
+
+
+Properties and Argtuments.
+
+	-p <a properties file> Read in a  properties file. Any values on the command
+	line would  override values in the properties file.
+
+	-f <a file> input data would be a list of files names If -f  is not not 
+	specified the program would just sit there expecting to get 
+	file names from  stdin.
+
+
+For compression 
+
+	-c <an integer> 	compression rate  
+
+	-n <an integer> 	neighborhhod size
+
+	-o <char-string>	output-char-set in the form of a string.
+
+	-fs <input-file>	input-file of file-names.
+
+
+	Output is comma-delimited, NL terminated rows of the following form.
+
+		<input-fname>, <output-fname>, c, n, char-set, signature\n
+
+
+	No output target is necessary because you can simply redirect the output 
+	to a file, another utility, etc.
+
+
+For comparing
+	You the set of signatures you wish to check against is given 
+	as the CSV output named above. 
+
+ 
+	
+
+	-ld means you're in estimate mode
+
+
+	-f <input-file-spec> is a csv file of the form output by the compression step 
+		these are the signatures you are checking against.
+
+	-i <input-file-spec> is a csv file of one or more rows you are tyring to match
+
+
+	-x is how different from the expected value the estimated LD has to be
+		to call it a match. Defining this is one of the most important 
+		things to figur out.  Stdevs from expected? 
+
+	
+	Output a comma-delimited string with 
+		<test-fname> c, n, char-set, signature, <matched-to-file-name>,
+			expected_ld, raw_estimate, adjusted_estimate,
+			estimated_degree_of_relationship,
+				 
+
+With this scheme you could have the CLI read in a huge set of signatures and then
+cat a list of signatures to it.  Whenever it recognizes similarity it would spit 
+out the two filenames and how related it thinks they are.
+
+
+
+	
+	
+
+
+
+
+
+
+
+
+
