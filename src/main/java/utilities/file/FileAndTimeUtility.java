@@ -11,6 +11,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
 
+/**
+ * Most of these routines are from another project and can be trashed.
+ */
 public class FileAndTimeUtility {
 
 	public static char BACKSLASH = '\\';
@@ -558,8 +561,8 @@ public class FileAndTimeUtility {
 
 	/**
 	 * Turn one line of delimited input into a list of strings. This routine is
-	 * suitable only for well formed input such as lines from your properties
-	 * file---it does no escape processing, does not handle handle null values,
+	 * suitable only for well-formed input such as lines from your properties
+	 * file---it does not escape processing, does not handle null values,
 	 * i.e., two delimiters next to each other, etc.
 	 * 
 	 * @param input
@@ -698,8 +701,14 @@ public class FileAndTimeUtility {
 		String out = getDateStringForFile(date);
 		return fbase + "." + out + fSuffix;
 	}
-	
 
+
+	/* *
+	 * Read in the entire file as a long string.
+	 * @param filename
+	 * @return
+	 * @throws Exception
+	 */
 	public static String getFileContents(String filename)
 			throws Exception {
 		File f = new File(filename);

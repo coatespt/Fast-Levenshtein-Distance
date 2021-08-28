@@ -6,6 +6,21 @@ The chief limitation is it works only on fairly large strings--several KB and up
 
 You can read about it in http://hadoopoopadoop.com/2015/11/08/super-fast-estimates-of-levenshtein-distance/
 
+Sample command line for invoking the CLI:
+ -p ./config/config.properties -f ./data/testcompress.csv -c 251 -n 11 -ld true -ft ./data/targets.csv -x 0.08
+
+-p is a java properties file. A sample is included.
+-f  is an input list of files
+-c and -n are the nominal compression rate and the neighborhood size.
+-ld is false means do compression of the files in the input list. If it is true
+    it means match each of the files to a target list that must be declared
+    either in the properties or as a command line argument.
+-ft is the list of target signatures.  Note that these are not filenames. It is
+    CSV output from running compression with -ld false.
+-x is a floating point number used to specify how significant you want an LD
+    comparison to be before printing it out.
+
+
 To build an executable jar file, execute the following from the project directory. It will build a jar in ./target.
  mvn assembly:assembly -DdescriptorId=jar-with-dependencies -Dmaven.test.skip=true
 

@@ -1,5 +1,6 @@
 package com.levenshtein.leven;
 
+import com.levenshtein.leven.cli.LDResult;
 import utilities.file.FileAndTimeUtility;
 
 import java.util.logging.Logger;
@@ -147,6 +148,11 @@ public class ScoreDistance {
 	 */
 	public int getLD(String str1, String str2) throws Exception{
 		return getDistance().LD(str1, str2);
+	}
+
+	public boolean goodEnough(LDResult ldr, double x){
+		// TODO: Need to do this computation.
+		return true;
 	}
 
 }

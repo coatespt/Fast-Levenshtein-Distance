@@ -1,81 +1,222 @@
 package com.levenshtein.leven.cli;
 
-
 import com.levenshtein.leven.ICompressor;
+import com.levenshtein.leven.ScoreDistance;
 import com.levenshtein.leven.StringCompressorRH;
-import utilities.exception.BadValueException;
 import utilities.file.FileAndTimeUtility;
 
 import java.io.FileInputStream;
-import java.util.List;
-import java.util.Properties;
-import java.util.Scanner;
+import java.util.*;
 
 import static java.lang.Integer.valueOf;
 
 /**
  * Command Line Interface
+ * <p>
+ * Compression: takes list of files from filenames given on command line
+ * or on stdin. Output is csv lines on stout. This output can be used
+ * as the LD target list.
+ * <p>
+ * LD matching: Find matches to set of input files among a set of
+ * target signatures. Target signatures are input from CSV
+ * lines as generated in compression mode.
+ * The targets are always input from precomputed signature CSV lines in a file.
+ * Note that the input is just file-names while the targets are pre-computed
+ * signatures.
  *
+ *
+ TODO: Currently the input is filenames. It would be useful to allow input from
+    pre-computed signatures.
  */
 public class Cli {
-    // So we want one or two?
-    public static String ARG_DASHS = "-";
-    // Default allocation for StringBuffer
-    public static int DEF_SB_SIZE=1024;
-
-    protected String [] argv = null;
-    protected String propsfile=null;
+    protected static String ARG_DASHES = "-";
+    protected static int DEF_SB_SIZE = 1024;
+    protected String[] argv = null;
+    protected String propsfile = null;
     protected String infile = null;
     protected int c = 0;
     protected int n = 0;
     protected String outChars;
     protected boolean ld = false;
     protected String targetFile = null;
-    double x = 0.0;
+    protected double x = 0.0;
 
-    public Cli(String [] argv){
-        this.argv=argv;
+    private ScoreDistance sd = null;
+
+    /**
+     * A CLI gets all it's setup via command-line arguments but you can
+     * set up automated tests by constructing argv list explicitly.
+     * @param argv An array of strings in the usual command-line form.
+     */
+    public Cli(String[] argv) {
+        this.argv = argv;
     }
 
-    public static void main(String [] argv){
-        System.err.println("This is the CLI running with args:" + Integer.toString(argv.length));
+    public static void main(String[] argv) {
         Cli cli = new Cli(argv);
         cli.go();
-        System.err.println("This is the CLI exiting...");
     }
 
-    public int go(){
+
+    /**
+     * Main driver of CLI.
+     * <p>Get the arguments</p>
+     * <p>If a properties file is specified, read them
+     * properties setting instance values</p>
+     * <p>Read the rest of the command line arguments. CL arguments
+     * that set values already found int properties file override them.</p>
+     * <p>If -ld=true it's an LD computation. Otherwise it's compression.</p>
+     * <p>Print the output as CSV</p>
+     * <p>Compression output can be used as target input for LD.</p>
+     * <p>Both compression and LD will accept input from standard in if an
+     * input file is not specified</p>
+     * @return
+     */
+    public int go() {
         try {
             parseArgs(argv);
-        }
-        catch(Exception bx){
-            System.err.println("Something went wrong with arguments or properties content.");
-            bx.printStackTrace();
-            System.exit(1);
+        } catch (Exception x) {
+            failure("Failed getting arguments or properties.", x);
         }
         if (ld) {
-           ldCompare();
-        }
-        else {
+            try {
+                // TODO: set properties for LD significance?
+                sd = new ScoreDistance();
+                doLdComparisons();
+            } catch (Exception x) {
+                failure("Failed doing LD.", x);
+            }
+        } else {
             try {
                 compression();
-            }
-            catch(Exception x){
-                x.printStackTrace();
+            } catch (Exception x) {
+                failure("Failed doing compression.", x);
             }
         }
         return 0;
     }
-    // TODO: It would be nice to have a feature that just returns the LD of two signatures.
+
+    // TODO: Always quit? Definitely for initialization failures but do you want to
+    //      quit if one comparison blows up?
+    private void failure(String err, Exception x){
+        System.err.println(err);
+        x.printStackTrace();
+        System.exit(1);
+    }
+
 
     /**
-     * Read in the list of targets. This file of signatures should have the same format as the output of compress.
-     *
-     * If there's a signatures **input** file, read it and execute all the LD's. Otherwise, expect
-     * signatures input to appear on standard in.
-     * TODO: Implement me!
+     * Read the list of targets into a data structure you can scan.
+     * <p>
+     * The file of signatures should have the same format as the
+     * output of compress.
+     * <p>
+     * Then accept filenames as input. Create a signature for each input
+     * file and test it against all of the targets.
+     * <p>
+     * The input can be either from a file or from standard in.
+     * <p>
      */
-    protected void ldCompare(){
+    protected void doLdComparisons() throws Exception {
+        printOutputFields();
+        List<FileSignature> targets = getSigList(targetFile);
+
+        if (infile == null) {
+            // Input expected from the command line
+            Scanner scanner = new Scanner(System.in);
+            String instr = null;
+            while ((instr = scanner.nextLine()) != null) {
+                List<LDResult> ldResults = getLDResults(instr, targets, x);
+                // note that one input can result in 0 or many outputs.
+                printLDResults(ldResults);
+            }
+            scanner.close();
+        } else {
+            // input from file
+            List<String> fsList = FileAndTimeUtility.readListFromFile(infile);
+            for (int i = 0; i < fsList.size(); i++) {
+                List<LDResult> ldResults = getLDResults(fsList.get(i), targets, x);
+                // note that one input can result in 0 or many outputs.
+                printLDResults(ldResults);
+            }
+        }
+    }
+
+    private void printOutputFields(){
+        System.err.println("Fields: input-file, target-file, expectedLD, raw-sig-ld," +
+                " estimated-ld, c, n, sig1-len, sig2-len, out-char-set, sig1, sig2");
+    }
+
+    /**
+      Print all the items in a list of results as CSV
+     <p>
+    TODO: Put a flag in properties for suppressing printing the signatures, etc.
+    */
+    protected void printLDResults(List<LDResult> lst) {
+        for (int i = 0; i < lst.size(); i++) {
+            System.out.println(lst.get(i).toShortCsvString());
+        }
+    }
+
+    /**
+     * Get a list of matches for a single input subject to filtering by the
+     * significance criterion, x.
+     *
+     * @param infile  the file-spec of a file to process against the target signatures
+     * @param targets a list of target signatures read in once
+     * @param x       a significance criterion the nature of which is TBD
+     * @return
+     * @throws Exception
+     */
+    protected List<LDResult> getLDResults(String infile, List<FileSignature> targets,
+                                          double x) throws Exception {
+        FileSignature fsi = fileSignatureFromFilename(infile);
+        List<LDResult> ldResults = new ArrayList<LDResult>();
+        for (int j = 0; j < targets.size(); j++) {
+            FileSignature fst = targets.get(j);
+            int rawLd = sd.getLD(fsi.getSig(), fst.getSig());
+            int expectedForRandom =
+                    sd.expectedDistance(fsi.getInputFileLen(), fst.getInputFileLen() );
+            int est =
+                    sd.getLDEst(fsi.getSig(), fst.getSig(),
+                    Math.min(fsi.getSig().length(),fst.getSig().length()),
+                    Math.max(fsi.getSig().length(),fst.getSig().length())
+                    );
+            LDResult ldr = new LDResult(infile, fst.getInputFname(),
+                    fsi.getSig(), fst.getSig(),
+                    rawLd, expectedForRandom, est, fsi.getC(), fsi.getN(), fsi.getcSet());
+
+            if (sd.goodEnough(ldr, x)){
+                ldResults.add(ldr);
+            }
+        }
+        return ldResults;
+    }
+
+    /**
+     * Set up a set of target-file signatures to search for each line of input.
+     *
+     * @return A list of FileSignature objects.
+     * @throws Exception if no file, can't read it, malformed, etc.
+     */
+    protected List<FileSignature> getSigList(String targetFile) throws Exception {
+        if (targetFile == null) {
+            String err = "No file of targets signatures given.";
+            throw new Exception(err);
+        }
+        List<FileSignature> sigList = new ArrayList<FileSignature>();
+        List<String> csvStrings = FileAndTimeUtility.readListFromFile(targetFile);
+        for (int i = 0; i < csvStrings.size(); i++) {
+            String csvLine = csvStrings.get(i).trim();
+            if (csvLine.length()>8) {
+                sigList.add(new FileSignature(csvStrings.get(i)));
+            }
+            else {
+                System.err.println("Something fishy in the signature list." +
+                        "at line:" + Integer.toString(i) + ". Blank line?");
+            }
+        }
+        return sigList;
     }
 
     /**
@@ -83,143 +224,128 @@ public class Cli {
      * input from standard in.
      */
     protected void compression() throws Exception {
-        System.err.println("Starting compression.");
-        if (infile==null){
+        if (infile == null) {
             Scanner scanner = new Scanner(System.in);
             String instr = null;
-            while ((instr=scanner.nextLine()) != null){
-                System.err.println("" + instr);
-                String contents = FileAndTimeUtility.getFileContents(instr);
-                String sig = getCompressor().compress(contents);
-                output(instr, sig, contents.length());
+            while ((instr = scanner.nextLine()) != null) {
+                fileSignatureFromFilename(instr).compressionOutput(DEF_SB_SIZE);
             }
             scanner.close();
         }
-        else if (FileAndTimeUtility.isFileExist(infile)){
+        else if (FileAndTimeUtility.isFileExist(infile)) {
             try {
                 List<String> fnames = FileAndTimeUtility.readListFromFile(infile);
                 for (int i = 0; i < fnames.size(); i++) {
-                    String fname = fnames.get(i);
-                    String contents = FileAndTimeUtility.getFileContents(fname);
-                    String sig = getCompressor().compress(contents);
-                    output(fname, sig, contents.length());
+                   fileSignatureFromFilename(fnames.get(i)).compressionOutput(DEF_SB_SIZE);
                 }
-            } catch(Exception x){
+            } catch (Exception x) {
                 System.err.println("Failed reading input file:" + infile + " msg:" + x.getMessage());
             }
-        }
-        else {
+        } else {
             System.err.println("Input file for compression does not exist:" + infile);
         }
-        System.err.println("compression completed normally");
     }
 
-    public void output(String fname, String sig, int flen){
-       StringBuffer sb = new StringBuffer(DEF_SB_SIZE);
-       sb.append(fname);
-       sb.append(",");
-       sb.append(flen);
-       sb.append(",");
-       sb.append(sig.length());
-       sb.append(",");
-       sb.append(c);
-       sb.append(",");
-       sb.append(n);
-       sb.append(",");
-       sb.append(outChars);
-       sb.append(",");
-       sb.append(sig.length());
-       sb.append(",");
-       sb.append(sig);
-       sb.append(",");
-       System.out.println(sb.toString());
-       System.out.flush();
+    /**
+     * Creaqte a FileSignature object for the named infile.
+     * @param fname The filespec of an input file.
+     * @return A FileSignature object
+     * @throws Exception
+     */
+    protected FileSignature fileSignatureFromFilename(String fname) throws Exception {
+        String contents = FileAndTimeUtility.getFileContents(fname);
+        String sig = getCompressor().compress(contents);
+        return new FileSignature(fname,contents.length(),c,n,outChars,sig);
     }
-    protected ICompressor compressor=null;
-    protected ICompressor getCompressor(){
-        if(compressor==null){
-            ICompressor ic = new StringCompressorRH(n,c,
+
+    protected ICompressor compressor = null;
+
+    /**
+     * Retrun an ICompressor object for the given n,c,and output character set
+     * that the CLI was initialized with.
+     * TODO: The choice of RH compressor is hard coded. Put it in a property.
+     * @return
+     */
+    protected ICompressor getCompressor() {
+        if (compressor == null) {
+            ICompressor ic = new StringCompressorRH(n, c,
                     StringCompressorRH.StringToCharArray(outChars),
                     20, 44, 12345);
             ic.setN(n);
             ic.setC(c);
-            compressor=ic;
+            compressor = ic;
         }
         return compressor;
     }
 
 
-
-    /**
-     * Remove white space and any leading dash.
-     * @param s
-     * @return
-     */
-    public String trim(String s){
-       s=s.trim();
-       if (s.startsWith(ARG_DASHS)) {
-           return s.substring(1,s.length());
-       }
-       return s;
-    }
-
     /**
      * First read the properties file if one is specified, then parse
      * the command line arguments overriding anything found in properties
      * or set beforehand as a default.
-     * @param argv
-     * @throws BadValueException
+     *
+     * @param argv The usual String[] for command line args.
+     * @throws Exception
      */
-    public void parseArgs(String [] argv) throws BadValueException{
-        if (argv.length % 2 != 0){
+    public void parseArgs(String[] argv) throws Exception {
+        if (argv.length % 2 != 0) {
             format();
             System.exit(1);
         }
-       for (int i=0; i < argv.length;) {
-           String a = trim(argv[i]);
-           String v = trim(argv[i+1]);
-           System.err.println("parameter: " + a + " argument: " + v);
-           if (a.equals("p")){
-                propsfile=v;
+        for (int i = 0; i < argv.length; ) {
+            String a = argTrim(argv[i]);
+            String v = argTrim(argv[i + 1]);
+            //System.err.println("parameter: " + a + " argument: " + v);
+            if (a.equals("p")) {
+                propsfile = v;
                 try {
                     readPropsFile(propsfile);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
-           }
-           else if (a.equals("f")){
-                infile=v;
-           }
-           else if (a.equals("c")){
+            } else if (a.equals("f")) {
+                infile = v;
+            } else if (a.equals("c")) {
                 c = Integer.parseInt(v);
-           }
-           else if (a.equals("n")){
+            } else if (a.equals("n")) {
                 n = Integer.parseInt(v);
-           }
-           else if (a.equals("ch")){
+            } else if (a.equals("ch")) {
                 outChars = v;
-           }
-           else if (a.equals("ld")){
-                ld = Boolean.getBoolean(v);
-           }
-           else if (a.equals("ft")){
+            } else if (a.equals("ld")) {
+                v=v.toLowerCase(Locale.ROOT);
+                if (v.equals("true")) {
+                    ld=true;
+                }
+                if(v.equals("false")){
+                    ld=false;
+                }
+            } else if (a.equals("ft")) {
                 targetFile = v;
-           }
-           else if (a.equals("x")){
+            } else if (a.equals("x")) {
                 x = Double.parseDouble(v);
-           }
-           else {
+            } else {
                 System.err.println("Unknown argument encountered:" + a);
-           }
-           i=i+2;
-       }
+            }
+            i = i + 2;
+        }
     }
 
-    // -p config.properties -f infile1.csv -c 201 -n 8 -o abcdABCD1234 -ld true -ft target.csv -fi input.csv -x 0.08
+    /**
+     * Remove white space and any leading dash from argument flag.
+     * @param s
+     * @return
+     */
+    public String argTrim(String s) {
+        s = s.trim();
+        if (s.startsWith(ARG_DASHES)) {
+            return s.substring(1, s.length());
+        }
+        return s;
+    }
 
     /**
      * Return a format string (in response to un-parsable arguments.)
+     *
      * @return
      */
     public String format() {
@@ -236,10 +362,11 @@ public class Cli {
         return sb.toString();
     }
 
-    // Properties file code below here.
-    // TODO: You could put this in another class.
+    // TODO:  Properties stuff should go in another class.
+
     /**
-     *  Read the properties file and override any values specified there.
+     * Read the properties file and override any values specified there.
+     *
      * @param pfile
      */
     public void readPropsFile(String pfile) throws Exception {
@@ -247,68 +374,78 @@ public class Cli {
         FileInputStream in = new FileInputStream(pfile);
         defaultProps.load(in);
         in.close();
-        if (getIntVal("c",defaultProps) != null) {
-           c = getIntVal("c",defaultProps);
+        if (getIntVal("c", defaultProps) != null) {
+            c = getIntVal("c", defaultProps);
         }
-        if (getIntVal("n",defaultProps) != null) {
-            n = getIntVal("n",defaultProps);
+        if (getIntVal("n", defaultProps) != null) {
+            n = getIntVal("n", defaultProps);
         }
-        if (getStringVal("f",defaultProps) != null) {
-            infile = getStringVal("f",defaultProps);
+        if (getStringVal("f", defaultProps) != null) {
+            infile = getStringVal("f", defaultProps);
         }
-        if (getStringVal("ch",defaultProps) != null) {
-            outChars = getStringVal("ch",defaultProps);
+        if (getStringVal("ch", defaultProps) != null) {
+            outChars = getStringVal("ch", defaultProps);
         }
-        if (getBoolVal("ld",defaultProps) != null) {
-            ld = getBoolVal("ld",defaultProps);
+        if (getBoolVal("ld", defaultProps) != null) {
+            ld = getBoolVal("ld", defaultProps);
         }
-        if (getStringVal("ft",defaultProps) != null) {
-            targetFile = getStringVal("ft",defaultProps);
+        if (getStringVal("ft", defaultProps) != null) {
+            targetFile = getStringVal("ft", defaultProps);
         }
-        if (getDoubleVal("x",defaultProps) != null) {
-            x = getDoubleVal("x",defaultProps);
+        if (getDoubleVal("x", defaultProps) != null) {
+            x = getDoubleVal("x", defaultProps);
         }
     }
 
-    private String getStringVal(String a, Properties props) throws Exception{
+    private String getStringVal(String a, Properties props) throws Exception {
         Object ob = props.get(a);
-        if (ob==null){
-            String err = "No "+ a +" value in properties";
+        if (ob == null) {
+            String err = "No " + a + " value in properties";
         } else {
-            System.err.println("Found  "+ a +" value in  properties:" + ob);
+            //System.err.println("Found  " + a + " value in  properties:" + ob);
             return ((String) ob).trim();
         }
         return null;
     }
 
-    private Boolean getBoolVal(String a, Properties props) throws Exception{
+    private Boolean getBoolVal(String a, Properties props) throws Exception {
         Object ob = props.get(a);
-        if (ob==null){
-            String err = "No "+ a +" value in properties";
+        if (ob == null) {
+            String err = "No " + a + " value in properties";
         } else {
-            System.err.println("Found  "+ a +" value in  properties:" + props.get(a));
-            return Boolean.valueOf(((String) ob).trim());
+            //System.err.println("Found  " + a + " value in  properties:" + props.get(a));
+            String arg = ((String) ob).trim().toLowerCase(Locale.ROOT);
+            if (arg.equals("true")){
+                return true;
+            }
+            else if (arg.equals("false")){
+                return false;
+            }
+            else {
+                String err = "getBoolVal() expecting a boolean but got:" + arg;
+                throw new Exception(err);
+            }
         }
         return null;
     }
 
-    private Double getDoubleVal(String a, Properties props) throws Exception{
+    private Double getDoubleVal(String a, Properties props) throws Exception {
         Object ob = props.get(a);
-        if (ob==null){
-            String err = "No "+ a +" value in properties";
+        if (ob == null) {
+            String err = "No " + a + " value in properties";
         } else {
-            System.err.println("Found  "+ a +" value in  properties:" + ob);
-            return Double.valueOf(((String)ob).trim());
+            //System.err.println("Found  " + a + " value in  properties:" + ob);
+            return Double.valueOf(((String) ob).trim());
         }
         return null;
     }
 
-    private Integer getIntVal(String a, Properties props) throws Exception{
+    private Integer getIntVal(String a, Properties props) throws Exception {
         Object ob = props.get(a);
-        if (ob==null){
-            String err = "No "+ a +" value in properties";
+        if (ob == null) {
+            String err = "No " + a + " value in properties";
         } else {
-            System.err.println("Found  "+ a +" value in  properties:" + ob);
+            //System.err.println("Found  " + a + " value in  properties:" + ob);
             return valueOf(((String) ob).trim());
         }
         return null;
