@@ -5,9 +5,8 @@ import utilities.exception.QueueEmptyException;
 import utilities.exception.QueueFullException;
 
 /**
- * This is used only in the experimental RollingHash, which is not yet as solid as the 
- * method used in StringCompressorPlain, and may be discarded.  
- * 
+ * This is used in the RollingHash
+ *
  * TODO fix the templating
  * 
  * This code was cribbed from http://oppansource.com/queue-implementation-in-java-using-circular-array/ and 
@@ -17,14 +16,13 @@ import utilities.exception.QueueFullException;
  * @param <E> The type stored by the Queue
  */
 public class CircularQueue<E> {
-
-	static Logger log = Logger.getLogger(CircularQueue.class); 
+	static Logger log = Logger.getLogger(CircularQueue.class);
     private final E[] circularQueueAr;
     private final int maxSize;   //Maximum Size of Circular Queue
-   
     private int rear;//elements will be added/queued at rear.
     private int front;   //elements will be removed/dequeued from front      
     private int number; //number of elements currently in Priority Queue
+
      /**
       * Constructor
       */
@@ -35,9 +33,7 @@ public class CircularQueue<E> {
         front=0;  
         rear=0;    
     }
- 
- 
- 
+
     /**
      * Adds element in Circular Queue(at rear)
      */
@@ -82,6 +78,5 @@ public class CircularQueue<E> {
     public boolean isEmpty() {
         return (number==0);
     }
- 
 
 }

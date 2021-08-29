@@ -35,7 +35,8 @@
         </descriptorRefs>
         <archive>
           <manifest>
-            <mainClass>com.levenshtein.leven.demo.Demo</mainClass>
+            <!--mainClass>com.levenshtein.leven.demo.Demo</mainClass-->
+            <mainClass>com.levenshtein.leven.cli.Cli</mainClass>
           </manifest>
         </archive>
       </configuration>
