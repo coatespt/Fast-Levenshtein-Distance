@@ -57,7 +57,6 @@ public class Cli {
         cli.go();
     }
 
-
     /**
      * Main driver of CLI.
      * <p>Get the arguments</p>
@@ -96,14 +95,14 @@ public class Cli {
         return 0;
     }
 
+
     // TODO: Always quit? Definitely for initialization failures but do you want to
     //      quit if one comparison blows up?
-    private void failure(String err, Exception x){
+    private void failure(String err, Exception x) {
         System.err.println(err);
         x.printStackTrace();
         System.exit(1);
     }
-
 
     /**
      * Read the list of targets into a data structure you can scan.
@@ -127,7 +126,6 @@ public class Cli {
             String instr = null;
             while ((instr = scanner.nextLine()) != null) {
                 List<LDResult> ldResults = getLDResults(instr, targets, x);
-                // note that one input can result in 0 or many outputs.
                 printLDResults(ldResults);
             }
             scanner.close();
@@ -135,13 +133,19 @@ public class Cli {
             // input from file
             List<String> fsList = FileAndTimeUtility.readListFromFile(infile);
             for (int i = 0; i < fsList.size(); i++) {
+                String file=fsList.get(i).trim();
+                if(file.equals("")){
+                    return;
+                }
                 List<LDResult> ldResults = getLDResults(fsList.get(i), targets, x);
-                // note that one input can result in 0 or many outputs.
                 printLDResults(ldResults);
             }
         }
     }
 
+    /**
+     * A format line so you know what the output means.
+     */
     private void printOutputFields(){
         System.err.println("Fields: input-file, target-file, expectedLD, raw-sig-ld," +
                 " estimated-ld, c, n, sig1-len, sig2-len, out-char-set, sig1, sig2");
@@ -183,10 +187,12 @@ public class Cli {
                     Math.max(fsi.getSig().length(),fst.getSig().length())
                     );
             LDResult ldr = new LDResult(infile, fst.getInputFname(),
+                    fsi.getInputFileLen(), fst.getInputFileLen(),
                     fsi.getSig(), fst.getSig(),
-                    rawLd, expectedForRandom, est, fsi.getC(), fsi.getN(), fsi.getcSet());
+                    rawLd, expectedForRandom, est,
+                    fsi.getC(), fsi.getN(), fsi.getcSet());
 
-            if (sd.goodEnough(ldr, x)){
+            if (sd.significant(ldr, x)){
                 ldResults.add(ldr);
             }
         }
@@ -209,7 +215,7 @@ public class Cli {
         for (int i = 0; i < csvStrings.size(); i++) {
             String csvLine = csvStrings.get(i).trim();
             if (csvLine.length()>8) {
-                sigList.add(new FileSignature(csvStrings.get(i)));
+                sigList.add(new FileSignature(csvLine));
             }
             else {
                 System.err.println("Something fishy in the signature list." +
@@ -278,6 +284,12 @@ public class Cli {
         return compressor;
     }
 
+
+//////////////////////////////////////////
+//////////////////////////////////////////
+////  Just argument stuff below here /////
+//////////////////////////////////////////
+//////////////////////////////////////////
 
     /**
      * First read the properties file if one is specified, then parse

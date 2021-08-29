@@ -48,7 +48,7 @@ public class FileSignature {
         setC(Integer.parseInt(lst.get(3)));
         setN(Integer.parseInt(lst.get(4)));
         setcSet(lst.get(5));
-        setSig(lst.get(7));
+        setSig(lst.get(6));
     }
 
     /**
