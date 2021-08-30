@@ -2,6 +2,7 @@ package com.levenshtein.leven.cli;
 
 import com.levenshtein.leven.ICompressor;
 import com.levenshtein.leven.ScoreDistance;
+import com.levenshtein.leven.SignificanceResult;
 import com.levenshtein.leven.StringCompressorRH;
 import utilities.file.FileAndTimeUtility;
 
@@ -119,12 +120,13 @@ public class Cli {
     protected void doLdComparisons() throws Exception {
         printOutputFields();
         List<FileSignature> targets = getSigList(targetFile);
-
+        int inputFileCount=0;
         if (infile == null) {
             // Input expected from the command line
             Scanner scanner = new Scanner(System.in);
             String instr = null;
             while ((instr = scanner.nextLine()) != null) {
+                inputFileCount++;
                 List<LDResult> ldResults = getLDResults(instr, targets, x);
                 printLDResults(ldResults);
             }
@@ -133,13 +135,17 @@ public class Cli {
             // input from file
             List<String> fsList = FileAndTimeUtility.readListFromFile(infile);
             for (int i = 0; i < fsList.size(); i++) {
+                inputFileCount++;
                 String file=fsList.get(i).trim();
                 if(file.equals("")){
                     return;
                 }
                 List<LDResult> ldResults = getLDResults(fsList.get(i), targets, x);
+                System.err.println("File search " + (i+1) + " " + file + " complete.");
                 printLDResults(ldResults);
             }
+            System.err.println("Input files:" + inputFileCount);
+            System.err.println("Target files:" + targets.size());
         }
     }
 
@@ -192,8 +198,10 @@ public class Cli {
                     rawLd, expectedForRandom, est,
                     fsi.getC(), fsi.getN(), fsi.getcSet());
 
-            if (sd.significant(ldr, x)){
+            SignificanceResult sdr = sd.significant(ldr, x);
+            if (sdr.getSignificnt()){
                 ldResults.add(ldr);
+                System.err.println(sdr.toString());
             }
         }
         return ldResults;
@@ -215,6 +223,7 @@ public class Cli {
         for (int i = 0; i < csvStrings.size(); i++) {
             String csvLine = csvStrings.get(i).trim();
             if (csvLine.length()>8) {
+                //System.err.println("target:" + i);
                 sigList.add(new FileSignature(csvLine));
             }
             else {

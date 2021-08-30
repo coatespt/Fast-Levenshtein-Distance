@@ -31,7 +31,7 @@ public class ScoreDistance {
     private IDistance getDistance() {
         if (distance == null) {
             distance = new StringDistance();
-            log.info("Creating IDistance instance:" + distance.getClass().getName());
+            //log.info("Creating IDistance instance:" + distance.getClass().getName());
         }
         return distance;
     }
@@ -46,7 +46,7 @@ public class ScoreDistance {
      *  from and isn't it dependent upon the type of data being processed?
      *  Several aspects of this need looking at.
      */
-    private double wholeFileRatio = 0.022;
+    private double wholeFileRatio = 0.22;
 
     /**
      * Amount by which the LD of a pair of equal size plain-generated signatures
@@ -61,7 +61,7 @@ public class ScoreDistance {
      *  compared to the signatures, which have approximately equal numbers of
      *  almost seventy characters.
      */
-    private double sigRatio = 0.030d;
+    private double sigRatio = 0.30d;
 
     /**
      * Empirical estimate of the amount by which the LD of a pair of equal
@@ -172,42 +172,32 @@ public class ScoreDistance {
      * @return boolean as the two files are/are-not to be considered related
      * @throws Exception
      */
-    public boolean significant(LDResult ldr, double x) throws Exception {
-        int shorter = Math.min(ldr.getSig1().length(), ldr.getSig2().length());
+    public SignificanceResult significant(LDResult ldr, double x) throws Exception {
 
+        int shorter = Math.min(ldr.getSig1().length(), ldr.getSig2().length());
         int signatureLenDiff = Math.abs(ldr.getSig1().length() - ldr.getSig2().length());
 
-        // After allowing for the difference in length, we'd expect the LD of the sigs to be about.
-        // for random pairs of files of this length.
-        double expectedOverlapLD = shorter * (1-getSigRatio());
+        // TODO: The sigRatio factor applies only to English text and should be settable either from
+        //  properties or by automated analysis of the data.
+        //
+        // The difference in length requires one operation per character.
+        // The equal shorter segments require fewer operations than their length by a factor of sigRatio,
+        //  which is an empirically derived quantity
+        double expectedSigLD = shorter * (1.0 - sigRatio) + signatureLenDiff ;
+        int actualSigLD = getLD(ldr.getSig1(),ldr.getSig2());
 
-        int actualLd = ldr.getRawLd();
+        // if the signatures are from unrelated files, this difference should be small.
+        double diff = Math.abs(expectedSigLD-actualSigLD);
 
-        // The calculaed LD minus the number of characters in the difference, all of which would
-        //    incu an edit operation.
-        int adjustedActualLD = actualLd - signatureLenDiff;
+        // The closer to zero the more similar the signatures are.
+        // TODO: We need the mean and standard deviation of S for random files
+        double significance = (diff / (1.0 * expectedSigLD));
 
-        // The shorter must be almost entirely contained in the longer
-        if (adjustedActualLD == 0) {
-            return true;
-        }
+        Boolean isSignificant = (significance > x);
 
-        if (expectedOverlapLD == 0) {
-            throw new Exception("expected overlap LD computed to be 0! This should never happen.");
-        }
-
-        // If the signatures are from unrelated files, the computed LD, adjusted for the difference
-        //  in length and the expected LD for files of that length should be close, so diff should
-        //  small, making the quotient close to 0.
-        double diff = Math.abs(expectedOverlapLD - adjustedActualLD);
-        double significance = diff / expectedOverlapLD;
-
-        if (significance < x) {
-            System.err.println("file:" + ldr.getInfile1() + " file2: " + ldr.getInfile2() + "Significance x:" + significance + " x:" + x);
-            return true;
-        } else {
-            return false;
-        }
+        SignificanceResult retVal = new SignificanceResult(ldr.getSig1().length(),ldr.getSig2().length(), actualSigLD,
+                expectedSigLD, significance, isSignificant, x);
+        return retVal;
     }
 
     /**

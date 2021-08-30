@@ -35,3 +35,4 @@ data/testfile-sigs.txt
 *.log
 *.pdf
 *.swp
+allfiles_sigs.csv.back

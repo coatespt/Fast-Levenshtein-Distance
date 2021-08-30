@@ -160,7 +160,7 @@ public class Demo {
 	protected void createSigs(String indir) throws Exception {
 		log.info("createSigs() starting");
 		String firstLine=null;
-		int TEST_ITERATIONS=2000;
+		int TEST_ITERATIONS=1;
 		double totalScaledError=0;
 		double ct=0;
 		System.out.println(logHeaders());

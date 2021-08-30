@@ -8,7 +8,8 @@ import org.apache.log4j.Logger;
  * Super-simple signature generator for text input and printable ASCII output.
  * We xor all values from P to P+n into a positive long.
  * 
- * TODO: This seems to work well, but how it works is obscure. Cleanup, document, and verify that it actually does a good job.
+ * TODO: This seems to work well, but how it works is obscure. Cleanup,
+ *	 document, and verify that it actually does a good job.
  * 
  * @author peter
  *
@@ -35,10 +36,8 @@ public class StringCompressorPlain extends ICompressor{
 	 * Squeeze a string down to about 1/c of its starting size
 	 * using neighborhood size n.
 	 *
-	 * @param String The input string to compress.
-	 * @param int the neighborhood size for each hash
-	 * @param int The comprssion factor
-	 * @return String a compressed signature string
+	 * @param str The string to compress
+	 * @return A string signature
 	 */
 	public String compress(String str){
 		return compressAlt(str, getN(), getC());
@@ -71,11 +70,9 @@ public class StringCompressorPlain extends ICompressor{
 		// Over-allocate the string buffer from the start so it doesn't have to grow repeatedly
 		StringBuffer sb = new StringBuffer((int)((str.length()/(double)c)*1.5d));
 		int strPos=0;
-		// Eliminate all redundant white space.
 		if(SQUEEZE_WHITE){
 			str=squeezeWhite(str);
 		}
-		
 		int strLen = str.length();
 		if(strLen==0){
 			return "";
