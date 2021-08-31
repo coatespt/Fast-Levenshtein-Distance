@@ -14,9 +14,19 @@ public class LDResult {
         private int rawLd;
         private int expectedForRandom;
         private int ldEstmate;
+        private double significance;
+        private double x;
         private int c;
         private int n;
         private String cSet;
+
+    public double getX(){return x;}
+
+    public void setX(double d){x = d;}
+
+    public void setSignificance(double s){ significance = s; }
+
+    public double getSignificance(){ return significance; }
 
     public int getInfile1Len(){ return infile1Len; }
 
@@ -131,7 +141,6 @@ public class LDResult {
 
     /**
      * Leave out the signatures, which can be excessively long
-     // TODO: Demo also has scores adjusted for file lengths. Add them?
      * @return
      */
     public String toShortCsvString() {
@@ -149,6 +158,10 @@ public class LDResult {
         sb.append(rawLd);
         sb.append(", ");
         sb.append(ldEstmate);
+        sb.append(", ");
+        sb.append(significance);
+        sb.append(", ");
+        sb.append(x);
         sb.append(", ");
         sb.append(c);
         sb.append(", ");

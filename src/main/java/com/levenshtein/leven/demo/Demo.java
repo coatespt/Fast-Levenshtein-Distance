@@ -181,11 +181,12 @@ public class Demo {
 
 				String sig1 = getCompressor().compress(cont1);
 				String sig2 = getCompressor().compress(cont2);
-				
-				int expectedForRandom = sd.expectedDistance(cont1.length(), cont2.length());
-				int est = sd.getLDEst(sig1, sig2, longerOriginal, shorterOriginal);
-				Date start=new Date();
+
 				int act = sd.getLD(cont1, cont2);
+
+				int expectedForRandom = sd.expectedDistance(cont1.length(), cont2.length());
+				int est = sd.getLDEst(sig1, sig2, longerOriginal, shorterOriginal, act);
+				Date start=new Date();
 				Date end=new Date();
 				double ldRateSec = FileAndTimeUtility.rateSec(1, start, end);
 				start=new Date();

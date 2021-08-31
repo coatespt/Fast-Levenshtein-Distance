@@ -26,8 +26,11 @@ import static java.lang.Integer.valueOf;
  * signatures.
  *
  *
- TODO: Currently the input is filenames. It would be useful to allow input from
-    pre-computed signatures.
+ TODO: Matching is way too slow. Look for redundant LD operations. Count them to be sure you aren't missing any as this is where all the time goes.
+ TODO: Implement multi-threading for the matching.
+ TODO: Currently the input is only filenames. It would be useful to allow input from pre-computed signatures.
+ TODO: The fields line is wrong. Fields: input-file, target-file, expectedLD, raw-sig-ld, estimated-ld, c, n, sig1-len, sig2-len, out-char-set, sig1, sig2
+
  */
 public class Cli {
     protected static String ARG_DASHES = "-";
@@ -190,7 +193,8 @@ public class Cli {
             int est =
                     sd.getLDEst(fsi.getSig(), fst.getSig(),
                     Math.min(fsi.getSig().length(),fst.getSig().length()),
-                    Math.max(fsi.getSig().length(),fst.getSig().length())
+                    Math.max(fsi.getSig().length(),fst.getSig().length()),
+                            rawLd
                     );
             LDResult ldr = new LDResult(infile, fst.getInputFname(),
                     fsi.getInputFileLen(), fst.getInputFileLen(),
@@ -198,8 +202,10 @@ public class Cli {
                     rawLd, expectedForRandom, est,
                     fsi.getC(), fsi.getN(), fsi.getcSet());
 
-            SignificanceResult sdr = sd.significant(ldr, x);
+            SignificanceResult sdr = sd.significant(ldr, x, rawLd);
             if (sdr.getSignificnt()){
+                ldr.setSignificance(sdr.getComputedSignificane());
+                ldr.setX(sdr.getX());
                 ldResults.add(ldr);
                 System.err.println(sdr.toString());
             }
@@ -223,6 +229,8 @@ public class Cli {
         for (int i = 0; i < csvStrings.size(); i++) {
             String csvLine = csvStrings.get(i).trim();
             if (csvLine.length()>8) {
+                // TODO. Catch exception here, log and continue. and continue.
+                // uncomment this to find a defective line.
                 //System.err.println("target:" + i);
                 sigList.add(new FileSignature(csvLine));
             }

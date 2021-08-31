@@ -45,6 +45,13 @@ point in the pom file's manifest section.  See above for how.
 Sample command line to run the jar for the CLI:
     java -jar target/Fast-Levenshtein-Distance-0.0.1-SNAPSHOT-jar-with-dependencies.jar  -p ./config/config.properties -f ./data/search.csv -c 251 -n 11 -ld true -ft ./data/target.csv -x 0.1
 
+Example running jar to make signatures from a list of files. Compression 1009 and neighborhood 11. Note
+that the output filename encodes those parameters.
+java -jar target/Fast-Levenshtein-Distance-0.0.1-SNAPSHOT-jar-with-dependencies.jar  -p ./config/config.properties -f ./data/allfiles.txt -c 1009 -n 11 -ld false > targets_1009_11.csv
+
+We search for our ten files among the results of the compression stesp
+java -jar target/Fast-Levenshtein-Distance-0.0.1-SNAPSHOT-jar-with-dependencies.jar  -p ./config/config.properties -f ./data/search.csv -c 1009 -n 11 -ld true -ft targets_1009_11.csv -x 0.4
+
 
 To get the code
 

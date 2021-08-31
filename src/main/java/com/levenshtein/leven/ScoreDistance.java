@@ -156,9 +156,9 @@ public class ScoreDistance {
      * @throws Exception if anything fails.
      */
     public int getLDEst(String sig1, String sig2, int longerUnCompressed,
-                        int shorterUncompressed) throws Exception {
+                        int shorterUncompressed, Integer rawLd) throws Exception {
         int longer = Math.max(sig1.length(), sig2.length());
-        int ld = getDistance().LD(sig1, sig2);
+        int ld = rawLd!=null?rawLd: getDistance().LD(sig1, sig2);
         double computedLenRatioPlain = ld / (double) longer;
         double estimatedUnadjusted = computedLenRatioPlain * longerUnCompressed;
         return (int) fudgeFactor(estimatedUnadjusted);
@@ -172,7 +172,7 @@ public class ScoreDistance {
      * @return boolean as the two files are/are-not to be considered related
      * @throws Exception
      */
-    public SignificanceResult significant(LDResult ldr, double x) throws Exception {
+    public SignificanceResult significant(LDResult ldr, double x, Integer ldval) throws Exception {
 
         int shorter = Math.min(ldr.getSig1().length(), ldr.getSig2().length());
         int signatureLenDiff = Math.abs(ldr.getSig1().length() - ldr.getSig2().length());
@@ -184,7 +184,7 @@ public class ScoreDistance {
         // The equal shorter segments require fewer operations than their length by a factor of sigRatio,
         //  which is an empirically derived quantity
         double expectedSigLD = shorter * (1.0 - sigRatio) + signatureLenDiff ;
-        int actualSigLD = getLD(ldr.getSig1(),ldr.getSig2());
+        int actualSigLD = ldval!=null? ldval: getLD(ldr.getSig1(),ldr.getSig2());
 
         // if the signatures are from unrelated files, this difference should be small.
         double diff = Math.abs(expectedSigLD-actualSigLD);

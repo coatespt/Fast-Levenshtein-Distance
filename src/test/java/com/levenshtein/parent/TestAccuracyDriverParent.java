@@ -77,7 +77,7 @@ public abstract class TestAccuracyDriverParent extends TestParent {
         }
         double rateCompressed = COMP_CT / (double) ((new Date()).getTime() - start.getTime()) * 1000;
 
-        int scoreDEst = scoreD.getLDEst(compressedF1, compressedF2, longerUnCompressed.length(), shorterUnCompressed.length());
+        int scoreDEst = scoreD.getLDEst(compressedF1, compressedF2, longerUnCompressed.length(), shorterUnCompressed.length(),null);
 
         start = new Date();
         int distUnCompressed = d.LD(f1Str, f2Str);
