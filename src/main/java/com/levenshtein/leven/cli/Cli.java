@@ -1,14 +1,11 @@
 package com.levenshtein.leven.cli;
-
 import com.levenshtein.leven.ICompressor;
 import com.levenshtein.leven.ScoreDistance;
 import com.levenshtein.leven.SignificanceResult;
 import com.levenshtein.leven.StringCompressorRH;
 import utilities.file.FileAndTimeUtility;
-
 import java.io.FileInputStream;
 import java.util.*;
-
 import static java.lang.Integer.valueOf;
 
 /**
@@ -25,11 +22,46 @@ import static java.lang.Integer.valueOf;
  * Note that the input is just file-names while the targets are pre-computed
  * signatures.
  *
- *
- TODO: Matching is way too slow. Look for redundant LD operations. Count them to be sure you aren't missing any as this is where all the time goes.
- TODO: Implement multi-threading for the matching.
- TODO: Currently the input is only filenames. It would be useful to allow input from pre-computed signatures.
- TODO: The fields line is wrong. Fields: input-file, target-file, expectedLD, raw-sig-ld, estimated-ld, c, n, sig1-len, sig2-len, out-char-set, sig1, sig2
+
+ TODO: Find, verify, correct and/or rewrite JUnit test for accuracy of estimates.
+
+ TODO: Demo. LD/sec, EST  LD/sec. Speedup all seem wrong.
+
+ TODO: Add statistics output for a target set. This would require ability to comment signatures.
+    Should include longest file, shortest file, longest signture, shortest signature, mean, stdev.
+
+ TODO: Run the tests for LD accuracy and see if the estimates are any good.
+
+ TODO: Flag to control output as per Frank's suggestions. Put options here. It's useless w/o the filenames, right?
+    so ouput fnames plus
+        Just the file-LD estimate?
+        Just Signature LD?
+        drop file lengths, signature lengths, t, cn, n
+    Either way, you have to make a heading line for each set of outputs.
+
+ TODO: Deal with the tiny files. Options--
+    Get rid of file smaller than x and rerun the compression
+    Handle the case where they compress to zero.
+
+ TODO: Run the compression for a range of compression rates and get time as a function of compression.
+
+ TODO: Get a data set for t value as as a function of compression.
+
+ TODO: Matching is slow. Look for redundant LD operations (stick in a counter?).
+
+ TODO: Implement multi-threading for the matching. Frank says this is low priority.
+
+ TODO: Implement multi-threading for compression. Frank says this is low priority.
+
+ TODO: Should we have option for input from pre-computed signatures?
+    For most cases, you have a few signatuers v many files so computing signatures on the fly is negligible
+    Are there realistic cases where the opposite is true? Many inputs for a few targets? That case can be
+        handled by simply reversing the targets and the inputs.
+    The meaningful case would be many inputs and many targets.
+
+ TODO: Check out if the fudgeFactor is being used anywhere else. Looks totally wrong. It could be producing errors.
+
+ TODO: JUnit tests are a mess.
 
  */
 public class Cli {
@@ -43,9 +75,11 @@ public class Cli {
     protected String outChars;
     protected boolean ld = false;
     protected String targetFile = null;
-    protected double x = 0.0;
-
+    protected double t = 0.0;
     private ScoreDistance sd = null;
+
+    protected boolean printHeader=true;
+    protected boolean verbose = false;
 
     /**
      * A CLI gets all it's setup via command-line arguments but you can
@@ -121,7 +155,12 @@ public class Cli {
      * <p>
      */
     protected void doLdComparisons() throws Exception {
-        printOutputFields();
+        if(verbose) {
+            System.err.println(LDResult.outputLine());
+        }
+        if (printHeader) {
+            System.out.println(LDResult.header());
+        }
         List<FileSignature> targets = getSigList(targetFile);
         int inputFileCount=0;
         if (infile == null) {
@@ -130,35 +169,63 @@ public class Cli {
             String instr = null;
             while ((instr = scanner.nextLine()) != null) {
                 inputFileCount++;
-                List<LDResult> ldResults = getLDResults(instr, targets, x);
+                List<LDResult> ldResults = getLDResults(instr, targets, t);
                 printLDResults(ldResults);
             }
             scanner.close();
         } else {
             // input from file
             List<String> fsList = FileAndTimeUtility.readListFromFile(infile);
+            // run each input file against all targets.
             for (int i = 0; i < fsList.size(); i++) {
                 inputFileCount++;
                 String file=fsList.get(i).trim();
                 if(file.equals("")){
                     return;
                 }
-                List<LDResult> ldResults = getLDResults(fsList.get(i), targets, x);
-                System.err.println("File search " + (i+1) + " " + file + " complete.");
+                List<LDResult> ldResults = getLDResults(fsList.get(i), targets, t);
+                if (verbose) {
+                    System.err.println("File search " + (i + 1) + " " + file + " complete.");
+                }
                 printLDResults(ldResults);
             }
-            System.err.println("Input files:" + inputFileCount);
-            System.err.println("Target files:" + targets.size());
+            if (verbose) {
+                System.err.println("Input files:" + inputFileCount);
+                System.err.println("Target files:" + targets.size());
+            }
+        }
+        if (verbose) {
+            printMMStdev(ldrSigs);
         }
     }
 
-    /**
-     * A format line so you know what the output means.
-     */
-    private void printOutputFields(){
-        System.err.println("Fields: input-file, target-file, expectedLD, raw-sig-ld," +
-                " estimated-ld, c, n, sig1-len, sig2-len, out-char-set, sig1, sig2");
-    }
+   private void printMMStdev(List<Double> lst) {
+       double accum = 0;
+       for (int i = 0; i < lst.size(); i++) {
+           accum = accum + lst.get(i);
+       }
+       double mean = accum / lst.size();
+       double ssd = 0;
+       for (int i = 0; i < lst.size(); i++) {
+           double diff = mean = lst.get(i);
+           ssd = ssd + (diff * diff);
+       }
+       double var = ssd / lst.size();
+       double stdev = Math.sqrt(var);
+       StringBuffer sb = new StringBuffer();
+       sb.append("\n\n");
+       sb.append("Significance mean:");
+       sb.append(mean);
+       sb.append(" variance:");
+       sb.append(var);
+       sb.append(" stdev:");
+       sb.append(stdev);
+       sb.append(" total LD comparisons:");
+       sb.append(lst.size());
+       sb.append(" matched:");
+       sb.append(matchedSigCount);
+       System.err.println(sb.toString());
+   }
 
     /**
       Print all the items in a list of results as CSV
@@ -171,43 +238,56 @@ public class Cli {
         }
     }
 
+    static List<Double> ldrSigs = new ArrayList<Double>();
+    static int matchedSigCount=0;
     /**
      * Get a list of matches for a single input subject to filtering by the
-     * significance criterion, x.
+     * significance criterion, t.
      *
      * @param infile  the file-spec of a file to process against the target signatures
      * @param targets a list of target signatures read in once
-     * @param x       a significance criterion the nature of which is TBD
+     * @param t       a significance criterion the nature of which is TBD
      * @return
      * @throws Exception
      */
     protected List<LDResult> getLDResults(String infile, List<FileSignature> targets,
-                                          double x) throws Exception {
+                                          double t) throws Exception {
         FileSignature fsi = fileSignatureFromFilename(infile);
         List<LDResult> ldResults = new ArrayList<LDResult>();
         for (int j = 0; j < targets.size(); j++) {
             FileSignature fst = targets.get(j);
             int rawLd = sd.getLD(fsi.getSig(), fst.getSig());
             int expectedForRandom =
-                    sd.expectedDistance(fsi.getInputFileLen(), fst.getInputFileLen() );
+                    sd.expectedDistanceForSigs(fsi.getSig().length(), fst.getSig().length());
+                    //sd.expectedDistance(fsi.getInputFileLen(), fst.getInputFileLen() );
+            // verify that this does not result in a second ld()
             int est =
-                    sd.getLDEst(fsi.getSig(), fst.getSig(),
-                    Math.min(fsi.getSig().length(),fst.getSig().length()),
-                    Math.max(fsi.getSig().length(),fst.getSig().length()),
-                            rawLd
-                    );
-            LDResult ldr = new LDResult(infile, fst.getInputFname(),
+                    //sd.getLDEst(fsi.getSig(), fst.getSig(),
+                    //Math.min(fsi.getSig().length(),fst.getSig().length()),
+                    //Math.max(fsi.getSig().length(),fst.getSig().length()),
+                    //        rawLd
+                    //);
+                    sd.getLDEstForOriginals(fsi,fst, rawLd);
+            LDResult ldr = new LDResult(
+                    infile, fst.getInputFname(),
                     fsi.getInputFileLen(), fst.getInputFileLen(),
                     fsi.getSig(), fst.getSig(),
                     rawLd, expectedForRandom, est,
                     fsi.getC(), fsi.getN(), fsi.getcSet());
 
-            SignificanceResult sdr = sd.significant(ldr, x, rawLd);
+            SignificanceResult sdr = sd.significant(ldr, t, rawLd);
             if (sdr.getSignificnt()){
+                matchedSigCount++;
                 ldr.setSignificance(sdr.getComputedSignificane());
-                ldr.setX(sdr.getX());
+                ldr.setT(sdr.getX());
                 ldResults.add(ldr);
-                System.err.println(sdr.toString());
+                if (verbose) {
+                    System.err.println(sdr.toString());
+                }
+            }
+            else {
+                // only care about stats for unrelated file LD's
+                ldrSigs.add(sdr.getComputedSignificane());
             }
         }
         return ldResults;
@@ -340,7 +420,8 @@ public class Cli {
                 n = Integer.parseInt(v);
             } else if (a.equals("ch")) {
                 outChars = v;
-            } else if (a.equals("ld")) {
+            }
+            else if (a.equals("ld")) {
                 v=v.toLowerCase(Locale.ROOT);
                 if (v.equals("true")) {
                     ld=true;
@@ -348,11 +429,20 @@ public class Cli {
                 if(v.equals("false")){
                     ld=false;
                 }
-            } else if (a.equals("ft")) {
+            }
+            else if (a.equals("ft")) {
                 targetFile = v;
-            } else if (a.equals("x")) {
-                x = Double.parseDouble(v);
-            } else {
+            }
+            else if (a.equals("t")) {
+                t = Double.parseDouble(v);
+            }
+            else if (a.equals("v")) {
+                verbose = Boolean.parseBoolean(v);
+            }
+            else if (a.equals("h")) {
+                printHeader = boolFromString(v);
+            }
+            else {
                 System.err.println("Unknown argument encountered:" + a);
             }
             i = i + 2;
@@ -387,7 +477,9 @@ public class Cli {
         sb.append("-ld true/false estimate mode.\n");
         sb.append("-f <input-file-spec> is a csv file of the form output by the compression step.\n");
         sb.append("-i <input-file-spec> is a csv file of one or more rows you are tyring to match.\n");
-        sb.append("-x is how different from the expected value the estimated LD has to be.\n");
+        sb.append("-t is how different from the expected value the estimated LD has to be.\n");
+        sb.append("-v true/false suppress the informational ouput written to stderr.\n");
+        sb.append("-h true/false print the output file header.\n");
         return sb.toString();
     }
 
@@ -421,8 +513,14 @@ public class Cli {
         if (getStringVal("ft", defaultProps) != null) {
             targetFile = getStringVal("ft", defaultProps);
         }
-        if (getDoubleVal("x", defaultProps) != null) {
-            x = getDoubleVal("x", defaultProps);
+        if (getDoubleVal("t", defaultProps) != null) {
+            t = getDoubleVal("t", defaultProps);
+        }
+        if (getBoolVal("h", defaultProps) != null) {
+            printHeader = getBoolVal("h", defaultProps);
+        }
+        if (getBoolVal("v", defaultProps) != null) {
+            verbose = getBoolVal("v", defaultProps);
         }
     }
 
@@ -442,23 +540,26 @@ public class Cli {
         if (ob == null) {
             String err = "No " + a + " value in properties";
         } else {
-            //System.err.println("Found  " + a + " value in  properties:" + props.get(a));
-            String arg = ((String) ob).trim().toLowerCase(Locale.ROOT);
-            if (arg.equals("true")){
-                return true;
-            }
-            else if (arg.equals("false")){
-                return false;
-            }
-            else {
-                String err = "getBoolVal() expecting a boolean but got:" + arg;
-                throw new Exception(err);
-            }
+            return boolFromString((String) ob);
         }
         return null;
     }
 
-    private Double getDoubleVal(String a, Properties props) throws Exception {
+    private Boolean boolFromString(String str) throws Exception{
+        //System.err.println("Found  " + a + " value in  properties:" + props.get(a));
+        String arg = (str.trim().toLowerCase(Locale.ROOT));
+        if (arg.equals("true")){
+            return true;
+        }
+        else if (arg.equals("false")){
+            return false;
+        }
+        else {
+            String err = "getBoolVal() expecting a boolean but got:" + arg;
+            throw new Exception(err);
+        }
+    }
+        private Double getDoubleVal(String a, Properties props) throws Exception {
         Object ob = props.get(a);
         if (ob == null) {
             String err = "No " + a + " value in properties";
@@ -467,7 +568,7 @@ public class Cli {
             return Double.valueOf(((String) ob).trim());
         }
         return null;
-    }
+        }
 
     private Integer getIntVal(String a, Properties props) throws Exception {
         Object ob = props.get(a);

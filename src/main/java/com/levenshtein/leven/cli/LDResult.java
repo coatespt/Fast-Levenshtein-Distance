@@ -15,14 +15,15 @@ public class LDResult {
         private int expectedForRandom;
         private int ldEstmate;
         private double significance;
-        private double x;
+        private double t;
         private int c;
         private int n;
         private String cSet;
 
-    public double getX(){return x;}
+    public double getT(){return t;}
 
-    public void setX(double d){x = d;}
+    public void setT(double d){
+        t = d;}
 
     public void setSignificance(double s){ significance = s; }
 
@@ -107,8 +108,7 @@ public class LDResult {
     public int getLdEstmate() { return ldEstmate; }
 
 
-    public LDResult(String infile1, String infile2,
-                    int if1Len, int if2Len,
+    public LDResult(String infile1, String infile2, int if1Len, int if2Len,
                     String sig1, String sig2,
                     int rawLd, int expectedForRnd, int ldEst,
                     int c, int n, String cSet) {
@@ -133,6 +133,8 @@ public class LDResult {
     public String toFullCsvString() {
         StringBuffer sb = new StringBuffer(toShortCsvString());
         sb.append(", ");
+        sb.append(cSet);
+        sb.append(", ");
         sb.append(sig1);
         sb.append(", ");
         sb.append(sig2);
@@ -153,6 +155,10 @@ public class LDResult {
         sb.append(", ");
         sb.append(infile2Len);
         sb.append(", ");
+        sb.append(sig1.length());
+        sb.append(", ");
+        sb.append(sig2.length());
+        sb.append(", ");
         sb.append(expectedForRandom);
         sb.append(", ");
         sb.append(rawLd);
@@ -161,19 +167,28 @@ public class LDResult {
         sb.append(", ");
         sb.append(significance);
         sb.append(", ");
-        sb.append(x);
+        sb.append(t);
+        sb.append(", ");
+        sb.append(getLdEstmate());
         sb.append(", ");
         sb.append(c);
         sb.append(", ");
         sb.append(n);
-        sb.append(", ");
-        sb.append(sig1.length());
-        sb.append(", ");
-        sb.append(sig2.length());
-        sb.append(", ");
-        sb.append(cSet);
         return sb.toString();
     }
 
+    public static String outputLine(){
+        return "\nsig-ld-fr-rand is the signature LD you'd expect for random signatures of this size." +
+                "\nraw-sig is the actual signature LD(sig1, sig2)" +
+                "\nfile-ld-est is the heuristic estimate of LD of the two files." +
+                "\nsignificance is a function of raw-sig, sig-ld-fr-rand, and the two signature lengths." +
+                "\nt is minimum significance for which output will be generated. Choice of t depends on the " +
+                "\n\tdata type and goal. t=0 returns all data regardless. t=1 returns only perfect signature matches.";
+    }
+
+    public static String header(){
+        return "infile1, infile2, infile1-len, infile2-len, sig1-len, sig2-len, sig-ld-fr-rand, raw-sig-ld, " +
+                "file-ld-est, significance, t, c, n";
+    }
 
 }

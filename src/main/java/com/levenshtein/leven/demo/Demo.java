@@ -160,11 +160,11 @@ public class Demo {
 	protected void createSigs(String indir) throws Exception {
 		log.info("createSigs() starting");
 		String firstLine=null;
-		int TEST_ITERATIONS=1;
+		int TEST_ITERATIONS=500;
 		double totalScaledError=0;
-		double ct=0;
 		System.out.println(logHeaders());
 		for(int i=0; i<inputFileList.size(); i++){
+			long ct=0;
 			for(int j=i+1; j<inputFileList.size(); j++){
 				String f1 = inputFileList.get(i);
 				String f2 = inputFileList.get(j);
@@ -182,33 +182,31 @@ public class Demo {
 				String sig1 = getCompressor().compress(cont1);
 				String sig2 = getCompressor().compress(cont2);
 
-				int act = sd.getLD(cont1, cont2);
-
-				int expectedForRandom = sd.expectedDistance(cont1.length(), cont2.length());
-				int est = sd.getLDEst(sig1, sig2, longerOriginal, shorterOriginal, act);
 				Date start=new Date();
+				// this is slow--we only need to do one to get a rate.
+				int act = sd.getLD(cont1, cont2);
 				Date end=new Date();
-				double ldRateSec = FileAndTimeUtility.rateSec(1, start, end);
+				double fileLDdRateSec = FileAndTimeUtility.rateSec(1, start, end);
+
+				int expectedForRandom = sd.expectedDistanceForSigs(cont1.length(), cont2.length());
+				int est = sd.getLDEst(sig1, sig2, longerOriginal, shorterOriginal, act);
+
+				// this is fast--do it many times to get a rate.
 				start=new Date();
 				for(int k=0; k<TEST_ITERATIONS; k++){
 					sd.getLD(sig1, sig2);
 				}
 				end=new Date();
-				double estRateSec = FileAndTimeUtility.rateSec(TEST_ITERATIONS, start, end);
-				double actLdToLen=act/(double) longerOriginal;
-				double unscldErrPln=act==0?0:Math.abs(est-act)/(double)act;
-				double corrected = est/1.7d;
-				double unscldErrCorrected=act==0?0:Math.abs(corrected-act)/(double)act;
-				double correctedScaled = (actLdToLen==0||corrected==0)?0:(unscldErrCorrected*actLdToLen);
-				double scaledErrorPlain=(actLdToLen==0||unscldErrPln==0)?0:(unscldErrPln*actLdToLen);
+				double sigLDRateSec = FileAndTimeUtility.rateSec(TEST_ITERATIONS, start, end);
+
+				// TODO: the error calcs are done in logLine(...). Move them here.
+				double corrected = est/1.3d;
+
 				ct++;
-				//System.out.println(logLine(f1, f2, longerOriginal, shorterOriginal,
-				//		expectedForRandom, act, est, scaledErrorPlain, ldRateSec,
-				//		estRateSec,  firstLine));
-				System.out.println(logLine(f1, f2, longerOriginal, shorterOriginal,
-						expectedForRandom, act, est, (int) corrected,
-						unscldErrPln, scaledErrorPlain, correctedScaled,
-						ldRateSec, estRateSec,  firstLine));
+				System.out.println(
+						logLine(f1, f2, longerOriginal, shorterOriginal,
+							expectedForRandom, act, est, (int) corrected,
+							fileLDdRateSec, sigLDRateSec,  firstLine));
 			}
 		}
 	}
@@ -226,10 +224,8 @@ public class Demo {
 		sb.append("CORRECTED EST,\t");
 		sb.append("RAW ERR,\t");
 		sb.append("CORRECTED ERR,\t");
-		sb.append("SCALED ERR,\t");
-		sb.append("COR'TD SCALED ERR,\t");
-		sb.append("ACTUAL LD/sec,\t");
-		sb.append("EST LD/sec,\t");
+		sb.append("FILE LD/sec,\t");
+		sb.append("SIG LD/sec\t");
 		sb.append("SPEEDUP,\t");
 		sb.append("FILE CHANGES");
 		return sb.toString();
@@ -238,7 +234,6 @@ public class Demo {
 	int ct=0;
 	private String logLine(String f1, String f2, int lgrOrig, int shtrOrig,
 						   int expctd, int act, int est, int correctedEst,
-						   double unscaledErrPln, double scdErr, double correctedScaled,
 						   double ldRateSec, double estRateSec, String firstLine) {
 		StringBuffer sb = new StringBuffer();
 		sb.append(++ct);
@@ -269,21 +264,15 @@ public class Demo {
 		sb.append(",\t\t");
 		// Corrected LD Estimate
 		sb.append(correctedEst);
-		sb.append(",\t\t\t");
+		sb.append(",\t\t\t\t");
 		// Raw error -- uncorrected estimate over actual
-		sb.append(Math.round(((double) (est + 1) / act)*1000)/1000.0);
+		sb.append(Math.round(((double) est / act)*10000)/10000.0);
 		sb.append(",\t\t");
 		// corrected error -- corrected estimate/actual
-		double v = (double) (correctedEst + 1) / act;
-		v = Math.round(v * 1000) / 1000.0;
+		double v = (double) correctedEst / act;
+		v = Math.round(v * 10000) / 10000.0;
 		sb.append(v);
 		sb.append(",\t\t\t");
-		// scaled raw error
-		sb.append(Math.round(scdErr*1000.0)/1000.0);
-		sb.append(",\t\t");
-		// scaled corrected error
-		sb.append(Math.round(correctedScaled*1000.0)/1000.0);
-		sb.append(",\t\t\t\t");
 		// LD Comparisons for rhe real files, per second
 		sb.append(Math.round(ldRateSec*1000.0)/1000.0);
 		sb.append(",\t\t\t");

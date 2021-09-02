@@ -1,5 +1,6 @@
 package com.levenshtein.leven;
 
+import com.levenshtein.leven.cli.FileSignature;
 import com.levenshtein.leven.cli.LDResult;
 import utilities.file.FileAndTimeUtility;
 
@@ -105,7 +106,7 @@ public class ScoreDistance {
      * corresponding string lengths to the ratio of the LD of the original
      * strings to the string length  (for same-length originals).
      *
-     * TODO Review this with Frank.
+     * TODO Review this with Frank. THIS LOOKS WRONG.
      *
      * @param in double The an estimated distance.
      * @return
@@ -117,15 +118,22 @@ public class ScoreDistance {
     }
 
     /**
-     * The expected distance of two random strings of lengths s1 and s2, give
-     * the expected contraction of LD (fudge factor);
-     *
+     * The expected distance of two random signatures of lengths s1 and s2,
+     *  give the empirically determined ratio of LD to signature length for
+     *  same-length strings.
      * @param s1
      * @param s2
      * @return
      */
-    public int expectedDistance(int s1, int s2) {
-        return (int) fudgeFactor(Math.max(s1, s2)) + Math.abs(s1 - s2);
+    public int expectedDistanceForSigs(int s1, int s2) {
+        int shorter = Math.max(s1, s2);
+        double shorterEst = shorter * (1 - sigRatio);
+        // double shorterEst = fudgeFactor(shorter);
+        int overlapPart =  Math.abs(s1 - s2);
+        double est = shorterEst + overlapPart;
+        int oldEst = (int) (Math.max(s1, s2) * sigRatio)  + Math.abs(s1 - s2);
+        double oldToNew = oldEst/(1.0*est);
+        return (int) est;
     }
 
     /**
@@ -135,11 +143,11 @@ public class ScoreDistance {
      * @param s1
      * @param s2
      * @return
-     */
-    public int expectedDistance(String s1, String s2) {
+    public int expectedDistanceForSigs(String s1, String s2) {
         return (int) fudgeFactor(Math.max(s1.length(), s2.length())) +
                 Math.abs(s1.length() - s2.length());
     }
+     */
 
     /**
      * Given two signatures and the length of the longer original string, compute
@@ -150,19 +158,63 @@ public class ScoreDistance {
      * <p>
      * Get the estimated LD of two files.
      *
-     * @param f1 String file name.
-     * @param f2 String file name.
+     * @param sig1 String file name.
+     * @param sig1 String file name.
      * @return double Return the estimate.
      * @throws Exception if anything fails.
+     *
+     * the difference in signature lengths would represent proportional amounts of the LD of
+     * the full files that would require 1:1 single char operations.
+     *
+     * That much of the estimate should scaled directly from c.
+     *
+     * That proportion of the sigs length difference should be subtracted from the sigs LD and the
+     * remainder scaled up by allowing for
+     *
+     * The rest would require
+     *
      */
     public int getLDEst(String sig1, String sig2, int longerUnCompressed,
-                        int shorterUncompressed, Integer rawLd) throws Exception {
-        int longer = Math.max(sig1.length(), sig2.length());
+        int shorterUncompressed, Integer rawLd) throws Exception {
+        int longerSig = Math.max(sig1.length(), sig2.length());
+        int shorterSig = Math.min(sig1.length(), sig2.length());
+        int sigDiff = longerSig-shorterSig;
+
+        double effectiveC = (longerUnCompressed+shorterUncompressed)/(1.0*(longerSig+shorterSig));
+
         int ld = rawLd!=null?rawLd: getDistance().LD(sig1, sig2);
-        double computedLenRatioPlain = ld / (double) longer;
-        double estimatedUnadjusted = computedLenRatioPlain * longerUnCompressed;
-        return (int) fudgeFactor(estimatedUnadjusted);
+
+        // The total file length difference takes 1:1 character operations to create
+        double ldForTheDiff = effectiveC * sigDiff;
+
+        //
+        double ldForTheRest = ((ld-sigDiff) * effectiveC) * (1.0 + wholeFileRatio) ;
+
+        // double computedLenRatioPlain = ld / (double) longer;
+        //double estimatedUnadjusted = computedLenRatioPlain * longerUnCompressed;
+        int retval =  (int) (shorterSig * sigRatio)  + sigDiff;
+        return retval;
+        //return (int) fudgeFactor(estimatedUnadjusted);
     }
+    public int getLDEstForOriginals(FileSignature fsi1, FileSignature fsi2, int ld) throws Exception {
+        int longerSig = Math.max(fsi1.getSig().length(), fsi2.getSig().length());
+        int shorterSig = Math.min(fsi1.getSig().length(), fsi2.getSig().length());
+        int sigDiff = longerSig-shorterSig;
+
+        int f1Len = fsi1.getInputFileLen();
+        int f2Len = fsi2.getInputFileLen();
+        int fDiff = Math.abs(f1Len-f2Len);
+
+        double effectiveC = (f1Len+f2Len)/(1.0*(longerSig+shorterSig));
+        double ldDiff = fDiff * (1.0 - wholeFileRatio);
+        double ldForTheRest = (shorterSig *  effectiveC) * (1.0  - wholeFileRatio) ;
+
+        int retVal = (int) ((effectiveC * ld) * (1.0 - wholeFileRatio));
+
+        return retVal;
+        //return (int) fudgeFactor(estimatedUnadjusted);
+    }
+
 
     /**
      *
