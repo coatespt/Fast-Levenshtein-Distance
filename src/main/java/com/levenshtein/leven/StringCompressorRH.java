@@ -14,6 +14,8 @@ import org.apache.log4j.Logger;
  *
  * It seems not to work as well as the plain! Why? It should.TestCompareAccuracy shows
  * consistently worse accuracy when the run on the same files at varying values of C.
+ *
+ * TODO The constructor is all over the tests with hardcoded values. Make them variables and move them up.
  * 
  * @author peter
  *
@@ -33,9 +35,18 @@ public class StringCompressorRH extends ICompressor{
 	private StringCompressorRH(){}
 
 	public StringCompressorRH(int n, int c, char[] outputChars, int minBits, int maxBits, int seed){
-		rh=new RollingHash(n,c,outputChars,minBits,maxBits,seed);
+		rh=new RollingHash(c,n,outputChars,minBits,maxBits,seed);
 	}
 
+	/**
+	 * Replace all multiple white spaces in the string with a single white space.
+	 * @param value
+	 * @return
+	 */
+	public String squeezeWhite(String value){
+		String str=value.replaceAll("\\s+", " ");
+		return str.trim();
+	}
 
 	/**
 	 * Compress input string into a hashed signature;
@@ -79,15 +90,6 @@ public class StringCompressorRH extends ICompressor{
 			System.out.println(sb);
 		}
 		return sb.toString();
-	}
-
-	/**
-	 * Replace all multiple white spaces in the string with a single white space.
-	 * @param value
-	 * @return
-	 */
-	public String squeezeWhite(String value){
-			return value.replaceAll("\\s+", " ");
 	}
 }
 

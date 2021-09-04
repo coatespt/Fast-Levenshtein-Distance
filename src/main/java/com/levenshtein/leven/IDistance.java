@@ -13,4 +13,5 @@ package com.levenshtein.leven;
  */
 public interface IDistance {
 	int LD(String s1, String s2);
+
 }

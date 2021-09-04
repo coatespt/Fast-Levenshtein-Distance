@@ -22,48 +22,41 @@ import java.util.Set;
 public class TestBasicOperations extends TestParent {
 	//static Logger log = Logger.getLogger(TestBasicOperations.class);
 
-	static int ALPHA_SIZE=256;
 	static int MIN_BITS=28;
 	static int MAX_BITS=36;
-	static int SEED=12345;
-	static int C=150;
-	static int N=20;
 	static long [] longs = null;
 	static char [] chars = new char[62];
 
-	static{
-		String charString = 
-			  "abcdefghijklmnopqrstuvwxyz"
-			+ "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-			+ "1234567890"; 
-		for(int i=0;i<chars.length;i++){
-			chars[i]=charString.charAt(i);
-		}
-	}
+	static String charString = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()_+=-{}[]:;/.<>?";
 
 	/**
 	 * Test squeezing each whitespace sequences down to a single space.
 	 * Optional in compression. Squeezing whitespace removes a lot of meaningless
-	 * small line changes e.g., MSDOS v Unix.
+	 * small line changes e.g., MSDOS v Unix and other irrelevant formatting.
+	 *
+	 * The sample string has a known number of spaces.
 	 */
 	@Test
 	public static void testWhitespaceKiller(){
-		System.out.println("testWhiteSpace() squeezing white space.");
+		System.out.println("testSqueezeWhiteSpace() squeezing white space.");
 		String one = "this    is     a string     with    \t\t  too\t\tmuch white   space.  ";
-		StringCompressorPlain sc = new StringCompressorPlain();
+		// The compressor parameters don't matter;
+		ICompressor sc = new StringCompressorRH(11, 101, outputChars , 25, 39, 12345);
 		String squeezed = sc.squeezeWhite(one);
 		assertTrue(squeezed.length()<one.length());
-		System.out.println("testWhiteSpace()   started with:[" + one + "]");
-		System.out.println("testWhiteSpace()   unsqueezed size:" + one.length());
-		System.out.println("testWhiteSpace() squeezed it to:[" + squeezed + "]");
-		System.out.println("testWhiteSpace() squeezed size:" + squeezed.length());
+		System.out.println("testSqueezeWhiteSpace()   started with:[" + one + "]");
+		System.out.println("testSqueezeWhiteSpace()   unsqueezed size:" + one.length());
+		System.out.println("testSqueezeWhiteSpace() squeezed it to:[" + squeezed + "]");
+		System.out.println("testSqueezeWhiteSpace() squeezed size:" + squeezed.length());
 		assertTrue(squeezed.length()==43);
-		System.out.println("testWhiteSpace() completed.");
+		System.out.println("testSqueezeWhiteSpace() completed.");
 	}
 
 	/**
-	 * Execute LD many times on a pair of small strings.
-	 * Beware--this may fail in debug because it tests for reasonable speed.
+	 * Execute LD many times on a pair of small strings sanity checking for reasonable speed on
+	 * stock string "The quick brown...".
+	 * <p>
+	 * Beware--this may fail in debug because debug runs very slowly.
 	 * Runs about 38,000 LD's per second on a laptop.
 	 * @throws Exception
 	 */
@@ -71,6 +64,7 @@ public class TestBasicOperations extends TestParent {
 	public static void testLDSpeedOnSmallStrings() throws Exception {
 		System.out.println("testLDSpeedOnSmallStrings() LD on "+ ITERATIONS+" pairs of small uncompressed strings.");
 		StringDistance d = new StringDistance();
+
 		@SuppressWarnings("unused")
 		int t = 0;
 		TimeAndRate tAndR = new TimeAndRate();
@@ -90,7 +84,7 @@ public class TestBasicOperations extends TestParent {
 	/**
 	 * Sanity check for the generation of random longs used in hashing neighborhoods of N.
 	 * Number of set v not-set bits should be close to 50/50;
-	 * Should be n distinct values.
+	 * There should be n distinct values.
 	 */
 	@Test
 	public static void testDistinctHashVals(){
@@ -104,23 +98,25 @@ public class TestBasicOperations extends TestParent {
 				System.out.println("\tlongs[" + i + "]=" + v + " bits:" + RollingHash.countSetBits(v));
 			}
 			int bits=RollingHash.countSetBits(v);
-			// It's **possible** but unlikely to have a bit cardinality outside of this range. It's
-			// bernoulli trials so you can easily compute the probability.
+			// It's not likely to have a bit cardinality outside of this range. It's a matter of
+			// Bernoulli trials so you can easily compute the probability.
 			if (bits>MAX_BITS || bits <MIN_BITS) {
 				System.out.println("testDistinctHashVals() bit card outside range:" + bits + " max:"  + MAX_BITS + " min:" + MIN_BITS);
 			}
-			//assertTrue(bits<=MAX_BITS);
-			//assertTrue(bits>=MIN_BITS);
+			assertTrue(bits<=MAX_BITS);
+			assertTrue(bits>=MIN_BITS);
 		}
 		System.out.println("testDistinctHashVals() set size:" + set.size() + " array:" + longs.length);
+		// Again, it's possible but highly unlikely that you'd ever get two identical values.
 		assertTrue(set.size()==longs.length);
 		System.out.println("testDistinctHashVals() completed.");
 	}
 		
 	/**
-	 * Test the speed of LD on a pair of big strings
+	 * Sanity check test of the speed of LD on a pair of big strings.
+	 * If this fails you could just be on a really slow machine but you should
+	 * investigate.
 	 * <p>
-	 * TODO: This needs some kind of assertion of the speedup
 	 * @throws Exception
 	 */
 	@Test
@@ -141,19 +137,20 @@ public class TestBasicOperations extends TestParent {
 				+ " pairs/sec");
 		double rate = tAndR.rateSecs();
 		System.out.println("testSpeedOfLDOnLargeFiles() rate per second:" + rate);
-		assertTrue(tAndR.rateSecs()>4);
+		assertTrue(tAndR.rateSecs()>0.1);
 		System.out.println("testSpeedOfLDOnLargeFiles() completed.");
 	}
 
 	private ICompressor compressor=null;
 	protected ICompressor getCompressor(){
 		if(compressor==null){
-			compressor = new StringCompressorPlain();
+			compressor = new StringCompressorRH(getC(), getN(), outputChars , MIN_BITS, MAX_BITS, SEED);
 		}
 		compressor.setC(c);
 		compressor.setN(n);
 		return compressor;
 	}
+
 	private IDistance distance = null;
 	protected IDistance getDistance(){
 		if(distance==null){
@@ -163,34 +160,46 @@ public class TestBasicOperations extends TestParent {
 	}
 
 	/**
-	 * Test compressing a lot of data to see how fast it it.
-	 * TODO This is only done with the default hash function. I bet the proposed one speeds that up a lot.
+	 * Test compressing a string to check that it compresses to approximately the specified C .
+	 * Do it many times so you can print out the speed.
+	 *
 	 * @throws Exception
 	 */
 	@Test
 	public void testCompressionOfBigFiles() throws Exception {
-		System.out.println("testCompressionOfBigFiles() 10k big files.");
-		System.out.println("\tcompression speed on " + COMPRESSIONS + " big files with c:" + c + " n:" + n);
-		//String longOne = readFile(big);
+		System.out.println("testCompressionOfBigFiles() of big files.");
+		// these are set globally and picked up by getCompressor().
+		setC(307);
+		setN(11);
+		setOutputChars(charString);
+		getCompressor().squeezeWhite(true);
+
 		String longOne = readFile(infile1);
 		int len = longOne.length();
 		long total = len*COMPRESSIONS;
 		long start = System.currentTimeMillis();
+		double accuracy=0d;
+
 		for (int i = 0; i < COMPRESSIONS; i++) {
-			getCompressor().setC(c);
-			getCompressor().setN(n);
+			double expectedSize = ((double)longOne.length())/getCompressor().getC();
 			String result = getCompressor().compress(longOne);
-			// sanity check that the result is reasonably close to that predicted by c.
-			assertTrue(result.length()*c*0.8<longOne.length());
+			int resultSize = result.length();
+			// this value should be reasonably close to 1.0
+			accuracy = ((double)Math.min(resultSize,expectedSize))/Math.max(resultSize,expectedSize);
+			assertTrue(accuracy>0.75);
 		}
 		long end = System.currentTimeMillis();
 		double rate = COMPRESSIONS / (double) (end - start) * 1000;
 		int charsSec = (int) (total/(double)(end-start) * 1000);
-		System.out.println("\tcompressing of "+longOne.length()+" string:" + 
-				COMPRESSIONS + " times for total "+total+" chars. "
-						+ "\n\telapsed ms: " + (end - start) + 
-				"\n\tfile-rate:" + rate + "/sec "
-						+ "\n\tchar-rate:" + charsSec + "/sec");
+		StringBuffer sb = new StringBuffer();
+		sb.append("\tcompressing of "); sb.append(longOne.length()); sb.append(" string\n");
+		sb.append("\titerations:"); sb.append(COMPRESSIONS);
+		sb.append("\n\ttotal of: "); sb.append(total); sb.append(" chars");
+		sb.append("\n\telapsed ms: "); sb.append(end - start);
+		sb.append("\n\tdocumetn-rate:"); sb.append(rate); sb.append("/sec ");
+		sb.append("\n\tchar-rate:"); sb.append(charsSec); sb.append("/sec");
+		sb.append("\n\tfidelity to C:"); sb.append(accuracy);
+		System.out.println(sb);
 	}
 	
 

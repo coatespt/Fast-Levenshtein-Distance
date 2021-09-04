@@ -24,6 +24,17 @@ public abstract class ICompressor {
 	public void squeezeWhite(boolean b){
 		SQUEEZE_WHITE=b;
 	}
+
+		/**
+		 * Replace all multiple white spaces in the string with a single white space.
+		 * @param value
+		 * @return
+		 */
+		public String squeezeWhite(String value){
+			String str=value.replaceAll("\\s+", " ");
+			return str.trim();
+		}
+
 	public int getN(){
 		return n;
 	}

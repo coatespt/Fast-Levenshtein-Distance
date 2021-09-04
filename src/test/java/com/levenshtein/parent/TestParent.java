@@ -2,10 +2,9 @@ package com.levenshtein.parent;
 
 import com.levenshtein.leven.ICompressor;
 import com.levenshtein.leven.IDistance;
-import com.levenshtein.leven.StringCompressorPlain;
+import com.levenshtein.leven.StringCompressorRH;
 import com.levenshtein.leven.StringDistance;
 import junit.framework.TestCase;
-// import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -13,27 +12,35 @@ import java.io.FileReader;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Parent class of all tests. Utility methods, default values, etc.
+ */
 public class TestParent  extends TestCase {
 	//static Logger log = Logger.getLogger(TestParent.class);
 	public int n = 12;
 	public int c = 25;
 	public static int copies = 100;
+
+	// TODO: Separate the test data file from the filenames.
+	// TODO: Allow the test methods to select the test set.
+	//
 	// 5000
-	public static String infile1 = "./data/infile1.txt";
+	public static String infile1 = "./data/testfiles/infile1.txt";
 	// 4936
-	public static String infile2 = "./data/infile2.txt";
+	public static String infile2 = "./data/testfiles/infile2.txt";
 	// 2500
-	public static String infile3 = "./data/infile3.txt";
+	public static String infile3 = "./data/testfiles/infile3.txt";
 	// 2524
-	public static String infile4 = "./data/infile4.txt";
+	public static String infile4 = "./data/testfiles/infile4.txt";
 	//28120
-	public static String infile5 = "./data/infile5.txt";
+	public static String infile5 = "./data/testfiles/infile5.txt";
 	// 27967
-	public static String infile6 = "./data/infile6.txt";
+	public static String infile6 = "./data/testfiles/infile6.txt";
 	// 24390
-	public static String infile7 = "./data/infile7.txt";
+	public static String infile7 = "./data/testfiles/infile7.txt";
 	//4743
-	public static String infile8 = "./data/infile8.txt";
+	public static String infile8 = "./data/testfiles/infile10.txt";
+	//public static String infile8 = "./data/testfiles/infile8.txt";
 	// 152699
 	public static String big = "./data/big.txt";
 
@@ -43,6 +50,7 @@ public class TestParent  extends TestCase {
 	// qbf-2
 	public static String t2 = "The quick brown fox jumped over the fat dog,"
 			+ " and each time the fox jumped he scared the zebra.";
+
 	// 44 25.6K files "split" from two unrelated 1MB Gutenberg books by different authors.
 	// All leading and trailing boilerplate removed from because it is very similar for all works.
 	// One book is a history of china the other is a Jules Verne novel.
@@ -76,13 +84,18 @@ public class TestParent  extends TestCase {
 
 	private ICompressor compressor = null;
 
+	int minBits=25;
+	int maxBits=39;
+	int seed=12345;
 	/**
 	 * Get the standard compressor (plain)
 	 */
+
 	protected ICompressor getCompressor() {
 		if (compressor == null) {
-			compressor = new StringCompressorPlain();
-		}
+			//compressor = new StringCompressorPlain();
+			compressor = new StringCompressorRH(getN(), getC(), outputChars , minBits, maxBits, seed);
+			}
 		compressor.setC(c);
 		compressor.setN(n);
 		return compressor;
@@ -124,6 +137,7 @@ public class TestParent  extends TestCase {
 	 * on big files.
 	 */
 	public static int COMPRESSIONS = 10000;
+
 	protected static int defaultN = 12;
 
 	/**
@@ -234,7 +248,8 @@ public class TestParent  extends TestCase {
 	 */
 	protected String compressToC(int c, int n, String infile)
 			throws Exception {
-		StringCompressorPlain comp = new StringCompressorPlain();
+		//StringCompressorPlain comp = new StringCompressorPlain();
+		ICompressor comp = new StringCompressorRH(c, n, outputChars , minBits, maxBits, seed);
 		comp.setC(c);
 		comp.setN(n);
 		String longOne = readFile(infile);
@@ -390,17 +405,23 @@ public class TestParent  extends TestCase {
 
 	// TODO This string could have more characters. This is only 62. You could add in puctuation, etc.
 	// TODO Might be useful to make it setable.
-	protected static String outputCharString = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+	protected static String outputCharString = "abcdefghijklmnopqrstuvwxyzABCDEFGHI" +
+			"JKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+{}[]?><.";
 	protected static ICompressor comp = null;
 	protected static char [] outputChars=null;
 	protected static int MINBITS=31;
 	protected static int MAXBITS=33;
 	protected static int SEED=12345;
 
-	static {
-		outputChars=new char[outputCharString.length()];
-		for(int i=0; i<outputCharString.length(); i++){
-			outputChars[i]=outputCharString.charAt(i);
+
+	protected static void setOutputChars(String str){
+		outputChars = new char[str.length()];
+		for(int i=0; i<str.length(); i++){
+			outputChars[i]=str.charAt(i);
 		}
+	}
+
+	static {
+		setOutputChars(outputCharString);
 	}
 }

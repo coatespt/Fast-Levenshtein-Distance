@@ -104,6 +104,8 @@ public class RollingHash {
 		}
 	}
 
+
+
 	/** Function to get number of set bits in binary
 	   representation of argument. Algorithm from K&R.
 		@param n the number we wish to count the bits in.

@@ -3,22 +3,15 @@ package com.levenshtein.parent;
 import com.levenshtein.leven.ICompressor;
 import com.levenshtein.leven.IDistance;
 import com.levenshtein.leven.ScoreDistance;
-//import org.apache.log4j.Logger;
+import com.levenshtein.leven.SignificanceResult;
+import com.levenshtein.leven.cli.FileSignature;
+import com.levenshtein.leven.cli.LDResult;
 
 import java.util.Date;
 
 /**
  * Abstract test class that requires concrete classes to implement getCompressor() and getDistance()
- * methods. This is so they can share the driver method onFiles(String comment, String f1, String f2).
- * <p>
- * The onFiles() method is called with the path/names of a pair of files and computes a number of
- * statistics: Exp'd speedup, LD computation rate for the raw files of that size,
- * rate to compute the signatures, LD for the signatures (pairs/sec), actual speed increase,
- * file-lengths, signature-lengths, Actual LD, LD of the signatures, Estimated LD
- * LD(compressed1,compressed2)/length(longer(compressed1,compressed2),
- * LD(uncompressed1,uncompressed2)/length(longer(uncompressesd1, uncompressed2),
- * Unscaled error, Scaled error, unscaled fudged error, Scaled fudged error:0.1545,
- * ScoreDistance error:0.1490
+ * methods.
  * <p>
  * Most of the time in this routine is spent computing the true LD of the files.
  *
@@ -26,19 +19,23 @@ import java.util.Date;
  */
 public abstract class TestAccuracyDriverParent extends TestParent {
     abstract protected ICompressor getCompressor();
-
     abstract protected IDistance getDistance();
 
-    //private Logger log = Logger.getLogger(TestAccuracyDriverParent.class);
-
-    // Measured empirically for book text
-    // May vary for other types of data.
     static double wholeFileRatio = 0.022;
     static double sigRatio = 0.030d;
+    static int COMP_CT = 1000;
 
     /**
-     * Compute LD for original stings, signatures, plus error rates based on the known LD of the strings.
-     *
+     * This method is called with the path/names of a pair of files and computes a number of
+     * statistics.  The most important are the expected LD for two unrelated files of that distance,
+     * the actual LD for the given files, and the predicted LD from the signatures.
+     * <p>
+     * Note that the true LD computation is sensitive to the size. 25k is about as big as is practical
+     * to compute this for. Beyond that it takes forever if you don't run out of memory first.
+     * <p>
+     * The caller should set the parameters of the compression, setC(), setN(), etc. These are in the
+     * TestParent class that this class derives from.
+     * <p>
      * @param str String Descriptive string for what is being tested.
      * @param f1  String file path one
      * @param f2  String file path two
@@ -48,124 +45,78 @@ public abstract class TestAccuracyDriverParent extends TestParent {
         ScoreDistance scoreD = new ScoreDistance();
         scoreD.setSigRatio(sigRatio);
         scoreD.setWholeFileRatio(wholeFileRatio);
-        System.out.println("onFiles() executing.");
-        StringBuffer sb = new StringBuffer();
-        sb.append("\t");
-        sb.append(str);
-        sb.append(" \n\tExp'd speedup: ");
-        sb.append(Math.pow(getC(), 2));
-        sb.append("\n");
+        System.out.println("\nonFiles() executing.");
 
         IDistance d = getDistance();
-
         String f1Str = readFile(f1);
         String f2Str = readFile(f2);
-
         String compressedF1 = getCompressor().compress(f1Str);
         String compressedF2 = getCompressor().compress(f2Str);
 
-        String longerCompressed = (compressedF1.length() <= compressedF2.length()) ? compressedF2 : compressedF1;
-        String longerUnCompressed = (f1Str.length() <= f2Str.length()) ? f2Str : f1Str;
-        String shorterUnCompressed = (f1Str.length() <= f2Str.length()) ? f2Str : f1Str;
+        StringBuffer sb = new StringBuffer();
+        sb.append("\t" + str + "\n");
 
-        // you have to do LD many times because it's too fast to measure with ms clock.
         int distCompressed = 0;
-        int COMP_CT = 1000;
         Date start = new Date();
         for (int k = 0; k < COMP_CT; k++) {
             distCompressed = d.LD(compressedF2, compressedF1);
         }
-        double rateCompressed = COMP_CT / (double) ((new Date()).getTime() - start.getTime()) * 1000;
-
-        int scoreDEst = scoreD.getLDEst(compressedF1, compressedF2, longerUnCompressed.length(), shorterUnCompressed.length(),null);
+        double rateCompressed = (COMP_CT / ((double)(new Date().getTime() - start.getTime()))) * 1000;
 
         start = new Date();
         int distUnCompressed = d.LD(f1Str, f2Str);
-        double rateUncompressed = 1.0d / (double) ((new Date()).getTime() - start.getTime()) * 1000;
-        sb.append("\tLD rate raw files: ");
+        double rateUncompressed = 1.0d / (new Date().getTime() - start.getTime()) * 1000;
+
+        sb.append("\tLD computation rate for raw files: ");
         sb.append(String.format("%.4f", rateUncompressed));
         sb.append(" files/sec");
-        sb.append(" LD rate sigs:");
+        sb.append("\n\tLD computation rate sigs:");
         sb.append(String.format("%.4f", rateCompressed));
-        sb.append(" pairs/sec, speed increase: ");
+        sb.append(" pairs/sec");
+        sb.append("\n\tSpeed increase: ");
         sb.append(String.format("%.4f", rateCompressed / rateUncompressed));
-        sb.append("X\n");
+        sb.append("x\n");
 
-        // does not account for difference in length.
-        double computedLenRatio = distCompressed / (double) longerCompressed.length();
-
-        double actualLenRatio = distUnCompressed / (double) longerUnCompressed.length();
-
-        double estimate = (double) (computedLenRatio * longerUnCompressed.length());
-
-        double unscaledError = distUnCompressed == 0 ? 0 : Math.abs(estimate - distUnCompressed) / distUnCompressed;
-        double scaledError = (actualLenRatio == 0 || unscaledError == 0) ? 0 : (unscaledError * actualLenRatio);
-
-        sb.append("\tRaw len: ");
+        FileSignature fs1 = new FileSignature(f1,f1Str.length(),getC(),getN(),outputCharString,compressedF1);
+        FileSignature fs2 = new FileSignature(f2,f2Str.length(),getC(),getN(),outputCharString,compressedF2);
+        System.out.println("f1:" + fs1.getInputFname() + " len:" + fs1.getInputFileLen() +
+                " f2:" + fs2.getInputFname()+ " len:" + fs2.getInputFileLen());
+        ScoreDistance sd = new ScoreDistance();
+        double expectedForRandomSigs = sd.expectedDistanceForSigs(compressedF1.length(),compressedF2.length());
+        double ldEstimate = sd.getLDEstForOriginals(fs1,fs2,distCompressed);
+        LDResult ldr = new LDResult(
+                f1, f2,
+                fs1.getInputFileLen(), fs2.getInputFileLen(),
+                fs1.getSig(), fs2.getSig(),
+                distCompressed, (int) expectedForRandomSigs, (int)ldEstimate,
+                fs1.getC(), fs1.getN(), fs1.getcSet());
+        SignificanceResult sr =  sd.significant(ldr, 0.4, distCompressed);
+        int estLDForUnrelated = sd.expectedDistanceForOriginals(f1Str,f2Str);
+        sb.append("\tFile lengths: ");
         sb.append(f1Str.length());
         sb.append(", ");
         sb.append(f2Str.length());
         sb.append("\n");
-        sb.append("\tSig len: ");
+        sb.append("\tSignature lengths: ");
         sb.append(compressedF2.length());
         sb.append(", ");
         sb.append(compressedF1.length());
-        sb.append("\n");
-        sb.append("\tLD raw:");
+        sb.append("\n\tLD for unrelated files:");
+        sb.append(estLDForUnrelated);
+        sb.append("\n\tComputed LD of files:");
         sb.append(distUnCompressed);
+        sb.append("\n\tEstimated LD of files:\t");
+        sb.append((int) ldEstimate);
         sb.append("\n");
-        sb.append("\tLD sigs:");
+        sb.append("\tComputed LD of signatures:");
         sb.append(distCompressed);
-        sb.append("\n");
-        sb.append("\tEstimated LD:\t");
-        sb.append((int) estimate);
-        sb.append("\n");
-
-        sb.append("\tLD(compressed1,compressed2)/length(longer(compressed1,compressed2):");
-        sb.append(String.format("%.4f", computedLenRatio));
-        sb.append("\n");
-        sb.append("\tScoreDEstimate: ");
-        sb.append(String.format("%.4f", computedLenRatio));
-        sb.append("\n");
-        sb.append("\tLD(uncompressed1,uncompressed2)/length(longer(uncompressesd1, uncompressed2):");
-        sb.append(String.format("%.4f", (actualLenRatio)));
-        sb.append("\n");
-
-        sb.append("\tUnscaled error:");
-        sb.append(String.format("%.4f", Math.abs(unscaledError)));
-        sb.append("\tScaled error:");
-        sb.append(String.format("%.4f", Math.abs(scaledError)));
-        double fudged = fudgeFactor(estimate);
-        double unscaledFudgedError = distUnCompressed == 0 ? 0 : Math.abs(fudged - distUnCompressed) / distUnCompressed;
-        double scaledFudgedError = (actualLenRatio == 0 || unscaledFudgedError == 0) ? 0 : (unscaledFudgedError * actualLenRatio);
-        sb.append("\tUnscaled fudged error:");
-        sb.append(String.format("%.4f", Math.abs(unscaledFudgedError)));
-        sb.append("\tScaled fudged error:");
-        sb.append(String.format("%.4f", Math.abs(scaledFudgedError)));
-
-        double unscaledScoreDError = distUnCompressed == 0 ? 0 : Math.abs(scoreDEst - distUnCompressed) / (double) distUnCompressed;
-        double scaledScoreDError = (actualLenRatio == 0 || unscaledScoreDError == 0) ? 0 : (unscaledScoreDError * actualLenRatio);
-        sb.append("\tScoreDistance error:");
-        sb.append(String.format("%.4f", Math.abs(scaledScoreDError)));
-        System.out.println(sb.toString());
+        sb.append("\n\tExpected for random sigs::");
+        sb.append((int) expectedForRandomSigs);
+        sb.append("\n\tExpected for random files:");
+        sb.append((int)11);
+        sb.append("\n\tSignificance:");
+        sb.append((int)(sr.getComputedSignificane()*10000)/10000.0);
+        System.out.println(sb);
         System.out.flush();
     }
-
-    /**
-     * The result is not simply scaled by the inverse of the compression. The following scales it more
-     * accurately.
-     * <p>
-     * Ratio of signature-LD/signature-length is greater than the ratio of whole-file-LD/whole-file-length.
-     * This method corrects for that.
-     *
-     * @param in
-     * @return
-     */
-    public double fudgeFactor(double in) {
-        double wholeFileRatio = 0.022;
-        double sigRatio = 0.030d;
-        double correctionFactor = sigRatio - wholeFileRatio;
-        return in - (in * correctionFactor);
-    }
-
 }

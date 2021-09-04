@@ -27,15 +27,12 @@ import org.junit.runners.Suite;
 	@RunWith(Suite.class)
 	@Suite.SuiteClasses( 
 			{ 
-			TestAccuracyDriverPlain101.class,
-			TestAccuracyDriverRH101.class,
+			TestAccuracyDriverRH_503_11.class,
 			TestBasicOperations.class,
-			//  TestCompareAccuracy.class,
+			TestRollingHash.class
 			//  TestMassCompare.class,
-			//TestRollingHash.class,
-			//TestPlainWRangeOfCAndN.class,
-			TestRegularHash.class,
-			//  TestSpeedForBigFiles.class,
+			//  TestRollingHash.class,
+			//  TestPlainWRangeOfCAndN.class,
 			//	TestVaryCandN.class,
 			//  TestRegularVRolling101.class,
 			}

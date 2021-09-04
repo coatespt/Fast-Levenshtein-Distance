@@ -22,22 +22,26 @@ import static java.lang.Integer.valueOf;
  * Note that the input is just file-names while the targets are pre-computed
  * signatures.
  *
+ * John Cook blog post on "index of coincidence" which is similar to Renyi entropy
+ *  (not quite the same as Shannon entropy.)
+ *  i.e. it is the negative log. This is of interest here because the index of coincidence of
+ *  of a body of text is characteristic of a language. (Or so I understand.) It should be different
+ *  for different human languages and different types of binary data. Investigate this.
+ *
+ * https://www.johndcook.com/blog/2021/08/14/index-of-coincidence/
+ *
 
  TODO: Find, verify, correct and/or rewrite JUnit test for accuracy of estimates.
-
- TODO: Demo. LD/sec, EST  LD/sec. Speedup all seem wrong.
 
  TODO: Add statistics output for a target set. This would require ability to comment signatures.
     Should include longest file, shortest file, longest signture, shortest signature, mean, stdev.
 
- TODO: Run the tests for LD accuracy and see if the estimates are any good.
-
- TODO: Flag to control output as per Frank's suggestions. Put options here. It's useless w/o the filenames, right?
-    so ouput fnames plus
+ TODO: Flag to control output as per Frank's suggestions.  It's always useless w/o the filenames, right?
         Just the file-LD estimate?
-        Just Signature LD?
-        drop file lengths, signature lengths, t, cn, n
-    Either way, you have to make a heading line for each set of outputs.
+        File-LD and Signature LD?
+        Keep all the fields except  t, cn, n
+        Keep all statistical fields but drop t, cn, n
+    Note we need separate heading lines for each set of outputs.
 
  TODO: Deal with the tiny files. Options--
     Get rid of file smaller than x and rerun the compression
@@ -259,14 +263,7 @@ public class Cli {
             int rawLd = sd.getLD(fsi.getSig(), fst.getSig());
             int expectedForRandom =
                     sd.expectedDistanceForSigs(fsi.getSig().length(), fst.getSig().length());
-                    //sd.expectedDistance(fsi.getInputFileLen(), fst.getInputFileLen() );
-            // verify that this does not result in a second ld()
             int est =
-                    //sd.getLDEst(fsi.getSig(), fst.getSig(),
-                    //Math.min(fsi.getSig().length(),fst.getSig().length()),
-                    //Math.max(fsi.getSig().length(),fst.getSig().length()),
-                    //        rawLd
-                    //);
                     sd.getLDEstForOriginals(fsi,fst, rawLd);
             LDResult ldr = new LDResult(
                     infile, fst.getInputFname(),
@@ -274,7 +271,6 @@ public class Cli {
                     fsi.getSig(), fst.getSig(),
                     rawLd, expectedForRandom, est,
                     fsi.getC(), fsi.getN(), fsi.getcSet());
-
             SignificanceResult sdr = sd.significant(ldr, t, rawLd);
             if (sdr.getSignificnt()){
                 matchedSigCount++;

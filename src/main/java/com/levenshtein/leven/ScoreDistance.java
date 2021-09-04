@@ -1,9 +1,7 @@
 package com.levenshtein.leven;
-
 import com.levenshtein.leven.cli.FileSignature;
 import com.levenshtein.leven.cli.LDResult;
 import utilities.file.FileAndTimeUtility;
-
 import java.util.logging.Logger;
 
 /**
@@ -39,28 +37,23 @@ public class ScoreDistance {
 
     /**
      * Approximate amount by which the LD of a pair of equal length random
-     * text English strings is * smaller than their length.
+     * text English strings is smaller than their length.
+     * TODO: This is not reliable. Need a better way to measure it and specify it as a parameter
      * <p></p>
      * This is used to fudge the product of signature LD and compression
      * factor to adjust the expectation.
-     * TODO: Is this an empirical value computed from a corpus? Where did it come
-     *  from and isn't it dependent upon the type of data being processed?
-     *  Several aspects of this need looking at.
      */
     private double wholeFileRatio = 0.22;
 
     /**
      * Amount by which the LD of a pair of equal size plain-generated signatures
      * is smaller than their length.
-     * <p></p>
-     * This is used to fudge product of signature LD and compression factor
-     * to adjust the expectation.
-     * TODO: As with wholeFileRatio, there are multiple of issues.
-     *  This could be stabler than the wholeFileRatio because the signatures are
-     *  pseudo-random while raw text is not. It's probably bigger because the
-     *  entropy of the raw text is lower--e.g., disproportionately many of a few chars
-     *  compared to the signatures, which have approximately equal numbers of
-     *  almost seventy characters.
+     * <p>
+     * This should be stabler than the wholeFileRatio because the signatures are
+     *  pseudo-random while raw text is not however, it may not be stable w.r.t.
+     *  the size of the output character set.
+     *
+     * TODO: This may not be reliable
      */
     private double sigRatio = 0.30d;
 
@@ -97,38 +90,16 @@ public class ScoreDistance {
     }
 
     /**
-     * Adjust an estimate for the difference between the LD of randomly chosen English
-     * text and the LD of the corresponding signatures differs.
-     * <p>
-     * Signatures have higher entropy, hence a relatively greater LD.
-     * <p>
-     * sigRatio is the average ratio of the LD of signatures to the
-     * corresponding string lengths to the ratio of the LD of the original
-     * strings to the string length  (for same-length originals).
-     *
-     * TODO Review this with Frank. THIS LOOKS WRONG.
-     *
-     * @param in double The an estimated distance.
-     * @return
-     */
-    public double fudgeFactor(double in) {
-        double correctionFactor = sigRatio - wholeFileRatio;
-        double v = in + (in * (correctionFactor));
-        return v;
-    }
-
-    /**
      * The expected distance of two random signatures of lengths s1 and s2,
      *  give the empirically determined ratio of LD to signature length for
-     *  same-length strings.
+     *  same-length strings. Note, length difference matters.
      * @param s1
      * @param s2
      * @return
      */
     public int expectedDistanceForSigs(int s1, int s2) {
-        int shorter = Math.max(s1, s2);
+        int shorter = Math.min(s1, s2);
         double shorterEst = shorter * (1 - sigRatio);
-        // double shorterEst = fudgeFactor(shorter);
         int overlapPart =  Math.abs(s1 - s2);
         double est = shorterEst + overlapPart;
         int oldEst = (int) (Math.max(s1, s2) * sigRatio)  + Math.abs(s1 - s2);
@@ -137,17 +108,38 @@ public class ScoreDistance {
     }
 
     /**
-     * The expected distance of two random strings of lengths s1 and s2, give
-     * the expected contraction of LD (fudge factor);
+     * Compute the expected LD for two unrelated text strings of the given lengths.
+     * The difference in length contributes one edit per character.
+     * The LD of the two shorter lengths averages about 0.22 less than that length.
+     *
+     * @param t1 The length of the first string.
+     * @param t2 The length of the second string.
+     * @return the expected LD of strings of that length.
+     */
+    public int expectedDistanceForOriginals(int t1, int t2){
+        int unmatched = Math.abs(t1-t2);
+        int matched =  Math.min(t1,t2);
+        int expected = (int) (matched * (1-getWholeFileRatio()) + unmatched);
+        return expected;
+    }
+
+    /**
+     * Compute the expected LD for two unrelated text strings.
+     * We take the lengths and call the numeric version of this function.
+     *
+     * @param t1 The first string.
+     * @param t2 The second string.
+     * @return the expected LD of strings of that length.
      *
      * @param s1
      * @param s2
      * @return
-    public int expectedDistanceForSigs(String s1, String s2) {
-        return (int) fudgeFactor(Math.max(s1.length(), s2.length())) +
-                Math.abs(s1.length() - s2.length());
-    }
      */
+    public int expectedDistanceForOriginals(String s1, String s2){
+       return expectedDistanceForOriginals(s1.length(), s2.length());
+    }
+
+
 
     /**
      * Given two signatures and the length of the longer original string, compute
@@ -158,11 +150,6 @@ public class ScoreDistance {
      * <p>
      * Get the estimated LD of two files.
      *
-     * @param sig1 String file name.
-     * @param sig1 String file name.
-     * @return double Return the estimate.
-     * @throws Exception if anything fails.
-     *
      * the difference in signature lengths would represent proportional amounts of the LD of
      * the full files that would require 1:1 single char operations.
      *
@@ -172,6 +159,11 @@ public class ScoreDistance {
      * remainder scaled up by allowing for
      *
      * The rest would require
+     *
+     * @param sig1 String file name.
+     * @param sig1 String file name.
+     * @return double Return the estimate.
+     * @throws Exception if anything fails.
      *
      */
     public int getLDEst(String sig1, String sig2, int longerUnCompressed,
@@ -194,25 +186,38 @@ public class ScoreDistance {
         //double estimatedUnadjusted = computedLenRatioPlain * longerUnCompressed;
         int retval =  (int) (shorterSig * sigRatio)  + sigDiff;
         return retval;
-        //return (int) fudgeFactor(estimatedUnadjusted);
     }
+
+
+    /**
+     * Given signatures for a pair of files, some other information about them such as
+     * file length, and the LD of the signatures, estimate the LD of the original files.
+     * @param fsi1 FileSignature object
+     * @param fsi2 FileSignature object
+     * @param ld The ld of the two signatures
+     * @return
+     * @throws Exception
+     */
     public int getLDEstForOriginals(FileSignature fsi1, FileSignature fsi2, int ld) throws Exception {
         int longerSig = Math.max(fsi1.getSig().length(), fsi2.getSig().length());
         int shorterSig = Math.min(fsi1.getSig().length(), fsi2.getSig().length());
         int sigDiff = longerSig-shorterSig;
-
         int f1Len = fsi1.getInputFileLen();
         int f2Len = fsi2.getInputFileLen();
         int fDiff = Math.abs(f1Len-f2Len);
 
         double effectiveC = (f1Len+f2Len)/(1.0*(longerSig+shorterSig));
-        double ldDiff = fDiff * (1.0 - wholeFileRatio);
-        double ldForTheRest = (shorterSig *  effectiveC) * (1.0  - wholeFileRatio) ;
 
-        int retVal = (int) ((effectiveC * ld) * (1.0 - wholeFileRatio));
+        // Each character difference in sig lengths contributes one character.
+        // So the rest of the ld divided by the length of the shorter signature
+        // represents the LD of the part that isn't the difference.
+        double ldSigRatio = (ld - sigDiff)/(double)shorterSig;
+
+        double ldForTheRest = ldSigRatio * Math.min(f1Len,f2Len) ;
+
+        int retVal = (int) (fDiff + ldForTheRest);
 
         return retVal;
-        //return (int) fudgeFactor(estimatedUnadjusted);
     }
 
 
@@ -229,12 +234,8 @@ public class ScoreDistance {
         int shorter = Math.min(ldr.getSig1().length(), ldr.getSig2().length());
         int signatureLenDiff = Math.abs(ldr.getSig1().length() - ldr.getSig2().length());
 
-        // TODO: The sigRatio factor applies only to English text and should be settable either from
-        //  properties or by automated analysis of the data.
-        //
-        // The difference in length requires one operation per character.
+        // The difference in length requires one operation per character of length difference.
         // The equal shorter segments require fewer operations than their length by a factor of sigRatio,
-        //  which is an empirically derived quantity
         double expectedSigLD = shorter * (1.0 - sigRatio) + signatureLenDiff ;
         int actualSigLD = ldval!=null? ldval: getLD(ldr.getSig1(),ldr.getSig2());
 
@@ -253,7 +254,7 @@ public class ScoreDistance {
     }
 
     /**
-     * Return the true LD of two files (extract contents)
+     * Return the actual LD of two files (extract contents)
      *
      * @param f1 String filename
      * @param f2 String filename
@@ -277,31 +278,4 @@ public class ScoreDistance {
     public int getLD(String str1, String str2) throws Exception {
         return getDistance().LD(str1, str2);
     }
-
-    /**
-     * TODO: This is supposed to just say if it's significant
-     *  Need to find a place to put all the rest of what it computes
-     * @param ldr
-     * @param x
-     * @return
-    public boolean goodEnough(LDResult ldr, double x) {
-        int longerOriginal = Math.max(ldr.getInfile1Len(),ldr.getInfile2Len());
-        double actLdToLen=ldr.getLdEstmate()/(double) longerOriginal;
-        double unscldErrPln=ldr.getRawLd()==0?0:Math.abs(ldr.getLdEstmate()-ldr.getRawLd())/(double)ldr.getRawLd();
-        double corrected = ldr.getLdEstmate()/1.7d;
-        double unscldErrCorrected=ldr.getRawLd()==0?0:Math.abs(corrected-ldr.getLdEstmate())/(double)ldr.getRawLd();
-        double correctedScaled = (actLdToLen==0||corrected==0)?0:(unscldErrCorrected*actLdToLen);
-        double scaledErrorPlain=(actLdToLen==0||unscldErrPln==0)?0:(unscldErrPln*actLdToLen);
-
-        //System.err.println("actual:" + ldr.getRawLd() + " unscaled error:" + unscldErrPln +
-        //         " scaled error:" + scaledErrorPlain + " corrected scaled error:" +  correctedScaled) ;
-
-        System.err.println("sig LD:" + ldr.getRawLd() + " sig"
-
-        if (corrected <= x){
-        }
-        return true;
-    }
-     */
-
 }

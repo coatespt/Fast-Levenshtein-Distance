@@ -169,8 +169,6 @@ public class LDResult {
         sb.append(", ");
         sb.append(t);
         sb.append(", ");
-        sb.append(getLdEstmate());
-        sb.append(", ");
         sb.append(c);
         sb.append(", ");
         sb.append(n);

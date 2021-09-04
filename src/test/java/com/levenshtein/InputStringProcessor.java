@@ -21,7 +21,6 @@ public class InputStringProcessor extends TestParent {
 
 	// The files below contain 11,023,266 characters of clean ASCII text from Gutenberg. All the header and trailer
 	// have been deleted. 213,156 lines total. 
-
 	//String cleanTextLoc="/Users/pcoates/Workspaces/personal-wkspc/data-gutenberg";
 	String cleanTextLoc="./data/allfiles/";
 	String [] cleanFiles1={
@@ -77,12 +76,9 @@ public class InputStringProcessor extends TestParent {
 		int len = Math.min(sb1.length(), sb2.length());
 		int numPairs = len/blockSize;
 
-
 		log.info("blocks:" + numPairs + " one:" + sb1.length() + " two:" + sb2.length());
 		log.info("createBlocks() completed");
 	}
-	
-	
 	
 
 	/**
