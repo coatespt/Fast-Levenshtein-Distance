@@ -1,4 +1,4 @@
-package utilities.mechanic;
+package com.levenshtein.testutil;
 
 import org.apache.log4j.Logger;
 import utilities.exception.NoNextValueException;

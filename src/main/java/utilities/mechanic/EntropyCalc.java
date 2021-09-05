@@ -3,15 +3,15 @@ package utilities.mechanic;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * TODO: I think this was from somewhere! Where?  find our or rewrite.
- *
- * Compute the Shannon entropy of a large input string.
- * 
- * @author pcoates
- */
 public class EntropyCalc {
-	
+	// TODO: Index of Coincidence might be better suited to the purpose than Shannon entropy.
+
+	/**
+	 * Compute the Shannon entropy of a large input string.
+	 * Did I write this or crib it from somewhere?
+	 *
+	 * @author pcoates
+	 */
 	public static Double calculateShannonEntropy(String str) {
 		  Map<Character, Integer> map = new HashMap<Character, Integer>();
 		  for (int i=0; i<str.length();i++) {

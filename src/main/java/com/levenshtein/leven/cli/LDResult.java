@@ -131,7 +131,7 @@ public class LDResult {
      * @return
      */
     public String toFullCsvString() {
-        StringBuffer sb = new StringBuffer(toShortCsvString());
+        StringBuffer sb = new StringBuffer(toShortCsvString(0));
         sb.append(", ");
         sb.append(cSet);
         sb.append(", ");
@@ -145,33 +145,46 @@ public class LDResult {
      * Leave out the signatures, which can be excessively long
      * @return
      */
-    public String toShortCsvString() {
+    public String toShortCsvString(int level) {
         StringBuffer sb = new StringBuffer(512);
         sb.append(infile1);
         sb.append(", ");
         sb.append(infile2);
         sb.append(", ");
-        sb.append(infile1Len);
-        sb.append(", ");
-        sb.append(infile2Len);
-        sb.append(", ");
-        sb.append(sig1.length());
-        sb.append(", ");
-        sb.append(sig2.length());
-        sb.append(", ");
-        sb.append(expectedForRandom);
-        sb.append(", ");
-        sb.append(rawLd);
-        sb.append(", ");
+        if(level==0 || level==1) {
+            sb.append(infile1Len);
+            sb.append(", ");
+            sb.append(infile2Len);
+            sb.append(", ");
+        }
+        if(level==0) {
+            sb.append(sig1.length());
+            sb.append(", ");
+            sb.append(sig2.length());
+            sb.append(", ");
+        }
+        if (level==0) {
+            sb.append(expectedForRandom);
+            sb.append(", ");
+            sb.append(rawLd);
+            sb.append(", ");
+        }
+
         sb.append(ldEstmate);
-        sb.append(", ");
-        sb.append(significance);
-        sb.append(", ");
-        sb.append(t);
-        sb.append(", ");
-        sb.append(c);
-        sb.append(", ");
-        sb.append(n);
+
+        if (level == 0 || level == 1 || level == 2 ) {
+            sb.append(", ");
+            sb.append(significance);
+        }
+
+        if (level == 0) {
+            sb.append(", ");
+            sb.append(t);
+            sb.append(", ");
+            sb.append(c);
+            sb.append(", ");
+            sb.append(n);
+        }
         return sb.toString();
     }
 
@@ -184,9 +197,23 @@ public class LDResult {
                 "\n\tdata type and goal. t=0 returns all data regardless. t=1 returns only perfect signature matches.";
     }
 
-    public static String header(){
-        return "infile1, infile2, infile1-len, infile2-len, sig1-len, sig2-len, sig-ld-fr-rand, raw-sig-ld, " +
-                "file-ld-est, significance, t, c, n";
+    public static String header(int n){
+        if (n==0) {
+            return "infile1, infile2, infile1-len, infile2-len, sig1-len, sig2-len, sig-ld-fr-rand, raw-sig-ld, " +
+                    "file-ld-est, significance, t, c, n";
+        }
+        else if (n==1) {
+            return "infile1, infile2, infile1-len, infile2-len, file-ld-est, significance";
+        }
+        if (n==2) {
+            return "infile1, infile2, file-ld-est, significance";
+        }
+        if (n==3) {
+            return "infile1, infile2, file-ld-est";
+        }
+        else {
+            return "BAD HEADER NUMBER SPECIFIED IN PROPS OR ARGUMENTS. MUST BE 0:2";
+        }
     }
 
 }

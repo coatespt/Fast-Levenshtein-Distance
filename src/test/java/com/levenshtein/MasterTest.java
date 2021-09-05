@@ -30,10 +30,6 @@ import org.junit.runners.Suite;
 			TestAccuracyDriverRH_503_11.class,
 			TestBasicOperations.class,
 			TestRollingHash.class
-			//  TestMassCompare.class,
-			//  TestPlainWRangeOfCAndN.class,
-			//	TestVaryCandN.class,
-			//  TestRegularVRolling101.class,
 			}
 	)
 	public class MasterTest {

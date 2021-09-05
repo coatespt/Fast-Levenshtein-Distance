@@ -1,4 +1,4 @@
-package utilities.file;
+package com.levenshtein.testutil;
 
 import org.apache.log4j.Logger;
 

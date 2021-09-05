@@ -5,13 +5,11 @@ import utilities.exception.QueueEmptyException;
 import utilities.exception.QueueFullException;
 
 /**
- * This is used in the RollingHash
+ * This code was cribbed from http://oppansource.com/queue-implementation-in-java-using-circular-array/ and
+ * slightly modified slightly by me.
  *
- * TODO fix the templating
- * 
- * This code was cribbed from http://oppansource.com/queue-implementation-in-java-using-circular-array/ and 
- * subsequently modified slightly by me. It needs to be cleaned up.
- * 
+ * TODO: Isn't there a Java collection for this? If so, replace this.
+ *
  * @author pcoates
  * @param <E> The type stored by the Queue
  */

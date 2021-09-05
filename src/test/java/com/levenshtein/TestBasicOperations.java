@@ -144,7 +144,7 @@ public class TestBasicOperations extends TestParent {
 	private ICompressor compressor=null;
 	protected ICompressor getCompressor(){
 		if(compressor==null){
-			compressor = new StringCompressorRH(getC(), getN(), outputChars , MIN_BITS, MAX_BITS, SEED);
+			compressor = new StringCompressorRH(getN(), getC(), outputChars , MIN_BITS, MAX_BITS, SEED);
 		}
 		compressor.setC(c);
 		compressor.setN(n);

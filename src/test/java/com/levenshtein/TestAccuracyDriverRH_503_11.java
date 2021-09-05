@@ -63,8 +63,8 @@ public class TestAccuracyDriverRH_503_11 extends TestAccuracyDriverParent {
 	 * @throws Exception
 	 */
 	public void testAllAgainstAll101() throws Exception {
-		setC(503);
-		setN(11);
+		setC(1007);
+		setN(17);
 		for(int i=0; i<files.length; i++){
 			for(int j=i; j<files.length; j++){
 				String  f1 = files[i];

@@ -9,53 +9,31 @@ import java.util.*;
 import static java.lang.Integer.valueOf;
 
 /**
- * Important errors
- * TODO: Fixme! Search file fails if blank line is present. Fix that AND don't fail if a line is unreadable.
- *  Count failed lines and fail at some point?
- * TODO: Check for empty sigs and move on. High compression can easily result in such.
  *
  * Command Line Interface
  * <p>
  * Compression: takes list of files from filenames given on command line
- * or on stdin. Output is csv lines on stout. This output can be used
- * as the LD target list.
+ * or one-by-one from stdin. Output is csv lines on stout. This output can be used
+ * as written as the LD target file.
  * <p>
- * LD matching: Find matches to set of input files among a set of
- * target signatures. Target signatures are input from CSV
- * lines as generated in compression mode.
- * The targets are always input from precomputed signature CSV lines in a file.
- * Note that the input is just file-names while the targets are pre-computed
- * signatures.
+ * LD matching: Find matches to set of input files among a set of target signatures.
+ * Files are given as file names while the targets are read from precomputed
+ * signature CSV lines in a file.
  *
- * https://www.johndcook.com/blog/2021/08/14/index-of-coincidence/
- *
+*
 
- Testing/Demo
- TODO: Deal with the tiny files in ./data/allfiles.  Options:
-    Get rid of file smaller than x and rerun the compression
-    Handle the case where they compress to zero--does it even come up?
-
- TODO Verify that the CLI is getting high quality results using the larger charset.
+ Important errors
 
  Possible errors
-
- TODO: Matching is slow. Look for redundant LD operations (stick in a counter?).
+ TODO: Deal with zero-length signatures that may result from tiny files and big C values.
 
  CLI Enhancements
 
- TODO: Should have option for input from pre-computed signatures?
+ TODO: Should have option for input from pre-computed signatures similar to targets from file?
 
  TODO: Implement multi-threading for the matching. Frank says this is low priority.
 
  TODO: Implement multi-threading for compression. Frank says this is low priority.
-
- TODO: Flag to control output as per Frank's suggestions.  It's always useless w/o the filenames, right?
-    Just the file-LD estimate?
-    File-LD and Signature LD?
-    Keep all the fields except  t, cn, n
-    Keep all statistical fields but drop t, cn, n
-    Note we need separate heading lines for each set of outputs.
-
 
  Statistical data gathering
  TODO: Run the compression for a range of compression rates and get time as a function of compression.
@@ -66,7 +44,8 @@ import static java.lang.Integer.valueOf;
     Should include longest file, shortest file, longest signture, shortest signature, mean, stdev.
 
  TODO: Index of Coincidence might be a good measure of signatures quality. See below this item.
- * John Cook blog post on "index of coincidence" which is similar to Renyi entropy
+ *  https://www.johndcook.com/blog/2021/08/14/index-of-coincidence/
+ *  John Cook blog post on "index of coincidence" which is similar to Renyi entropy
  *  (not quite the same as Shannon entropy.)
  *  i.e. it is the negative log. This is of interest here because the index of coincidence of
  *  of a body of text is characteristic of a language. (Or so I understand.) It should be different
@@ -75,9 +54,10 @@ import static java.lang.Integer.valueOf;
 
  */
 public class Cli {
-    protected static String ARG_DASHES = "-";
-    protected static int DEF_SB_SIZE = 1024;
-
+    static String ARG_DASHES = "-";
+    // StringBuffer init size to avoid reallocating many times.
+    static int DEF_SB_SIZE = 1024;
+    // Used in XOR hash to ensure that psueod-random values don't have too many ones or zeros.
     static int MinBits=25;
     static int MaxBits=39;
     static int Seed=12345;
@@ -95,6 +75,7 @@ public class Cli {
 
     protected boolean printHeader=true;
     protected boolean verbose = false;
+    protected int outputLevel = 0;
 
     /**
      * A CLI gets all it's setup via command-line arguments but you can
@@ -172,7 +153,7 @@ public class Cli {
             System.err.println(LDResult.outputLine());
         }
         if (printHeader) {
-            System.out.println(LDResult.header());
+            System.out.println(LDResult.header(outputLevel));
         }
         List<FileSignature> targets = getSigList(targetFile);
         int inputFileCount=0;
@@ -194,7 +175,7 @@ public class Cli {
                 inputFileCount++;
                 String file=fsList.get(i).trim();
                 if(file.equals("")){
-                    return;
+                    continue;
                 }
                 List<LDResult> ldResults = getLDResults(fsList.get(i), targets, t);
                 if (verbose) {
@@ -212,7 +193,12 @@ public class Cli {
         }
     }
 
+    /**
+     * Statistics about unrelated matches. Note in output that they are extremely low.
+     * @param lst
+     */
    private void printMMStdev(List<Double> lst) {
+       System.err.println("The significance computed for unrelated files should be small, with low variance.");
        double accum = 0;
        for (int i = 0; i < lst.size(); i++) {
            accum = accum + lst.get(i);
@@ -228,15 +214,17 @@ public class Cli {
        StringBuffer sb = new StringBuffer();
        sb.append("\n\n");
        sb.append("Significance mean:");
-       sb.append(mean);
+       sb.append((int) (mean * 10000)/10000d);
        sb.append(" variance:");
-       sb.append(var);
+       sb.append((int) (var * 10000)/10000d);
        sb.append(" stdev:");
-       sb.append(stdev);
-       sb.append(" total LD comparisons:");
+       sb.append((int) (stdev * 10000)/10000d);
+       sb.append(" unrelated sig comparisons: ");
        sb.append(lst.size());
-       sb.append(" matched:");
+       sb.append(" matches:");
        sb.append(matchedSigCount);
+       sb.append(" total comparisons:");
+       sb.append(sd.getTotalLDCalls());
        System.err.println(sb.toString());
    }
 
@@ -247,7 +235,7 @@ public class Cli {
     */
     protected void printLDResults(List<LDResult> lst) {
         for (int i = 0; i < lst.size(); i++) {
-            System.out.println(lst.get(i).toShortCsvString());
+            System.out.println(lst.get(i).toShortCsvString(outputLevel));
         }
     }
 
@@ -314,14 +302,12 @@ public class Cli {
         for (int i = 0; i < csvStrings.size(); i++) {
             String csvLine = csvStrings.get(i).trim();
             if (csvLine.length()>8) {
-                // TODO. Catch exception here, log and continue. and continue.
                 // uncomment this to find a defective line.
                 //System.err.println("target:" + i);
                 try {
                     sigList.add(new FileSignature(csvLine));
                 }
                 catch(Exception x){
-                    // This could be from a short file and a high compression rate.
                     System.err.println("Signature read failed line:" + i + " Empty sig field? Malformed? " + csvLine);
                 }
             }
@@ -451,6 +437,13 @@ public class Cli {
             else if (a.equals("h")) {
                 printHeader = boolFromString(v);
             }
+            else if (a.equals("ol")){
+              outputLevel = Integer.parseInt(v);
+              if (outputLevel<0 || outputLevel>3) {
+                  String err = "Output level must be in range 0:3";
+                  throw new Exception(err);
+              }
+            }
             else {
                 System.err.println("Unknown argument encountered:" + a);
             }
@@ -489,6 +482,7 @@ public class Cli {
         sb.append("-t is how different from the expected value the estimated LD has to be.\n");
         sb.append("-v true/false suppress the informational ouput written to stderr.\n");
         sb.append("-h true/false print the output file header.\n");
+        sb.append("-ol 1 to 3, Higher number gives fewer output fields. \n");
         return sb.toString();
     }
 
@@ -530,6 +524,9 @@ public class Cli {
         }
         if (getBoolVal("v", defaultProps) != null) {
             verbose = getBoolVal("v", defaultProps);
+        }
+        if (getIntVal("ol", defaultProps) != null) {
+            outputLevel = getIntVal("c", defaultProps);
         }
     }
 

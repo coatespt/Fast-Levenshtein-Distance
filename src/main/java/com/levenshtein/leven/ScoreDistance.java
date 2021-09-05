@@ -15,6 +15,7 @@ public class ScoreDistance {
     private final Logger log = Logger.getLogger(String.valueOf(ScoreDistance.class));
     private IDistance distance = null;
 
+
     /**
      * Need to parameterized this with any parameters for computing significance.
      */
@@ -172,7 +173,8 @@ public class ScoreDistance {
 
         double effectiveC = (longerUnCompressed+shorterUncompressed)/(1.0*(longerSig+shorterSig));
 
-        int ld = rawLd!=null?rawLd: getDistance().LD(sig1, sig2);
+        //int ld = rawLd!=null?rawLd: getDistance().LD(sig1, sig2);
+        int ld = rawLd!=null?rawLd: getLD(sig1, sig2);
 
         // The total file length difference takes 1:1 character operations to create
         double ldForTheDiff = effectiveC * sigDiff;
@@ -265,6 +267,12 @@ public class ScoreDistance {
         return getLD(f1Str, f2Str);
     }
 
+
+    private static int totalCalls = 0;
+    public static int getTotalLDCalls(){
+        return totalCalls;
+    }
+
     /**
      * Get the LD of two strings (not files.)
      *
@@ -275,6 +283,7 @@ public class ScoreDistance {
      */
     public int getLD(String str1, String str2) throws Exception {
         //System.err.println("getLD() s1:"+str1.length()+" s2:"+str2.length());
+        totalCalls++;
         return getDistance().LD(str1, str2);
     }
 }

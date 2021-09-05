@@ -37,7 +37,7 @@ public class TestRollingHash extends TestParent {
 	 * We force a new compressor each time because in these tests we're changing the values.
 	 */
 	protected ICompressor getCompressor(){
-		compressor = new StringCompressorRH(getC(), getN(), outputChars , MIN_BITS, MAX_BITS, SEED);
+		compressor = new StringCompressorRH(getN(), getC(), outputChars , MIN_BITS, MAX_BITS, SEED);
 		compressor.setC(C);
 		compressor.setN(N);
 		return compressor;
