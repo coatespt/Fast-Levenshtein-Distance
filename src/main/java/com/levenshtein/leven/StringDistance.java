@@ -3,15 +3,16 @@ package com.levenshtein.leven;
 /**
  * Compute the Levenshtein Distance of two strings.
  * <p> 
- * Cribbed from something I found <a href="http://www.merriampark.com/ld.htm#JAVA"> here</a>
- * and modified a little.
+ * Cribbed from <a href="http://www.merriampark.com/ld.htm#JAVA"> here</a>
+ * and modified a little but the domain is now defunct so there is nobody to credit.
  * <p> 
  * LD method creates and manipulates an array of integers of size N * M where N and M * are the 
  * size of the two sequences. Note that this by itself implies at least quadratic 
  * complexity in both space and time.
  * <p> 
- * TODO: Could be replaced with a more optimized method for further speedups.
- * 
+ * TODO: this could be replaced with code of better provenance. Is there some standard library version?
+ *
+ * NOTHING TO TEST
  * @author pcoates
  */
 public class StringDistance implements IDistance {

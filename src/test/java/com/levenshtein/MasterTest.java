@@ -31,7 +31,6 @@ import org.junit.runners.Suite;
 			TestBasicOperations.class,
 			TestRollingHash.class
 			//  TestMassCompare.class,
-			//  TestRollingHash.class,
 			//  TestPlainWRangeOfCAndN.class,
 			//	TestVaryCandN.class,
 			//  TestRegularVRolling101.class,

@@ -40,7 +40,6 @@ public class ScoreDistance {
      * text English strings is smaller than their length.
      * TODO: This is not reliable. Need a better way to measure it and specify it as a parameter
      * <p></p>
-     * This is used to fudge the product of signature LD and compression
      * factor to adjust the expectation.
      */
     private double wholeFileRatio = 0.22;
@@ -145,7 +144,6 @@ public class ScoreDistance {
      * Given two signatures and the length of the longer original string, compute
      * the raw estimate as LD(sig1,sig2)/longerSigLen*longerOriginalStringLen.
      * <p>
-     * Adjust this string by the fudge factor that considers the ratio of LD to string
      * lengths for originals and signatures (they differ.)
      * <p>
      * Get the estimated LD of two files.
@@ -276,6 +274,7 @@ public class ScoreDistance {
      * @throws Exception
      */
     public int getLD(String str1, String str2) throws Exception {
+        //System.err.println("getLD() s1:"+str1.length()+" s2:"+str2.length());
         return getDistance().LD(str1, str2);
     }
 }

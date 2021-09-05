@@ -19,6 +19,7 @@ public class FileSignature {
     private int n;
     private String cSet;
     private String sig;
+    private int sigLen = 0;
 
     /**
      * Parse a CSV file of signatures into a List of FileSignature objects.
@@ -49,6 +50,7 @@ public class FileSignature {
         setN(Integer.parseInt(lst.get(4)));
         setcSet(lst.get(5));
         setSig(lst.get(6));
+        setSigLen(getSig().length());
     }
 
     /**
@@ -69,7 +71,11 @@ public class FileSignature {
        this.n=neigh;
        this.cSet=cSet;
        this.sig=signature;
+       this.sigLen=sig.length();
     }
+    public int getSigLen(){return sigLen;}
+
+    public void setSigLen(int i){ sigLen = i;}
 
     public String getcSet() {
         return cSet;
@@ -124,7 +130,7 @@ public class FileSignature {
         sb.append(",");
         sb.append(getInputFileLen());
         sb.append(",");
-        sb.append(getSig().length());
+        sb.append(getSigLen());
         sb.append(",");
         sb.append(c);
         sb.append(",");

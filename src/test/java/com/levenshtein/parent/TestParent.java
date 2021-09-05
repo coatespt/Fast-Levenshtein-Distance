@@ -93,9 +93,8 @@ public class TestParent  extends TestCase {
 
 	protected ICompressor getCompressor() {
 		if (compressor == null) {
-			//compressor = new StringCompressorPlain();
 			compressor = new StringCompressorRH(getN(), getC(), outputChars , minBits, maxBits, seed);
-			}
+		}
 		compressor.setC(c);
 		compressor.setN(n);
 		return compressor;
@@ -248,7 +247,6 @@ public class TestParent  extends TestCase {
 	 */
 	protected String compressToC(int c, int n, String infile)
 			throws Exception {
-		//StringCompressorPlain comp = new StringCompressorPlain();
 		ICompressor comp = new StringCompressorRH(c, n, outputChars , minBits, maxBits, seed);
 		comp.setC(c);
 		comp.setN(n);

@@ -50,10 +50,17 @@ public abstract class ICompressor {
 	
 	public abstract String compress(String str);
 
-	public static String chars ="qrZ126stucRSTHfgmnoPQJKLIdeM345UVhvwxDEFGWXY7ij890NOakyzABClbp";
+	public static String chars = null;
+
+
 	// Convert a string to an array of characters.
 	//
-	public static char[] StringToCharArray(String str){
+	public static char[] StringToCharArray(String ch) throws Exception {
+		chars=ch;
+		if (chars==null || chars.length()<26){
+			// Sanity check--so few chars means you probably passed in the wrong string. This can be changed or removed.
+			throw new Exception("output characters set null or very short in StringToCharArray method");
+		}
 		char [] tmp =new char[chars.length()];
 		for(int i=0; i<chars.length(); i++){
 			tmp[i]=chars.charAt(i);

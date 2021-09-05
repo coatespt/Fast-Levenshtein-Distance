@@ -7,13 +7,9 @@ import java.util.*;
 
 
 /**
- * Experimental hashing method intended to be faster and more comprehensible for
- * this specialized application.
- * 
- * Works by creating a static map of each possible 8-bit input
- * onto a pseudo-random long integer (There are only 256.)
+ * Works by creating a static map of each possible 16-bit input
  *
- * The hash of the current neighborhood is the bit-wise XOR of the latest N characters
+ * The hash of the current neighborhood is the bit-wise XOR of the latest N 16-bit characters
  * that have been read (modulo the cardinality of the output alphabet).
  *
  * It's fast because the hash of neighborhood at position k can be computed by XOR'ing
@@ -38,9 +34,10 @@ import java.util.*;
  * A discussion of Java String.hashcode() cna be found here:
  *  https://animeshgaitonde.medium.com/the-curious-case-of-java-string-hashcode-6d98c734a313
  *
- * TODO: TestCompareAccuracy says RH signatures are bigger!
- *    Why? Something must be wrong (could be the unit-test.) Use ScoreDistance for uniformity.
- * 
+ * TODO: This is oriented towards Java 16 bit characters. Need a general purpose version that works
+ * 	with bytes so it can be used with binary data. That would be part of a larger effort as
+ * 	more has to change for binary files.
+ *
  * @author pcoates
  *
  */

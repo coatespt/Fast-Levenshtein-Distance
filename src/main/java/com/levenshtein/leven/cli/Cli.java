@@ -9,6 +9,11 @@ import java.util.*;
 import static java.lang.Integer.valueOf;
 
 /**
+ * Important errors
+ * TODO: Fixme! Search file fails if blank line is present. Fix that AND don't fail if a line is unreadable.
+ *  Count failed lines and fail at some point?
+ * TODO: Check for empty sigs and move on. High compression can easily result in such.
+ *
  * Command Line Interface
  * <p>
  * Compression: takes list of files from filenames given on command line
@@ -22,55 +27,61 @@ import static java.lang.Integer.valueOf;
  * Note that the input is just file-names while the targets are pre-computed
  * signatures.
  *
+ * https://www.johndcook.com/blog/2021/08/14/index-of-coincidence/
+ *
+
+ Testing/Demo
+ TODO: Deal with the tiny files in ./data/allfiles.  Options:
+    Get rid of file smaller than x and rerun the compression
+    Handle the case where they compress to zero--does it even come up?
+
+ TODO Verify that the CLI is getting high quality results using the larger charset.
+
+ Possible errors
+
+ TODO: Matching is slow. Look for redundant LD operations (stick in a counter?).
+
+ CLI Enhancements
+
+ TODO: Should have option for input from pre-computed signatures?
+
+ TODO: Implement multi-threading for the matching. Frank says this is low priority.
+
+ TODO: Implement multi-threading for compression. Frank says this is low priority.
+
+ TODO: Flag to control output as per Frank's suggestions.  It's always useless w/o the filenames, right?
+    Just the file-LD estimate?
+    File-LD and Signature LD?
+    Keep all the fields except  t, cn, n
+    Keep all statistical fields but drop t, cn, n
+    Note we need separate heading lines for each set of outputs.
+
+
+ Statistical data gathering
+ TODO: Run the compression for a range of compression rates and get time as a function of compression.
+
+ TODO: Get a data set for t value as as a function of compression.
+
+ TODO: Add statistics output for a target set. This would require ability to comment signatures.
+    Should include longest file, shortest file, longest signture, shortest signature, mean, stdev.
+
+ TODO: Index of Coincidence might be a good measure of signatures quality. See below this item.
  * John Cook blog post on "index of coincidence" which is similar to Renyi entropy
  *  (not quite the same as Shannon entropy.)
  *  i.e. it is the negative log. This is of interest here because the index of coincidence of
  *  of a body of text is characteristic of a language. (Or so I understand.) It should be different
  *  for different human languages and different types of binary data. Investigate this.
  *
- * https://www.johndcook.com/blog/2021/08/14/index-of-coincidence/
- *
-
- TODO: Find, verify, correct and/or rewrite JUnit test for accuracy of estimates.
-
- TODO: Add statistics output for a target set. This would require ability to comment signatures.
-    Should include longest file, shortest file, longest signture, shortest signature, mean, stdev.
-
- TODO: Flag to control output as per Frank's suggestions.  It's always useless w/o the filenames, right?
-        Just the file-LD estimate?
-        File-LD and Signature LD?
-        Keep all the fields except  t, cn, n
-        Keep all statistical fields but drop t, cn, n
-    Note we need separate heading lines for each set of outputs.
-
- TODO: Deal with the tiny files. Options--
-    Get rid of file smaller than x and rerun the compression
-    Handle the case where they compress to zero.
-
- TODO: Run the compression for a range of compression rates and get time as a function of compression.
-
- TODO: Get a data set for t value as as a function of compression.
-
- TODO: Matching is slow. Look for redundant LD operations (stick in a counter?).
-
- TODO: Implement multi-threading for the matching. Frank says this is low priority.
-
- TODO: Implement multi-threading for compression. Frank says this is low priority.
-
- TODO: Should we have option for input from pre-computed signatures?
-    For most cases, you have a few signatuers v many files so computing signatures on the fly is negligible
-    Are there realistic cases where the opposite is true? Many inputs for a few targets? That case can be
-        handled by simply reversing the targets and the inputs.
-    The meaningful case would be many inputs and many targets.
-
- TODO: Check out if the fudgeFactor is being used anywhere else. Looks totally wrong. It could be producing errors.
-
- TODO: JUnit tests are a mess.
 
  */
 public class Cli {
     protected static String ARG_DASHES = "-";
     protected static int DEF_SB_SIZE = 1024;
+
+    static int MinBits=25;
+    static int MaxBits=39;
+    static int Seed=12345;
+
     protected String[] argv = null;
     protected String propsfile = null;
     protected String infile = null;
@@ -110,8 +121,6 @@ public class Cli {
      * <p>Print the output as CSV</p>
      * <p>Compression output can be used as target input for LD.</p>
      * <p>Both compression and LD will accept input from standard in if an
-     * input file is not specified</p>
-     * @return
      */
     public int go() {
         try {
@@ -308,7 +317,13 @@ public class Cli {
                 // TODO. Catch exception here, log and continue. and continue.
                 // uncomment this to find a defective line.
                 //System.err.println("target:" + i);
-                sigList.add(new FileSignature(csvLine));
+                try {
+                    sigList.add(new FileSignature(csvLine));
+                }
+                catch(Exception x){
+                    // This could be from a short file and a high compression rate.
+                    System.err.println("Signature read failed line:" + i + " Empty sig field? Malformed? " + csvLine);
+                }
             }
             else {
                 System.err.println("Something fishy in the signature list." +
@@ -360,19 +375,17 @@ public class Cli {
     protected ICompressor compressor = null;
 
     /**
-     * Retrun an ICompressor object for the given n,c,and output character set
+     * Return an ICompressor object for the given n,c,and output character set
      * that the CLI was initialized with.
-     * TODO: The choice of RH compressor is hard coded. Put it in a property.
      * @return
      */
-    protected ICompressor getCompressor() {
+    protected ICompressor getCompressor() throws Exception{
+        //compressor = new StringCompressorRH(getN(), getC(), outputChars , minBits, maxBits, seed);
         if (compressor == null) {
-            ICompressor ic = new StringCompressorRH(n, c,
-                    StringCompressorRH.StringToCharArray(outChars),
-                    20, 44, 12345);
-            ic.setN(n);
-            ic.setC(c);
-            compressor = ic;
+            compressor = new StringCompressorRH(n, c, ICompressor.StringToCharArray(outChars), MinBits, MaxBits, Seed);
+            compressor.setN(n);
+            compressor.setC(c);
+            //System.err.println("charset = " + outChars);
         }
         return compressor;
     }

@@ -17,8 +17,7 @@ import java.util.Properties;
 
 //import com.a140.util.file.FileAndTimeUtility;
 
-// TODO: Lost track of which hash this uses. Figure it out.
-// TODO: Try this same test against original, rolling, and xor hash.
+// TODO: You broke something. This now gives completely wacky estimates app. 10x too small.
 //
 
 
@@ -77,16 +76,20 @@ import java.util.Properties;
  */
 public class Demo {
 	static Logger log = Logger.getLogger(Demo.class);
-	private String config = "./config/demo.properties";
+	static int MinBits = 26;
+	static int MaxBits = 39;
+	static int Seed = 12345;
+	static int N = 17;
+	static int C = 251;
+	static String config = "./config/demo.properties";
 
 	private String flag = null;
-	private int c=0;
-	private int n=0;
+	private int c=C;
+	private int n=N;
 	private final String inputDir=null;
 	private List<String> inputFileList=null;
 	private String sigsDir=null;
 	private ScoreDistance sd = null;
-
 
 	public static void main(String [] args){
 		Demo demo = new Demo();
@@ -133,7 +136,7 @@ public class Demo {
 	}
 	
 	protected ICompressor compressor = null;
-	protected ICompressor getCompressor(){
+	protected ICompressor getCompressor() throws Exception{
 		if(compressor==null){
 			// This is the one that is demonstrated to work
 			// and is page one of the spreadsheet relating to N
@@ -142,7 +145,7 @@ public class Demo {
 			// August 14 2021 Trying this one out.
 			ICompressor ic = new StringCompressorRH(n,c,
 					StringCompressorRH.StringToCharArray(StringCompressorRH.chars),
-					20, 44, 12345);
+					MinBits, MaxBits, Seed);
 			ic.setN(n);
 			ic.setC(c);
 			compressor=ic;
@@ -264,7 +267,7 @@ public class Demo {
 		sb.append(",\t\t");
 		// Corrected LD Estimate
 		sb.append(correctedEst);
-		sb.append(",\t\t\t\t");
+		sb.append(",\t\t\t");
 		// Raw error -- uncorrected estimate over actual
 		sb.append(Math.round(((double) est / act)*10000)/10000.0);
 		sb.append(",\t\t");
