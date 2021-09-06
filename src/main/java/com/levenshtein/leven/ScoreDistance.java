@@ -142,22 +142,8 @@ public class ScoreDistance {
 
 
     /**
-     * Given two signatures and the length of the longer original string, compute
-     * the raw estimate as LD(sig1,sig2)/longerSigLen*longerOriginalStringLen.
-     * <p>
-     * lengths for originals and signatures (they differ.)
-     * <p>
-     * Get the estimated LD of two files.
-     *
-     * the difference in signature lengths would represent proportional amounts of the LD of
-     * the full files that would require 1:1 single char operations.
-     *
-     * That much of the estimate should scaled directly from c.
-     *
-     * That proportion of the sigs length difference should be subtracted from the sigs LD and the
-     * remainder scaled up by allowing for
-     *
-     * The rest would require
+     * TODO: This is obsolete and incorrect but is used in Demo. Switch Demo to the version that
+     *  uses FileSignature objects plus LD and delete this incorrect version.
      *
      * @param sig1 String file name.
      * @param sig1 String file name.
@@ -188,36 +174,44 @@ public class ScoreDistance {
         return retval;
     }
 
-
     /**
-     * Given signatures for a pair of files, some other information about them such as
-     * file length, and the LD of the signatures, estimate the LD of the original files.
-     * @param fsi1 FileSignature object
-     * @param fsi2 FileSignature object
-     * @param ld The ld of the two signatures
+     * Compute the estimated LD of two files represented by FileSignature objects, plus
+     * the computed LD of the two signatures.The FileSignature objects hold
+     * the respective signatures as well as some information about the files.
+     * They do not hold the file contents.
+     * TODO: This appears to give very good estimates for related files but progressively
+     *  poorer estimates as the objects diverge. For unrelated objects the estimates
+     *  are about 0.69 of what they should be.
+     *
+     * @param fs1
+     * @param fs2
+     * @param rawSigLD
      * @return
      * @throws Exception
      */
-    public int getLDEstForOriginals(FileSignature fsi1, FileSignature fsi2, int ld) throws Exception {
-        int longerSig = Math.max(fsi1.getSig().length(), fsi2.getSig().length());
-        int shorterSig = Math.min(fsi1.getSig().length(), fsi2.getSig().length());
+    public int getLDEst(FileSignature fs1, FileSignature fs2, Integer rawSigLD) throws Exception {
+        int longerSig = Math.max(fs1.getSig().length(), fs2.getSig().length());
+        int shorterSig = Math.min(fs1.getSig().length(), fs2.getSig().length());
         int sigDiff = longerSig-shorterSig;
-        int f1Len = fsi1.getInputFileLen();
-        int f2Len = fsi2.getInputFileLen();
-        int fDiff = Math.abs(f1Len-f2Len);
+        int longerUnCompressed = Math.max(fs1.getInputFileLen(), fs2.getInputFileLen());
+        int shorterUnCompressed = Math.min(fs1.getInputFileLen(), fs2.getInputFileLen());
 
-        double effectiveC = (f1Len+f2Len)/(1.0*(longerSig+shorterSig));
+        // We know how much they compressed because we have the original file lengths.
+        double effectiveC = (longerUnCompressed+shorterUnCompressed)/(1.0*(longerSig+shorterSig));
 
-        // Each character difference in sig lengths contributes one character.
-        // So the rest of the ld divided by the length of the shorter signature
-        // represents the LD of the part that isn't the difference.
-        double ldSigRatio = (ld - sigDiff)/(double)shorterSig;
+        //int ld = rawLd!=null?rawLd: getDistance().LD(sig1, sig2);
+        int sigLD = rawSigLD!=null?rawSigLD: getLD(fs2.getSig(), fs2.getSig());
 
-        double ldForTheRest = ldSigRatio * Math.min(f1Len,f2Len) ;
+        // The total file length difference contributes 1:1 character operations.
+        //
+        double ldForTheDiff = longerUnCompressed-shorterUnCompressed;
 
-        int retVal = (int) (fDiff + ldForTheRest);
+        // The difference in length wsa 1:1 but
+        double ldForTheRest = (sigLD-sigDiff) * effectiveC * (1.0 + wholeFileRatio) ;
 
-        return retVal;
+        int retval =  (int) (ldForTheDiff + ldForTheRest);
+
+        return retval;
     }
 
 

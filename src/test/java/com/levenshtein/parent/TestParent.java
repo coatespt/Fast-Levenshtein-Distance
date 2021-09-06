@@ -5,6 +5,7 @@ import com.levenshtein.leven.IDistance;
 import com.levenshtein.leven.StringCompressorRH;
 import com.levenshtein.leven.StringDistance;
 import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -421,5 +422,13 @@ public class TestParent  extends TestCase {
 
 	static {
 		setOutputChars(outputCharString);
+	}
+
+	/**
+	 * Maven blows up if there are no tests in a file named Test*
+	 */
+	@Test
+	public void testNothing(){
+		System.out.println("testNothing testing nothing.");
 	}
 }

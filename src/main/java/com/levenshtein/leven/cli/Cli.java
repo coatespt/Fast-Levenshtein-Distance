@@ -12,38 +12,73 @@ import static java.lang.Integer.valueOf;
  *
  * Command Line Interface
  * <p>
- * Compression: takes list of files from filenames given on command line
- * or one-by-one from stdin. Output is csv lines on stout. This output can be used
- * as written as the LD target file.
+ * Compression mode: takes list of files from filenames given on command line
+ * or one-by-one from stdin. The output is csv lines on stout. This output can be used
+ * as-written as the LD target file.
  * <p>
  * LD matching: Find matches to set of input files among a set of target signatures.
- * Files are given as file names while the targets are read from precomputed
- * signature CSV lines in a file.
+ * The files are given as file names similarly to compression mode.  The targets are read
+ * from precomputed CSV signature lines in a file. The CSV Signature lines are exactly
+ * the format of the compression-mode output.
  *
 *
 
  Important errors
 
+ TODO: Estimates are highly accurate when the files are in fact related. They are exact when
+    the files are the same but about 0.7 of what they should be when the files are totally
+    unrelated.  This should be fixable. It might just mean that the correction factor for length of
+    signature is being misapplied.
+
+ TODO: Check out the significance computation. It seems poorly thought out.
+
+ TODO: The test TestRollingHash.testCompressionDistRH() shows large differences in the distribution
+    of output characters for values of C that are not very different.
+    Likewise min/max used characters. It only uses one value of N.
+    Figure out why. It could be bone-head dumb. If it's not, write a utility feature to
+    generate the best C and N combinations for ranges of compressions.
+
  Possible errors
+
  TODO: Deal with zero-length signatures that may result from tiny files and big C values.
 
  CLI Enhancements
 
  TODO: Should have option for input from pre-computed signatures similar to targets from file?
 
- TODO: Implement multi-threading for the matching. Frank says this is low priority.
+ TODO: Implement multi-threading for the matching. Would probably increase throughput by several x.
+    Frank says this is low priority.
 
- TODO: Implement multi-threading for compression. Frank says this is low priority.
+ TODO: Implement multi-threading for compression. Would probably increase throughput by several x.
+    Frank says this is low priority.
 
- Statistical data gathering
- TODO: Run the compression for a range of compression rates and get time as a function of compression.
+ Statistical data gathering not necessarily part of CLI but probably essential for the paper.
 
- TODO: Get a data set for t value as as a function of compression.
+ TODO: Get a data set for matching accuracy as a function of N. This is important, as N has two big effects
+    on accuracy: (1) Small N is less sensitive to minor differences as each can bleed out to at most
+    N-1 character distance away. (2) On the other hand small N results in a low cardinality of
+    neighborhood hash values and thus less pseudo-randomness in the signatures. Verify that (2) is
+    in fact correct. There is a RollingHash test class with the basics already.
 
- TODO: Add statistics output for a target set. This would require ability to comment signatures.
-    Should include longest file, shortest file, longest signture, shortest signature, mean, stdev.
+ TODO: Run the compression for a range of compression rates and get rate as a function of compression.
+    I'm betting it makes almost no difference.
+
+ TODO: Get a data set for significance as as a function of compression rate.
+    Run the same set of files with a range of compression rates?
+    We could probably do this from the existing test set.
+
+ TODO: Explain why the compression rates make such a difference to the output character distribution.
+
+ TODO: Add statistics output for a target set. We already compute m,md,stdev for the LD's of
+    unrelated files. Should add:
+        A statistic that takes into account file length differences.
+        Longest file, shortest file
+        Longest signture, shortest signature.
 
  TODO: Index of Coincidence might be a good measure of signatures quality. See below this item.
+
+ TODO: Compute a list of good compression and N values.
+
  *  https://www.johndcook.com/blog/2021/08/14/index-of-coincidence/
  *  John Cook blog post on "index of coincidence" which is similar to Renyi entropy
  *  (not quite the same as Shannon entropy.)
@@ -261,7 +296,8 @@ public class Cli {
             int expectedForRandom =
                     sd.expectedDistanceForSigs(fsi.getSig().length(), fst.getSig().length());
             int est =
-                    sd.getLDEstForOriginals(fsi,fst, rawLd);
+                    sd.getLDEst(fsi,fst, rawLd);
+                    //sd.getLDEstForOriginals(fsi,fst, rawLd);
             LDResult ldr = new LDResult(
                     infile, fst.getInputFname(),
                     fsi.getInputFileLen(), fst.getInputFileLen(),

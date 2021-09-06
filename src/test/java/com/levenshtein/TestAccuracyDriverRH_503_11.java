@@ -5,8 +5,8 @@ import com.levenshtein.leven.IDistance;
 import com.levenshtein.leven.StringCompressorRH;
 import com.levenshtein.leven.StringDistance;
 import com.levenshtein.parent.TestAccuracyDriverParent;
+import org.junit.Test;
 
-// TODO Need a speed test of the hashes.
 /**
  * 
  * Drives TestAccuracyDriverParent routines for computing LD raw, LD Signatures, 
@@ -46,7 +46,7 @@ public class TestAccuracyDriverRH_503_11 extends TestAccuracyDriverParent {
 	@Override
 	protected ICompressor getCompressor(){
 		if(compressor==null){
-			compressor = new StringCompressorRH(getC(), getN(), outputChars , MIN_BITS, MAX_BITS, SEED);
+			compressor = new StringCompressorRH(getN(), getC(), outputChars , MIN_BITS, MAX_BITS, SEED);
 		}
 		compressor.setC(c);
 		compressor.setN(n);
@@ -63,8 +63,8 @@ public class TestAccuracyDriverRH_503_11 extends TestAccuracyDriverParent {
 	 * @throws Exception
 	 */
 	public void testAllAgainstAll101() throws Exception {
-		setC(1007);
-		setN(17);
+		setC(501);
+		setN(11);
 		for(int i=0; i<files.length; i++){
 			for(int j=i; j<files.length; j++){
 				String  f1 = files[i];
@@ -81,5 +81,9 @@ public class TestAccuracyDriverRH_503_11 extends TestAccuracyDriverParent {
 				onFiles(sb.toString(), f1, f2);
 			}
 		}
+	}
+	@Test
+	public void testNothing(){
+		System.out.println("testNothing testing nothing.");
 	}
 }

@@ -3,6 +3,7 @@ package com.levenshtein.leven.demo;
 import com.levenshtein.leven.ICompressor;
 import com.levenshtein.leven.ScoreDistance;
 import com.levenshtein.leven.StringCompressorRH;
+import com.levenshtein.leven.cli.FileSignature;
 import org.apache.log4j.Logger;
 import utilities.file.FileAndTimeUtility;
 
@@ -138,11 +139,7 @@ public class Demo {
 	protected ICompressor compressor = null;
 	protected ICompressor getCompressor() throws Exception{
 		if(compressor==null){
-			// This is the one that is demonstrated to work
-			// and is page one of the spreadsheet relating to N
-			//ICompressor ic = new StringCompressorPlain();
-
-			// August 14 2021 Trying this one out.
+			StringCompressorRH.chars="abcdefghijklmnopqrstuvwxsyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()_-+=[]{};:<>.?";
 			ICompressor ic = new StringCompressorRH(n,c,
 					StringCompressorRH.StringToCharArray(StringCompressorRH.chars),
 					MinBits, MaxBits, Seed);
@@ -182,6 +179,7 @@ public class Demo {
 				getCompressor().setC(c);
 				getCompressor().setN(n);
 
+
 				String sig1 = getCompressor().compress(cont1);
 				String sig2 = getCompressor().compress(cont2);
 
@@ -192,7 +190,9 @@ public class Demo {
 				double fileLDdRateSec = FileAndTimeUtility.rateSec(1, start, end);
 
 				int expectedForRandom = sd.expectedDistanceForSigs(cont1.length(), cont2.length());
-				int est = sd.getLDEst(sig1, sig2, longerOriginal, shorterOriginal, act);
+				FileSignature fs1 = new FileSignature(f1, cont1.length(), c, n, getCompressor().chars , sig1);
+				FileSignature fs2 = new FileSignature(f2, cont2.length(), c, n, getCompressor().chars , sig2);
+				int est = sd.getLDEst(fs1,fs2,sd.getLD(sig1,sig2));
 
 				// this is fast--do it many times to get a rate.
 				start=new Date();
@@ -202,7 +202,9 @@ public class Demo {
 				end=new Date();
 				double sigLDRateSec = FileAndTimeUtility.rateSec(TEST_ITERATIONS, start, end);
 
-				// TODO: the error calcs are done in logLine(...). Move them here.
+				//  TODO Verify that the calculation match what is done in the CLI and review the error
+				// 		calculations (which have no analog in the CLI, of course.)
+				//
 				double corrected = est/1.3d;
 
 				ct++;

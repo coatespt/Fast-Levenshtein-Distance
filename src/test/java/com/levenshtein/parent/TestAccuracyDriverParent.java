@@ -6,6 +6,7 @@ import com.levenshtein.leven.ScoreDistance;
 import com.levenshtein.leven.SignificanceResult;
 import com.levenshtein.leven.cli.FileSignature;
 import com.levenshtein.leven.cli.LDResult;
+import org.junit.Test;
 
 import java.util.Date;
 
@@ -25,6 +26,13 @@ public abstract class TestAccuracyDriverParent extends TestParent {
     static double sigRatio = 0.030d;
     static int COMP_CT = 1000;
 
+    /**
+     * Maven blows up if there are no tests in a file named Test*
+     */
+    @Test
+    public void testNothing(){
+        System.out.println("testNothing testing nothing.");
+    }
     /**
      * This method is called with the path/names of a pair of files and computes a number of
      * statistics.  The most important are the expected LD for two unrelated files of that distance,
@@ -64,7 +72,7 @@ public abstract class TestAccuracyDriverParent extends TestParent {
         double rateCompressed = (COMP_CT / ((double)(new Date().getTime() - start.getTime()))) * 1000;
 
         start = new Date();
-        int distUnCompressed = d.LD(f1Str, f2Str);
+        int ldUnCompressed = d.LD(f1Str, f2Str);
         double rateUncompressed = 1.0d / (new Date().getTime() - start.getTime()) * 1000;
 
         sb.append("\tLD computation rate for raw files: ");
@@ -83,7 +91,8 @@ public abstract class TestAccuracyDriverParent extends TestParent {
                 " f2:" + fs2.getInputFname()+ " len:" + fs2.getInputFileLen());
         ScoreDistance sd = new ScoreDistance();
         double expectedForRandomSigs = sd.expectedDistanceForSigs(compressedF1.length(),compressedF2.length());
-        double ldEstimate = sd.getLDEstForOriginals(fs1,fs2,distCompressed);
+        //double ldEstimate = sd.getLDEstForOriginals(fs1,fs2,distCompressed);
+        double ldEstimate=sd.getLDEst(fs1, fs2, distCompressed);
         LDResult ldr = new LDResult(
                 f1, f2,
                 fs1.getInputFileLen(), fs2.getInputFileLen(),
@@ -91,6 +100,18 @@ public abstract class TestAccuracyDriverParent extends TestParent {
                 distCompressed, (int) expectedForRandomSigs, (int)ldEstimate,
                 fs1.getC(), fs1.getN(), fs1.getcSet());
         SignificanceResult sr =  sd.significant(ldr, 0.4, distCompressed);
+
+        double estimatedToReal = 1.0;
+        // Can do this because the algorithm returns 0 if the signatures are the same.
+        if (ldUnCompressed!=0){
+            estimatedToReal=((double)ldEstimate)/ldUnCompressed;
+        }
+        if (estimatedToReal>1.0d){
+            estimatedToReal=Math.pow(estimatedToReal,-1.0);
+        } else if (estimatedToReal != 1d){
+            estimatedToReal=-1d * estimatedToReal;
+        }
+
         int estLDForUnrelated = sd.expectedDistanceForOriginals(f1Str,f2Str);
         sb.append("\tFile lengths: ");
         sb.append(f1Str.length());
@@ -101,21 +122,20 @@ public abstract class TestAccuracyDriverParent extends TestParent {
         sb.append(compressedF2.length());
         sb.append(", ");
         sb.append(compressedF1.length());
-        sb.append("\n\tLD for unrelated files:");
+        sb.append("\n\tExpected LD for unrelated files:");
         sb.append(estLDForUnrelated);
-        sb.append("\n\tComputed LD of files:");
-        sb.append(distUnCompressed);
-        sb.append("\n\tEstimated LD of files:\t");
-        sb.append((int) ldEstimate);
-        sb.append("\n");
         sb.append("\tComputed LD of signatures:");
         sb.append(distCompressed);
-        sb.append("\n\tExpected for random sigs::");
+        sb.append("\n\tExpected LD for random sigs::");
         sb.append((int) expectedForRandomSigs);
-        sb.append("\n\tExpected for random files:");
-        sb.append((int)11);
         sb.append("\n\tSignificance:");
         sb.append((int)(sr.getComputedSignificane()*10000)/10000.0);
+        sb.append("\n\tComputed LD of files:");
+        sb.append(ldUnCompressed);
+        sb.append("\n\tEstimated LD of files:\t");
+        sb.append((int) ldEstimate);
+        sb.append("\n\testimate diverges by:");
+        sb.append(estimatedToReal);
         System.out.println(sb);
         System.out.flush();
     }

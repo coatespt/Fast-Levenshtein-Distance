@@ -62,14 +62,14 @@ public class TestRollingHash extends TestParent {
 	 * 	 Increased neighborhood size should therefore increase the entropy of the
 	 * 	 compressed string but it will tend to mask fine-grain changes. Choice
 	 * 	 is application depenednt
-	 *
+	 * TODO Note that some compression rates have much lower stdev than others that aren't much different.
 	 * @throws Exception
 	 */
 	@Test
 	public void testCompressionDistRH() throws Exception {
 		String reallybig = "./data/allfiles/jbunc10.txt";
 		System.out.println("testCompressionSpeedRH() starting.");
-		for(int i=51; i<150; i+=1){
+		for(int i=51; i<2000; i+=17){
 			_rollingHashCharDist(reallybig, i, 11, 500);
 		}
 		System.out.println("testCompressionSpeedRH() ending.");
@@ -193,6 +193,7 @@ public class TestRollingHash extends TestParent {
 		double ssd = 0d;
 		int min = Integer.MAX_VALUE;
 		int max = Integer.MIN_VALUE;
+		int diffMinMax = 0;
 		for (Character entry : cts.keySet()) {
 			int ct = cts.get(entry);
 			min=Math.min(min,ct);
@@ -200,13 +201,14 @@ public class TestRollingHash extends TestParent {
 			double diff = mean-ct;
 			ssd += (diff*diff);
 		}
+		diffMinMax = max-min;
 		mean=(int)(mean*1000)/1000d;
 		double var = ssd/cts.size();
 		double stdev = Math.sqrt(var);
 		var = (int)(var * 1000)/1000d;
 		stdev = (int)(stdev * 1000) / 1000d;
-		System.out.println("Comp: " + getC() + "\tN: " + getN() + "\tmin: " + min + "\tmax: " +
-				max + "\tmean: " + mean +  "\tstdev: " + stdev + "\t chars in output:" + cts.size() + "\tchars in set:" + outputChars.length);
+		System.out.println("Comp: " + getC() + "\tN: " + getN() + "\tmin: " + min + "\tmax: " + max + "\t diff: " + diffMinMax +
+				"\t\tmean: " + mean +  "\tstdev: " + stdev + "\t chars in output:" + cts.size() + "\tchars in set:" + outputChars.length);
 		if (cts.size()!=outputChars.length) {
 			// This will fail sometimes for smaller values of n unless you uses a very large file.
 			// E.g n=7 will fail occasionally for 150k files.  This isn't an error per se but it's in
