@@ -1,0 +1,419 @@
+
+Fast Levenshtein Estimate Tool Manual
+
+This manual describes the basic functions of the program, how to use
+the CLI, how to download and build it, how to run it, the purposes of the
+command line and property file arguments, and more advanced tips on how
+trouble-shoot and use it effectively.
+
+
+What Does It Do?
+
+This command-line (CLI) tool computes estimates of the Levenshtein Distance (LD)
+of pairs of text files using small, variable-length signatures in place of
+the original files.
+
+The tool reads into memory a file of target signatures and takes search input in the
+form of a list of filenames. The search filenames can be supplied either in a file or
+on stdin, Unix style.
+
+A signature for each input file is computed and paired with each precomputed target
+signature. If the estimated LD for the original files is sufficiently low, a line of CSV
+output is generated, naming the related files and giving the estimated LD, an indication
+of the significance of the estimate, and some other pertinent data.
+
+
+How Is It Used?
+
+The tool is used in two modes: signature generation and file matching.
+
+In signature generation mode, the CLI takes as input a list of fully-qualified
+filenames. It takes each filename in turn, reads the indicated file, and generates
+one line of CSV output. An output line contains the name of the original file,
+its length, the three parameters that define the signature generation, and
+the generated signature.
+
+In matching mode, the CLI reads a file of target signatures (as produced
+by signature generation mode) into memory. It then takes a list of fully-qualified
+filenames as input, either from a file or from stdin. For each file named in the
+input, a signature is generated and paired with each of the target signatures.
+If the estimated LD of a file pair is deemed significantly lower than would be
+expected for unrelated text files of those respective lengths, a line of CSV
+output is generated.
+
+A line of the matching output gives the name of the source and target files, the
+estimated LD of the pair, the LD that would be expected for unrelated files, the
+"significance" of the result and some other useful information.
+
+
+Estimated LD and The Threshold of Significance, T
+
+A significance value between 0.0 and 1.0 is computed for each pair of signatures.
+If the significance value is greater than a threshold parameter, T, a match is
+deemed to have been found and a line of output is generated.
+
+The significance value is used instead of the raw LD estimate because the meaning of
+the estimated LD depends on the sizes of the files, which can be of different lengths.
+The significance value considers the lengths of both signatures and the estimated LD.
+
+The best choice of threshold parameter T depends on the goal of matching.
+
+Identical signatures will result in significance of 1.0, but note that pairs of originals
+can differ somewhat and still have identical signatures. Therefore, significance of 1.0
+should be interpreted as meaning that the underlying files differ by at most as small amount.
+
+At the other end of the scale of similarity, randomly selected text files of equal length
+would almost never have a significance score of zero unless they have very unusual and
+complimentary properties such as not using any of the same characters. Unrelated text files of
+equal length tend to have a low significance of around 0.2.
+
+In the middle range, pairs with significance values greater than about 0.5 are nearly
+always related in some obvious way. Significance above 0.9 usually indicates minor
+variations on the same file. A typical example in this range might be an original
+text document paired with a version of itself marked up with HTML.
+
+
+Getting the Source Code
+
+If you are reading this file, you have probably already obtained the project
+directory that contains source code, documentation, and test data. If not, you
+can clone the project directory from Github using "git clone" and the
+following URL.
+
+    git@github.com:coatespt/Fast-Levenshtein-Distance.git
+
+Alternatively, you can download the project as a zip file. Go to the following
+Github page to get the zip file.
+
+    https://github.com/coatespt/Fast-Levenshtein-Distance
+
+Put the zip file in the directory where you keep your projects. Unzipping the file
+will create a directory called Fast-Levenshtein in the directory where you unzip.
+Similarly, if you choose to git-clone the project, "cd" to your projects directory
+and execute the clone command below to get the same directory a zip file would produce.
+
+     git clone  git@github.com:coatespt/Fast-Levenshtein-Distance.git
+
+
+
+Building the Executable Jar File
+
+The easiest way to build is to use Maven (mvn) from the command line. This will
+produce an executable Java jar file located in the Fast-Levenshtein/target
+directory.
+
+Alternatively, you can load the code into your Java IDE and run it from there. Any
+Java IDE such as Eclipse or Intellij Idea should work fine. All popular IDE's provide
+some way to supply the runtime arguments. The arguments used in running from an IDE
+should be the same as used with the executable jar.
+
+If your IDE has Maven enabled, it should also be able to generate an executable jar
+file from within the IDE. The CLI has been built and run with Java 11 but may
+also build with slightly earlier Java versions. Your IDE documentation will include
+instructions on how to build an executable jar file from within the IDE.
+
+To build and execute the code from the command line you will need the Java 11
+JDK and Maven 3.6.3 installed. If you already have the jar, to run it you will need
+only Java JRE and not the JDK or Maven. Instructions for installing Java and Maven
+can be found with Google.
+
+Open a shell and use cd to go to the project directory. Then execute the
+following command line.
+
+    mvn assembly:assembly -DdescriptorId=jar-with-dependencies -Dmaven.test.skip=true
+
+If all goes well, the first time it runs, Maven will automatically download all the
+libraries, stashing them in a hidden directory in your home directory. It will use
+the stashed libraries in all future builds unless/until some other library or
+library version is specified in the ./pom.xml file. Unless you are developing, there is
+no reason to care about this.
+
+The jar file that results from a successful build will be found in ./target
+
+
+Some Build Details
+
+By default, Maven runs your JUnit tests and if any tests fail, the jar will not be built.
+To avoid build failure due to a broken tests, you can set the command line option when
+you execute the mvn command. This following argument is specified in the example command
+above.
+
+    -Dmaven.test.skip=false
+
+The jar can be configured to execute any main() that is defined in the source tree. This
+project has two or three mains, one of which is the CLI. A particular main() gets set as
+the entry point if configured to do so under the "manifest" tag in the ./pom.xml file.
+If you open this file with an editor you can see which main() is specified. You should
+not have to change this unless you want to execute the Demo instead of the Cli.
+
+If mvn runs out of memory during the build, it is probably because you ran the tests, which
+run LD on some big files. This can happen because either you did not specify
+-Dmaven.test.skip=false or did not specify the argument at all. Maven defaults to running the tests.
+
+The memory settings for Maven can be adjusted with the MAVEN_OPTS environment variable.
+If you need more memory, you can put the following line in your .profile or just run it by hand in
+the shell you are working from. If you execute it by hand, it will only apply to the shell
+you are using at the time. Putting it in your profile will set it for all subsequently openeed
+shells. The example shown gives mvn up to four gigabytes.
+
+    export MAVEN_OPTS="-Xmx4g -XX:MaxPermSize=500m"
+
+The result of successful execution will be a jar file in the target directory (created
+by mvn.) It will be named something like
+
+    ./target/Fast-Levenshtein-Distance-0.0.1-SNAPSHOT-jar-with-dependencies.jar
+
+Rename it to something conveniently short like fld.jar.
+
+
+
+Running The CLI
+
+Parameters For a Run
+
+There are a total of ten parameters, but some apply only to signature generation. All but
+one of them can be set in a configuration file which by default is ./config/config.properties.
+You are free to specify any file name and location on the command line.
+
+When experimenting, it is convenient to keep multiple version of the properties file for
+various settings and encode the key properties into the name. Most of the values rarely change,
+so usually it is enough to encode the compression rate and neighborhood size. For example,
+with C=507 and N=17 you could name the properties file:
+
+    ./confg/config_503_17.properties
+
+Arguments in the properties file are the same as those available on the command line. Just leave
+off the dash, e.g, the command line argument -c 251 is equivalent to  c = 251 in the properties
+file. If you give the same argument in both the properties file and the command line, the command
+line value overrides the properties file value.
+
+Arguments
+-p  The name of a Java properties file. See default in ./config/confg.properties.
+    This argument is necessary.
+
+-f  The name of an input file that is a list of fully qualified file names. See sample
+    ./data/source.csv. If this is not set, the input is assumed to be coming from stdin.
+
+-c  The nominal compression rate, which is a positive integer with a valued in the range
+    of low hundreds to about 1500. See detailed explanation at the end of this document.
+
+-n  The neighborhood size, and integer. Common value include 11, 13, 17. See detailed
+    explanation at the end of this document.
+
+-ch A text string of unique characters. This string defines the set of characters that
+    can appear in the signatures. See detailed explanation at the end of this document.
+
+-ld Setting this to false means operate in compression mode using the input file named in
+    the -f argument.
+
+    Setting to true means operate in matching mode. As with compression mode
+    the input will either be read from the file specified in -f or taken from standard in.
+    If -ld is true, the target signature file must be given as the -ft argument.
+
+-ft Is a CSV file of target signatures. -ft is ignored in compression mode but required
+    in matching mode. The file usually contains the output of a run in compression mode
+    with the input file being the list of original target files.
+
+-t  Is a floating point number between 0.0 and 1.0. It is used to specify how high the
+    significance score of the LD estimate for of a pair of signatures needs be to merit
+    printing out a result. See detailed explanation in the section above on significance
+    for details.
+
+-h  true/false. Indicate whether to print a CSV header for he CSV output.
+
+-v  true/false. Turns off informational message written to stderr. The true output is
+    written to stdout and the informational messages to stderr, so you can also dismiss the
+    informational messages by redirecting stderr into the bit-bucket with the 2>/dev/null
+    Unix command line notation. Using the argument is preferable because it allows error
+    messages to be displayed if something goes wrong.
+
+-ol An integer from 0:3, inclusive. Controls the number of fields in the output of matching
+    mode. The higher the number, the more restricted the output.
+
+
+
+Try Out Compression Mode
+
+The following command line executes on sample data supplied with the download. We'll create our
+target signatures from the files located in ./data/target_ld. The -rtd argument causes the
+relative path to be included in the filename.
+
+    ls -rtd ./data/target_ld > target_file_names.csv
+
+This will produce a file target_file_names.csv with contents something like the following:
+
+    ./data/target_ld/01tcb10.txt
+    ./data/target_ld/1mrar10.txt
+    ./data/target_ld/1whlc10.txt
+    ...
+
+The files, in this case, are books from the Gutenberg library. They are unchanged except for the
+removal of a few hundred lines of Gutenberg foundation boilerplate that is almost the same for
+all the files.
+
+To produce a target file of signatures with some reasonable properties we execute the following:
+
+   java -jar ./target/fld.jar -p ./config/config.properties -f ./data/target_file_names.csv -c 251 -n 11 -ld false
+
+Note that the output went to the screen. To make it useful you want to put it in a file. The
+easiest way to do this is to simply redirect into a file as shown below.
+
+Note, we have encoded the key signature properties in the target signature file name to avoid accidentally
+getting them wrong when we use this data in matching mode. The resulting file has the same contents that
+formerly spewed by on the screen, minus any error or informational messages.
+
+   java -jar ./target/fld.jar -p ./config/config.properties -f ./data/target_file_names.csv -c 251 -n 11 -ld false > target_sigs_251_11.csv
+
+
+
+
+Try Out Matching Mode
+
+The files in the ./data/search_ld/ are mostly variants of the files in ./data/target_ld/. There is 1005.txt
+but also 1005_1.txt, 1005_1.txt, etc. Variants have chunks of lines deleted or duplicated, random words
+deleted, etc.  (You will be able to see about how different they are from the matching results, which, after
+all, is the point of this exercise.)
+
+We generate a list of these files similarly to how we generated the target list.
+
+    ls -rtd ./data/search_ld > search_file_names.csv
+
+
+Now, we look for matches to the search files among the target signatures. Note the input file is what we just
+listed, the target file is the signature file generated by compression, and the C and N arguments
+are the same as those we used for making the input signatures.
+
+We have also specified -t 0.46. This value is somewhat arbitrary. It ws chosen because some files are changed
+quite a lot and we still want to spot them.
+
+    java -jar target/fld.jar -p ./config/config.properties -f ./data/search_file_names.csv -c 251 -n 11 -ld true -v false -ft ./data/target_sigs_251_11.csv -t 0.46
+
+
+
+
+Notes on Choosing Parameters for Compression and Matching
+
+The importance of these values is obvious once you know how the heuristic works. The signatures
+are extremely compressed thumbnails of the originals. Differences in the signatures reflect analogous
+differences in the files in approximately similar relative locations. Many minor differences will
+wash out but overall but files with numerous minor differences throughout the originals will
+generally result in signatures with minor differences sprinkled throughout. Likewise, the signatures
+of files that are mostly the same but one of which has some added sections in the middle will be
+mostly the same except that the signature of the file with the added sections have proportional
+stretches that do not appear in the other signature.
+
+
+The N Parameter
+
+The signature-generating algorithm moves from the beginning of the input to the end, considering only
+restricted neighborhoods of the input when it decides whether to output a character of the
+signature. Therefore, the effect of any given region of input can only affect a limited are of the
+generated signature. The parameter N is the width of the neighborhood. The first neighborhood runs
+from positions 0 to N-1, the next from 1 to N, the third from 2 to N+1, and so on.
+
+The value of N defines how far the effect of a given character of input can be felt. Larger N is
+makes the signatures more sensitive to small changes.  A small N makes the signatures less likely
+to be affected by tiny changes, but if the N is too small, the distribution characters in the output
+is lumpier, resulting in lower accuracy for a given signature length. It's a trade-off.
+Values in the low to middle teens seem to work well for most purposes.
+
+The C Parameter
+
+C is the most important parameter. The chance that a character of signature will be
+emitted for a given neighborhood is approximately 1/C. Therefore, the overall size
+of the signatures will be approximately 1/C the size of the input text.
+
+A useful value of C might be anywhere from less than 100 to 1500 or more depending upon
+the application goal and the size of the input data. For reasons that are explained
+elsewhere, estimating LD will be faster than computing an exact value by a factor that
+is approximately the square of the compression rate.
+
+For example, on a 3.0 GHZ laptop, it takes about 0.8 seconds to compute the true LD of a
+pair of 24KB text files. This is prohibitively slow for many purposes, despite the
+modest file size. In comparison, the rate for estimating LD of files of this size from
+signatures created at a compression rate of 251 is about 71,000 pairs per second,
+which is a six-figure speedup in exchange for a somewhat less accurate result.
+
+Expressed the other way around, if for your application the practical file size limit for
+computing the true LD of text documents is X, the practical size limit for estimating
+the LD will be CX. In the example above, if the execution time of 0.8 second is the
+upper limit of what is tolerable, the size limit for estimating LD would be 251 times
+larger or about 6MB. (24KB * 251 = 6024KB = 6.024MB)
+
+Using different values of C for successive matching operations can be useful. Files can
+be matched quickly using a relatively high value of C, and then more precise estimates
+can be obtained for the files identified as being related by use of a lower C value.
+
+Many variations of this strategy are possible.
+
+
+The Output Character Set
+
+The set of output characters is given in a string that has exactly one occurrence of each character.
+The order does not matter, but it must be consistent for compression and matching phases.
+Repeating a character will result in that character showing up disproportionately often in the output.
+
+The default set has consists of the upper and lower case alphabetic characters, all ten numerals,
+and most of the punctuation and other familiar ASCII characters on the keyboard. Characters that might
+be confusing in a CSV file are excluded for convenience, e.g. the comma, tab, newline, backslash, etc.
+
+There are 85 characters in the default set. You can change the set in the properties file or on
+the command if you wish. In general, the larger the set, the better unless it leads to confusion.
+As the program is Java, Unicode characters could presumably be included but this has not been
+tested.
+
+
+
+Some Things That Can Go Wrong
+
+Out of Memory Failures
+
+If you run low on memory, Java lets you know by crashing. Should this happen, you can use the Java memory
+options -Xmx and -Xms. An example follows which starts the JVM with 2GB and lets the memory grow to 4GB.
+
+java -Xmx=4000m  -Xms=2000m -jar target/fld.jar -p ./config/config.properties -f ./data/search.csv -c 251 -n 11 -ld true -ft ./data/target.csv -t 0.46
+
+The heuristic itself doesn't use excessive memory, but you may run into this problem with the Demo, which
+computes LD for large files, or if you use very large sets of target signatures.
+
+
+
+Nothing Seems to Match
+
+If you attempt to run in matching mode with different parameters from those used to generate the target signatures,
+nothing will match. The -c, -n, and -ch values need to be exactly the same for both phases. You probably did
+not change the -ch from its default, so check the c and n values.
+
+
+Matching Is Low Quality Or Matching Is Extremely Slow
+
+These problems can be the inverse of each other and can be attacked with the same general approach.
+
+Poor matching quality can be caused by using a value for C that is too high for the input and
+target file sizes. Check whether your settings result signatures of trivial size.
+Note that the signature size will be on average approximately equal to the file size divided by C, but
+there is considerable variance. For most purposes you will want the expected length of the signatures to
+be at least 100. Signature of a kilobyte or more can still give reasonably fast performance.
+
+Too low a value for C will yield such large signatures that matching slows to a crawl or even crashes
+for lack of memory.
+
+The problem is that one C does not fit all purposes or file sizes
+
+For serious use of this utility, you will often want to sort the input files and target files
+into buckets on the basis of file size and use different compression rates for the buckets.
+This is reasonable because for basic matching you will rarely be concerned with the LD of files that
+are of wildly different sizes. If your buckes partition the range of files sizes, you are likely
+to miss files that happen to be near a boundary. For this reason, you will probably want to overlap
+the buckets so that files of significantly different size will still paired against each other.
+
+This technique can be combined with  the use of fast, coarse matching to find candidates, followed
+by a finer grained matching using lower values of C to get a more accurate estimate for files
+that have been identified as having probably being related.
+
+Details on how to filter filenames according to the size of the files is beyond the scope of this
+document, but the process is not difficult. It can be done using the standard Unix command
+line utilities, utility languages such as Awk or Perl, or even a high-level language such as Python.
+
+
+

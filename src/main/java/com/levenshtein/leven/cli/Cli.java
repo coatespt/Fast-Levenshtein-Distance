@@ -26,9 +26,9 @@ import static java.lang.Integer.valueOf;
  Important errors
 
  TODO: Estimates are highly accurate when the files are in fact related. They are exact when
-    the files are the same but about 0.7 of what they should be when the files are totally
-    unrelated.  This should be fixable. It might just mean that the correction factor for length of
-    signature is being misapplied.
+    the files are the same, only slightly off when the files are almost the same, but deteriorate
+    to about 0.7 of the true LD for files that are totally unrelated.  This should be fixable.
+     It might just mean that the correction factor for length of signature is being misapplied.
 
  TODO: Check out the significance computation. It seems poorly thought out.
 
@@ -52,20 +52,51 @@ import static java.lang.Integer.valueOf;
  TODO: Implement multi-threading for compression. Would probably increase throughput by several x.
     Frank says this is low priority.
 
+ Testing
+  TODO:  Input from stdin has not been tested
+
+  TODO: Test with some other document types such as MS Word .doc files, PDF's, etc.
+
  Statistical data gathering not necessarily part of CLI but probably essential for the paper.
 
- TODO: Get a data set for matching accuracy as a function of N. This is important, as N has two big effects
-    on accuracy: (1) Small N is less sensitive to minor differences as each can bleed out to at most
-    N-1 character distance away. (2) On the other hand small N results in a low cardinality of
-    neighborhood hash values and thus less pseudo-randomness in the signatures. Verify that (2) is
-    in fact correct. There is a RollingHash test class with the basics already.
+ TODO: Make set A: large unrelated files of uniform size
 
- TODO: Run the compression for a range of compression rates and get rate as a function of compression.
-    I'm betting it makes almost no difference.
+ TODO: Make set B: Take one file from A and mutate it into a set of related files of similar size
 
- TODO: Get a data set for significance as as a function of compression rate.
-    Run the same set of files with a range of compression rates?
-    We could probably do this from the existing test set.
+ TODO: Put the disk type in the implementation notes!
+
+ TODO: Measure compression speed
+    Do the same test for a series of compression values.
+    Use A and Set B as input so that file caching does not affect the result.
+    Do the test on the files and do the same test on in-memory data.
+    Use a loop that reads and compresses the files and time
+        The whole thing
+        Just the compression part.
+
+ TODO: Run a dataset for accuracy of the estimate as a function of C over a wide range.
+    Match related files
+    Match unrelated files
+    Accuracy for same-length files
+    Accuracy for different length files.
+
+ TODO: Run a dataset for speed estimate as a function of C over a wide range.
+    Match related files
+    Match unrelated files
+    Accuracy for same-length files
+    Accuracy for different length files.
+
+
+ TODO: Develop a data set for matching accuracy as a function of N which has two big effects on accuracy:
+    (1) Small N is less sensitive to minor differences as each can bleed out to at most
+    N-1 character distance away.
+    (2) On the other hand small N results in a low cardinality of neighborhood hash values and thus
+    less pseudo-randomness in the signatures.
+    Verify that (2) is in fact correct. There is a RollingHash test class with the basics already.
+
+ TODO: Run the compression as a function of N. Pretty sure it makes not difference, but verify.
+
+ TODO: test matching time as a function of C over a wide range of C and file size.
+    Does this need to be done for both related and unrelated files?
 
  TODO: Explain why the compression rates make such a difference to the output character distribution.
 
@@ -86,7 +117,7 @@ import static java.lang.Integer.valueOf;
  *  of a body of text is characteristic of a language. (Or so I understand.) It should be different
  *  for different human languages and different types of binary data. Investigate this.
  *
-
+ https://towardsdatascience.com/non-negative-matrix-factorization-for-image-compression-and-clustering-89bb0f9fa8ee
  */
 public class Cli {
     static String ARG_DASHES = "-";

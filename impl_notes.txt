@@ -1,0 +1,26 @@
+
+This document contains implementation note for the Fast Levenshtein Estimate tool.
+It is an opensource project and is available on Github without charge.
+
+The program has a simple command-line interface (CLI) that is intended to run on the
+Unix or Linux command line in the standard Unix pipeline style. The program reads its
+CSV input from a file or from standard input (stdin) and writes its output to stdin,
+also as lines of CSV.
+
+There is no graphical interface.
+
+The program is written entirely in Java 11 and compiled using Maven 3.6.3 using OpenJDK 64-Bit Java
+version: 11.0.11. Development was done on the PopOS version of Ubuntu, "linux" version:
+"5.11.0-7620-generic", arch: "amd64", family: "unix".
+
+That said, the source code is generic Java using no advanced features, and should
+be forgiving about attempts to compile under earlier Java versions. As a Java program, the
+jar file that results from building should run any operating system that supports the
+appropriate Java JRE.
+
+The project can be cloned using git@github.com:coatespt/Fast-Levenshtein-Distance.git
+and can be built on the command line using Maven mvn or in any Java IDE such as
+Eclipse or Intellij Idea. See details for downloading, building, and running in the file
+manual.txt
+
+
