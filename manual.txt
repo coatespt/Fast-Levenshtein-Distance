@@ -238,7 +238,7 @@ The following command line executes on sample data supplied with the download. W
 target signatures from the files located in ./data/target_ld. The -rtd argument causes the
 relative path to be included in the filename.
 
-    ls -rtd ./data/target_ld > target_file_names.csv
+    ls -rtd ./data/target_ld/* > target_file_names.csv
 
 This will produce a file target_file_names.csv with contents something like the following:
 

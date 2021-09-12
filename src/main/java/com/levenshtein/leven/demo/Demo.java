@@ -72,7 +72,7 @@ public class Demo {
     static int MaxBits = 39;
     static int Seed = 12345;
     static int N = 17;
-    static int C = 251;
+    static int C = 103;
     static String config = "./config/demo.properties";
     private String flag = null;
     private int c = C;
@@ -160,9 +160,9 @@ public class Demo {
     protected void createSigs(String indir) throws Exception {
         log.info("createSigs() starting");
         String firstLine = null;
-        int TEST_ITERATIONS = 500;
+        int TEST_ITERATIONS = 2000;
         double totalScaledError = 0;
-        System.out.println(logHeaders());
+        System.out.println(logHeadersAlt());
         for (int i = 0; i < inputFileList.size(); i++) {
             long ct = 0;
             for (int j = i + 1; j < inputFileList.size(); j++) {
@@ -192,6 +192,7 @@ public class Demo {
                 int expectedForRandom = sd.expectedDistanceForSigs(cont1.length(), cont2.length());
                 FileSignature fs1 = new FileSignature(f1, cont1.length(), c, n, getCompressor().chars, sig1);
                 FileSignature fs2 = new FileSignature(f2, cont2.length(), c, n, getCompressor().chars, sig2);
+
                 int est = sd.getLDEst(fs1, fs2, sd.getLD(sig1, sig2));
 
                 // this is fast--do it many times to get a rate.
@@ -200,16 +201,31 @@ public class Demo {
                     sd.getLD(sig1, sig2);
                 }
                 end = new Date();
+                long seconds = end.getTime()-start.getTime();
                 double sigLDRateSec = FileAndTimeUtility.rateSec(TEST_ITERATIONS, start, end);
+                if(seconds == 0){
+                   System.err.println("Oh no!");
+                }
 
                 //  TODO Verify that the calculation match what is done in the CLI and review the error
                 // 		calculations (which have no analog in the CLI, of course.)
-                //
+                //  TODO: Use the declared value--this is the shrinkage for a signature
                 double corrected = est / 1.3d;
 
+                // The error needs to be scaled to the ratio of the LD to the size of the strings.
+                // e.g an estimate of 10 when the actual difference is 100 sounds bad, but if the strings
+                // are a megabyte it's amazingly perfect.
+                // TODO: But is the the right calculation? Seems close...
+
+                // The mean of the two sizes? Does that make sense?
+                double ldToSize = act/((longerOriginal+shorterOriginal)/2d);
+                double ldAbsError = corrected/act;
+                double scaledToSize = ldAbsError * ldToSize;
+
+                scaledToSize = ((int)(scaledToSize*1000))/1000d;
                 ct++;
-                System.out.println( logLine(f1, f2, longerOriginal, shorterOriginal,
-                                expectedForRandom, act, est, (int) corrected,
+                System.out.println( logLineAlt(f1, f2, longerOriginal, shorterOriginal,
+                                expectedForRandom, act, est, (int) corrected, scaledToSize,
                                 fileLDdRateSec, sigLDRateSec, firstLine));
             }
         }
@@ -217,7 +233,7 @@ public class Demo {
 
     private String logHeaders() {
         StringBuffer sb = new StringBuffer();
-        sb.append("FILE 1,\t");
+        sb.append("FILE 1,\t\t");
         sb.append("FILE 2,\t");
         sb.append("FLEN 1,\t");
         sb.append("FLEN 2,\t");
@@ -228,6 +244,7 @@ public class Demo {
         sb.append("CORRECTED EST,\t");
         sb.append("RAW ERR,\t");
         sb.append("CORRECTED ERR,\t");
+        sb.append("SCALED TO ORIG,\t");
         sb.append("FILE LD/sec,\t");
         sb.append("SIG LD/sec\t");
         sb.append("SPEEDUP,\t");
@@ -235,10 +252,57 @@ public class Demo {
         return sb.toString();
     }
 
+    private String logHeadersAlt() {
+        StringBuffer sb = new StringBuffer();
+        sb.append("CALC'D LD,");
+        sb.append("RAW EST,");
+        sb.append("CORRECTED EST,");
+        sb.append("RAW ERR,");
+        sb.append("CORRECTED ERR,");
+        sb.append("SCALED TO ORIG,");
+        sb.append("SPEEDUP");
+        return sb.toString();
+    }
+
+    private String logLineAlt(String f1, String f2, int lgrOrig, int shtrOrig,
+                           int expctd, int act, int est, int correctedEst, double scaledToSize,
+                           double ldRateSec, double estRateSec, String firstLine) {
+        StringBuffer sb = new StringBuffer();
+        // actual LD`
+        sb.append(act);
+        sb.append(",");
+        // estimated
+        sb.append(est);
+        sb.append(",");
+        // corrected estimate
+        sb.append(correctedEst);
+        sb.append(",");
+        // raw error
+        double e = (1 - Math.round(((double) est / act) * 1000)) / 1000.0;
+        sb.append(e);
+        sb.append(",");
+        // corrected estimate
+        double v = 1-(double) correctedEst / act;
+        v = Math.round(v * 1000) / 1000.0;
+        sb.append(v);
+        sb.append(",");
+        // scaled to size
+        sb.append(scaledToSize);
+        sb.append(",");
+        sb.append(Math.round(estRateSec * 1000.0) / 1000.0);
+        sb.append(",");
+        // estimate/second
+        double spdup=(int)((estRateSec / (double)ldRateSec));
+        sb.append(spdup);
+        sb.append("");
+        return sb.toString();
+    }
+
+
     int ct = 0;
 
     private String logLine(String f1, String f2, int lgrOrig, int shtrOrig,
-                           int expctd, int act, int est, int correctedEst,
+                           int expctd, int act, int est, int correctedEst, double scaledToSize,
                            double ldRateSec, double estRateSec, String firstLine) {
         StringBuffer sb = new StringBuffer();
         sb.append(++ct);
@@ -271,12 +335,17 @@ public class Demo {
         sb.append(correctedEst);
         sb.append(",\t\t\t");
         // Raw error -- uncorrected estimate over actual
-        sb.append(Math.round(((double) est / act) * 10000) / 10000.0);
+        double e = (1 - Math.round(((double) est / act) * 1000)) / 1000.0;
+        //sb.append(Math.round(((double) est / act) * 10000) / 10000.0);
+        sb.append(e);
         sb.append(",\t\t");
         // corrected error -- corrected estimate/actual
-        double v = (double) correctedEst / act;
-        v = Math.round(v * 10000) / 10000.0;
+        double v = 1-(double) correctedEst / act;
+        v = Math.round(v * 1000) / 1000.0;
         sb.append(v);
+        sb.append(",\t\t\t");
+        // error scaled to size of originals
+        sb.append(scaledToSize);
         sb.append(",\t\t\t");
         // LD Comparisons for rhe real files, per second
         sb.append(Math.round(ldRateSec * 1000.0) / 1000.0);
@@ -284,7 +353,9 @@ public class Demo {
         // LD Estimates from signatures, per second
         sb.append(Math.round(estRateSec * 1000.0) / 1000.0);
         sb.append(",\t");
-        sb.append(Math.round((estRateSec / ldRateSec) * 1000.0) / 1000.0);
+        // Speedup
+        double spdup=(int)((estRateSec / (double)ldRateSec));
+        sb.append(spdup);
         sb.append(",\t");
         // Descriptions of file changes
         sb.append(firstLine.replaceAll(",", " "));
@@ -478,13 +549,11 @@ public class Demo {
         sb.append("\n");
         sb.append("\t\t[CORRECTED ERR]\tA constant applied to the results");
         sb.append("\n");
-        sb.append("\t\t[SCALED ERR]\tError scaled to file sizes.");
+        sb.append("\t\t[SCALED TO ORIG]\tError scaled to file sizes.");
         sb.append("\n");
-        sb.append("\t\t[COR'TD SCALED ERR]\tError both corrected and scaled.");
+        sb.append("\t\t[FILE LD/sec]\tNumber of 25K LD computations/second (It's < 1)");
         sb.append("\n");
-        sb.append("\t\t[ACTUAL LD/sec]\tNumber of 25K LD computations/second (It's < 1)");
-        sb.append("\n");
-        sb.append("\t\t[EST LD/sec]\testimate computations per second.");
+        sb.append("\t\t[SIG LD/sec]\testimate computations per second.");
         sb.append("\n");
         sb.append("\t\t[SPEEDUP]\tSpeedup factor for estimate v full LD computation.");
         sb.append("\n");

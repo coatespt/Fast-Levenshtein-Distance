@@ -11,6 +11,10 @@ import static java.lang.Integer.valueOf;
 /**
  *
  * Command Line Interface
+ * This program is intended to run in standard Unix pipeline style, accepting
+ * CSV input from either a file or from standard-in and writing output to standard-in
+ * allowing the input to be directed to a file or piped into another program as input.
+ *
  * <p>
  * Compression mode: takes list of files from filenames given on command line
  * or one-by-one from stdin. The output is csv lines on stout. This output can be used
@@ -23,7 +27,7 @@ import static java.lang.Integer.valueOf;
  *
 *
 
- Important errors
+ Important errors or weaknesses
 
  TODO: Estimates are highly accurate when the files are in fact related. They are exact when
     the files are the same, only slightly off when the files are almost the same, but deteriorate
@@ -32,17 +36,17 @@ import static java.lang.Integer.valueOf;
 
  TODO: Check out the significance computation. It seems poorly thought out.
 
- TODO: The test TestRollingHash.testCompressionDistRH() shows large differences in the distribution
-    of output characters for values of C that are not very different.
-    Likewise min/max used characters. It only uses one value of N.
-    Figure out why. It could be bone-head dumb. If it's not, write a utility feature to
+ TODO: The test TestRollingHash.testCompressionDistRH() shows a surprising variation in the
+    lumpiness of the distribution of output characters for values of C that are not very different.
+    Likewise the min/max used characters.
+    Figure out why. It could be dumb. If it's not, write a utility feature to
     generate the best C and N combinations for ranges of compressions.
 
  Possible errors
 
  TODO: Deal with zero-length signatures that may result from tiny files and big C values.
 
- CLI Enhancements
+ Possible Enhancements
 
  TODO: Should have option for input from pre-computed signatures similar to targets from file?
 
@@ -52,8 +56,15 @@ import static java.lang.Integer.valueOf;
  TODO: Implement multi-threading for compression. Would probably increase throughput by several x.
     Frank says this is low priority.
 
+ TODO: Effective use requires that files be in bucket of similar size. Work out a command-line
+    pipeline to bucket files by size into overlapping buckets.
+
+ TODO: Cross matching. Break files into equal size pieces and do the LD estimates for the
+    components. This would allow files with areas with a high degree of similarity in a limited
+    region to be more readily recognized.
+
  Testing
-  TODO:  Input from stdin has not been tested
+  TODO:  Input from stdin has not been tested--only input from files of filenames.
 
   TODO: Test with some other document types such as MS Word .doc files, PDF's, etc.
 
@@ -62,16 +73,6 @@ import static java.lang.Integer.valueOf;
  TODO: Make set A: large unrelated files of uniform size
 
  TODO: Make set B: Take one file from A and mutate it into a set of related files of similar size
-
- TODO: Put the disk type in the implementation notes!
-
- TODO: Measure compression speed
-    Do the same test for a series of compression values.
-    Use A and Set B as input so that file caching does not affect the result.
-    Do the test on the files and do the same test on in-memory data.
-    Use a loop that reads and compresses the files and time
-        The whole thing
-        Just the compression part.
 
  TODO: Run a dataset for accuracy of the estimate as a function of C over a wide range.
     Match related files

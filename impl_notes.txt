@@ -10,13 +10,15 @@ also as lines of CSV.
 There is no graphical interface.
 
 The program is written entirely in Java 11 and compiled using Maven 3.6.3 using OpenJDK 64-Bit Java
-version: 11.0.11. Development was done on the PopOS version of Ubuntu, "linux" version:
-"5.11.0-7620-generic", arch: "amd64", family: "unix".
-
-That said, the source code is generic Java using no advanced features, and should
+version: 11.0.11. That said, the source code is generic Java using no advanced features, and should
 be forgiving about attempts to compile under earlier Java versions. As a Java program, the
 jar file that results from building should run any operating system that supports the
 appropriate Java JRE.
+
+Test results were obtained on a System-76 laptop running the Pop!_OS version 21.04 codename hirsuit.
+This is a Pop version of Ubuntu, "linux" version: "5.11.0-7620-generic", arch: "amd64", family: "unix".
+The system used for testing has an Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz and a
+Samsung SSD 860 EVO 1TB SSD drive.
 
 The project can be cloned using git@github.com:coatespt/Fast-Levenshtein-Distance.git
 and can be built on the command line using Maven mvn or in any Java IDE such as

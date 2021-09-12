@@ -1,0 +1,163 @@
+
+data/demo/input-1/xaa to xaz  	26 files of size 25,600  that are all sections of
+the Gutenberg A History of China by tWolfram Eberhard 
+
+
+data/demo/input-2/xaa  file with nine variants of the first 25.6K of The Histroy of China  	
+	25602 xaa
+	25643 xaa-1
+	24239 xaa-2
+	24458 xaa-3
+	19055 xaa-4
+	25327 xaa-5
+	24815 xaa-6
+	25347 xaa-7
+	22899 xaa-9
+
+data/many/china/ contains 44 files of size 25600 plus the file that they are 
+	segments of chnbl10.txt, which is size 1134400
+
+
+data/many/vern/ contains 44 files of size 25600 plus the file that they are 
+milnd11.txt, size 1134902
+
+
+data/search_ld is 16 files some of which are variations of another file, such as 
+	1005.txt, 1005_1.txt, 1006_3.txt, etc.
+	File sizes range from 796389 to 17,295,670
+
+  2017047 1005_1.txt
+   796389 1005_2.txt
+  1667051 1005_3.txt
+  2085945 1005.txt
+  2338242 1ddcl10.txt
+ 16233200 1vkip11_1.txt
+ 15713510 1vkip11_2.txt
+ 10521000 1vkip11_3.txt
+ 17195670 1vkip11.txt
+  1303430 1ws1010_1.txt
+  1263310 1ws1010_3.txt
+  1396000 1ws1010.txt
+  5891970 2hcth10_1.txt
+  5855120 2hcth10_3.txt
+  8960090 2hcth10.txt
+  5846664 dinfr09.txt
+
+data/target_ld/ is 19 files ranging from 34,590 to 1,719,567
+  275559 01tcb10.txt
+  552010 0ddc809a.txt
+  120907 0ws1810.txt
+  119955 0ws2410.txt
+  279300 1bskt10.txt
+  268289 1ddcn10.txt
+  307027 1labt10.txt
+  888776 1lllm11.txt
+  622039 1mrar10.txt
+  804503 1noam10.txt
+ 1210227 1vapd10.txt
+ 1719567 1vkip11.txt
+  406732 1whlc10.txt
+  139600 1ws1010.txt
+  136516 1ws1411.txt
+  896009 2hcth10.txt
+   34590 2lcbd10.txt
+  757444 2lofl10.txt
+  631026 2malay10.txt
+
+data/compress_targets.csv  is a list of the 36 files in data/target_ld and data/search_ld
+cat compress_targets.csv | xargs wc | awk 'BEGIN{chars=0;lines=0}{chars = chars + $3; lines = lines + $2 }END{print chars; print lines;  print NR;}'
+data/compress_targets.csv       36 files, 40,157,074 bytes, 6,928,714 lines
+
+The following are the times recorded for creating signatures for the 36 files, 40.1MB of files in compress_targets.csv
+
+java -jar ./target/fld.jar -p ./config/config.properties -f ./data/compress_targets.csv -c 50 -n 17 -ld false > c_targets_50_17.csv  1.217
+
+java -jar ./target/fld.jar -p ./config/config.properties -f ./data/compress_targets.csv -c 100 -n 17 -ld false > c_targets_100_17.csv 1.262
+
+java -jar ./target/fld.jar -p ./config/config.properties -f ./data/compress_targets.csv -c 200 -n 17 -ld false > c_targets_200_17.csv 1.170
+
+java -jar ./target/fld.jar -p ./config/config.properties -f ./data/compress_targets.csv -c 300 -n 17 -ld false > c_targets_300_17.csv 1.69
+
+java -jar ./target/fld.jar -p ./config/config.properties -f ./data/compress_targets.csv -c 400 -n 17 -ld false > c_targets_400_17.csv 1.162
+
+java -jar ./target/fld.jar -p ./config/config.properties -f ./data/compress_targets.csv -c 500 -n 17 -ld false > c_targets_500_17.csv 1.762
+
+java -jar ./target/fld.jar -p ./config/config.properties -f ./data/compress_targets.csv -c 600 -n 17 -ld false > c_targets_600_17.csv 1.146
+
+java -jar ./target/fld.jar -p ./config/config.properties -f ./data/compress_targets.csv -c 700 -n 17 -ld false > c_targets_700_17.csv 1.242
+
+java -jar ./target/fld.jar -p ./config/config.properties -f ./data/compress_targets.csv -c 800 -n 17 -ld false > c_targets_800_17.csv 1.152
+
+java -jar ./target/fld.jar -p ./config/config.properties -f ./data/compress_targets.csv -c 900 -n 17 -ld false > c_targets_900_17.csv 1.272
+
+java -jar ./target/fld.jar -p ./config/config.properties -f ./data/compress_targets.csv -c 1000 -n 17 -ld false > c_targets_1000_17.csv 1.197
+
+java -jar ./target/fld.jar -p ./config/config.properties -f ./data/compress_targets.csv -c 1100 -n 17 -ld false > c_targets_1100_17.csv 1.197
+
+java -jar ./target/fld.jar -p ./config/config.properties -f ./data/compress_targets.csv -c 1200 -n 17 -ld false > c_targets_1200_17.csv 1.241
+
+java -jar ./target/fld.jar -p ./config/config.properties -f ./data/compress_targets.csv -c 1300 -n 17 -ld false > c_targets_1300_17.csv 1.168
+
+java -jar ./target/fld.jar -p ./config/config.properties -f ./data/compress_targets.csv -c 1400 -n 17 -ld false > c_targets_1400_17.csv 1.184
+
+java -jar ./target/fld.jar -p ./config/config.properties -f ./data/compress_targets.csv -c 1500 -n 17 -ld false > c_targets_1500_17.csv 1.185
+
+
+Run the following (same as runs above) 11 times in a row with the same arguments, 1500/17
+java -jar ./target/fld.jar -p ./config/config.properties -f ./data/compress_targets.csv -c 1500 -n 17 -ld false > c_targets_1500_17.csv 1.185
+1.154
+1.190
+1.155
+1.231
+1.169
+1.198
+1.204
+1.171
+1.243
+1.180
+1.196
+
+
+The big list,  allfiles.txt has 18,216 files with 7,166,984,763 byes (7.167 GB) of data. Average file size 393,444.
+The following runtimes were captured for signature generation for all files.
+
+Note there is little variation in the time to process across the compression range of c=50 to c=1500
+
+time execution of wc on the same data:
+
+java -jar ./target/fld.jar -p ./config/config.properties -f ./data/allfiles.txt -c 50 -n 17 -ld false > allfiles_50_17.csv            4m44      284
+
+java -jar ./target/fld.jar -p ./config/config.properties -f ./data/allfiles.txt -c 100 -n 17 -ld false > allfiles_100_17.csv          4m37      261
+
+java -jar ./target/fld.jar -p ./config/config.properties -f ./data/allfiles.txt -c 200 -n 17 -ld false > allfiles_200_17.csv          4m40      264
+
+java -jar ./target/fld.jar -p ./config/config.properties -f ./data/allfiles.txt -c 300 -n 17 -ld false > allfiles_300_17.csv          4m49      273   * note wc ran during this
+
+java -jar ./target/fld.jar -p ./config/config.properties -f ./data/allfiles.txt -c 400 -n 17 -ld false > allfiles_400_17.csv          4m26      266
+
+java -jar ./target/fld.jar -p ./config/config.properties -f ./data/allfiles.txt -c 500 -n 17 -ld false > allfiles_500_17.csv          4m39      279
+
+java -jar ./target/fld.jar -p ./config/config.properties -f ./data/allfiles.txt -c 600 -n 17 -ld false > allfiles_600_17.csv          4m35      275
+
+java -jar ./target/fld.jar -p ./config/config.properties -f ./data/allfiles.txt -c 700 -n 17 -ld false > allfiles_700_17.csv          4m28      268
+
+java -jar ./target/fld.jar -p ./config/config.properties -f ./data/allfiles.txt -c 800 -n 17 -ld false > allfiles_800_17.csv          4m39      279
+
+java -jar ./target/fld.jar -p ./config/config.properties -f ./data/allfiles.txt -c 900 -n 17 -ld false > allfiles_900_17.csv          4m40      280
+
+java -jar ./target/fld.jar -p ./config/config.properties -f ./data/allfiles.txt -c 1000 -n 17 -ld false > allfiles_1000_17.csv        4m34      274
+
+java -jar ./target/fld.jar -p ./config/config.properties -f ./data/allfiles.txt -c 1100 -n 17 -ld false > allfiles_1100_17.csv        4m43      283
+
+java -jar ./target/fld.jar -p ./config/config.properties -f ./data/allfiles.txt -c 1200 -n 17 -ld false > allfiles_1200_17.csv        4m43      283
+
+java -jar ./target/fld.jar -p ./config/config.properties -f ./data/allfiles.txt -c 1300 -n 17 -ld false > allfiles_1300_17.csv        4m43      283
+
+java -jar ./target/fld.jar -p ./config/config.properties -f ./data/allfiles.txt -c 1400 -n 17 -ld false > allfiles_1400_17.csv        4m38      283
+
+java -jar ./target/fld.jar -p ./config/config.properties -f ./data/allfiles.txt -c 1500 -n 17 -ld false > allfiles_1500_17.csv        4m47      287
+
+
+
+
+
