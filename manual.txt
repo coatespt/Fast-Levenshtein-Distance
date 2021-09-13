@@ -1,7 +1,7 @@
 
 Fast Levenshtein Estimate Tool Manual
 
-This manual describes the basic functions of the program, how to use
+This manual introduces the basic functions of the program, how to use
 the CLI, how to download and build it, how to run it, the purposes of the
 command line and property file arguments, and more advanced tips on how
 trouble-shoot and use it effectively.
@@ -30,20 +30,20 @@ The tool is used in two modes: signature generation and file matching.
 In signature generation mode, the CLI takes as input a list of fully-qualified
 filenames. It takes each filename in turn, reads the indicated file, and generates
 one line of CSV output. An output line contains the name of the original file,
-its length, the three parameters that define the signature generation, and
+its length, three parameters that define the signature generation, and
 the generated signature.
 
-In matching mode, the CLI reads a file of target signatures (as produced
-by signature generation mode) into memory. It then takes a list of fully-qualified
-filenames as input, either from a file or from stdin. For each file named in the
-input, a signature is generated and paired with each of the target signatures.
-If the estimated LD of a file pair is deemed significantly lower than would be
-expected for unrelated text files of those respective lengths, a line of CSV
-output is generated.
+In matching mode, the CLI reads a file of target signatures (as produced by signature
+generation mode) into memory. It then takes a list of fully-qualified filenames as input,
+either from a file or from stdin. For each file named in the input, a signature is
+generated and paired with each of the target signatures. If the estimated LD of a file
+pair is deemed significantly lower than would be expected for unrelated text files of
+those respective lengths, a line of CSV output is generated.
 
 A line of the matching output gives the name of the source and target files, the
 estimated LD of the pair, the LD that would be expected for unrelated files, the
 "significance" of the result and some other useful information.
+
 
 
 Estimated LD and The Threshold of Significance, T
@@ -73,24 +73,24 @@ variations on the same file. A typical example in this range might be an origina
 text document paired with a version of itself marked up with HTML.
 
 
+
 Getting the Source Code
 
-If you are reading this file, you have probably already obtained the project
-directory that contains source code, documentation, and test data. If not, you
-can clone the project directory from Github using "git clone" and the
-following URL.
+If you are reading this file, you have probably already obtained the project directory that
+contains source code, documentation, and test data. If not, you can clone the project directory
+from Github using "git clone" and the following URL.
 
     git@github.com:coatespt/Fast-Levenshtein-Distance.git
 
-Alternatively, you can download the project as a zip file. Go to the following
-Github page to get the zip file.
+Alternatively, you can download the project as a zip file. Go to the following Github page to
+get the zip file.
 
     https://github.com/coatespt/Fast-Levenshtein-Distance
 
-Put the zip file in the directory where you keep your projects. Unzipping the file
-will create a directory called Fast-Levenshtein in the directory where you unzip.
-Similarly, if you choose to git-clone the project, "cd" to your projects directory
-and execute the clone command below to get the same directory a zip file would produce.
+Put the zip file in the directory where you keep your projects. Unzipping the file will create a
+directory called Fast-Levenshtein in the directory where you unzip. Similarly, if you choose to
+git-clone the project, "cd" to your projects directory and execute the clone command below to
+get the same directory a zip file would produce.
 
      git clone  git@github.com:coatespt/Fast-Levenshtein-Distance.git
 
@@ -98,63 +98,56 @@ and execute the clone command below to get the same directory a zip file would p
 
 Building the Executable Jar File
 
-The easiest way to build is to use Maven (mvn) from the command line. This will
-produce an executable Java jar file located in the Fast-Levenshtein/target
-directory.
+The easiest way to build is to use Maven (mvn) from the command line. This will produce an executable
+Java jar file located in the Fast-Levenshtein/target directory.
 
-Alternatively, you can load the code into your Java IDE and run it from there. Any
-Java IDE such as Eclipse or Intellij Idea should work fine. All popular IDE's provide
-some way to supply the runtime arguments. The arguments used in running from an IDE
-should be the same as used with the executable jar.
+Alternatively, you can load the code into your Java IDE and run it from there. Any Java IDE such as
+Eclipse or Intellij Idea should work fine. All popular IDE's provide some way to supply the runtime
+arguments. The arguments used in running from an IDE should be the same as used with the executable jar.
 
-If your IDE has Maven enabled, it should also be able to generate an executable jar
-file from within the IDE. The CLI has been built and run with Java 11 but may
-also build with slightly earlier Java versions. Your IDE documentation will include
-instructions on how to build an executable jar file from within the IDE.
+If your IDE has Maven enabled, it should also be able to generate an executable jar file from within
+the IDE. The CLI has been built and run with Java 11 but may also build with slightly earlier Java versions.
+Your IDE documentation will include instructions on how to build an executable jar file from within the IDE.
 
-To build and execute the code from the command line you will need the Java 11
-JDK and Maven 3.6.3 installed. If you already have the jar, to run it you will need
-only Java JRE and not the JDK or Maven. Instructions for installing Java and Maven
-can be found with Google.
+To build and execute the code from the command line you will need the Java 11 JDK and Maven 3.6.3
+installed. If you already have the jar, to run it you will need only Java JRE and not the JDK or Maven.
+Instructions for installing Java and Maven can be found with Google.
 
 Open a shell and use cd to go to the project directory. Then execute the
 following command line.
 
     mvn assembly:assembly -DdescriptorId=jar-with-dependencies -Dmaven.test.skip=true
 
-If all goes well, the first time it runs, Maven will automatically download all the
-libraries, stashing them in a hidden directory in your home directory. It will use
-the stashed libraries in all future builds unless/until some other library or
-library version is specified in the ./pom.xml file. Unless you are developing, there is
-no reason to care about this.
+If all goes well, the first time it runs, Maven will automatically download all the libraries, stashing them
+in a hidden directory in your home directory. It will use the stashed libraries in all future builds
+unless/until some other library or library version is specified in the ./pom.xml file. Unless you are
+developing, there is no reason to care about this.
 
 The jar file that results from a successful build will be found in ./target
 
 
 Some Build Details
 
-By default, Maven runs your JUnit tests and if any tests fail, the jar will not be built.
-To avoid build failure due to a broken tests, you can set the command line option when
-you execute the mvn command. This following argument is specified in the example command
-above.
+By default, Maven runs your JUnit tests and if any tests fail, the jar will not be built. To avoid build
+failure due to a broken tests, you can set the command line option when you execute the mvn command.
+This following argument is specified in the example command above.
 
     -Dmaven.test.skip=false
 
-The jar can be configured to execute any main() that is defined in the source tree. This
-project has two or three mains, one of which is the CLI. A particular main() gets set as
-the entry point if configured to do so under the "manifest" tag in the ./pom.xml file.
-If you open this file with an editor you can see which main() is specified. You should
-not have to change this unless you want to execute the Demo instead of the Cli.
+The jar can be configured to execute any main() that is defined in the source tree. This project has two
+or three mains, one of which is the CLI. A particular main() gets set as the entry point if configured
+to do so under the "manifest" tag in the ./pom.xml file. If you open this file with an editor you can see
+which main() is specified. You should not have to change this unless you want to execute the Demo instead
+of the Cli.
 
-If mvn runs out of memory during the build, it is probably because you ran the tests, which
-run LD on some big files. This can happen because either you did not specify
--Dmaven.test.skip=false or did not specify the argument at all. Maven defaults to running the tests.
+If mvn runs out of memory during the build, it is probably because you ran the tests, which run LD on some
+big files. This can happen because either you did not specify -Dmaven.test.skip=false or did not specify
+the argument at all. Maven defaults to running the tests.
 
-The memory settings for Maven can be adjusted with the MAVEN_OPTS environment variable.
-If you need more memory, you can put the following line in your .profile or just run it by hand in
-the shell you are working from. If you execute it by hand, it will only apply to the shell
-you are using at the time. Putting it in your profile will set it for all subsequently openeed
-shells. The example shown gives mvn up to four gigabytes.
+The memory settings for Maven can be adjusted with the MAVEN_OPTS environment variable. If you need more
+memory, you can put the following line in your .profile or just run it by hand in the shell you are working
+from. If you execute it by hand, it will only apply to the shell you are using at the time. Putting it in
+your profile will set it for all subsequently openeed shells. The example shown gives mvn up to four gigabytes.
 
     export MAVEN_OPTS="-Xmx4g -XX:MaxPermSize=500m"
 
@@ -171,14 +164,14 @@ Running The CLI
 
 Parameters For a Run
 
-There are a total of ten parameters, but some apply only to signature generation. All but
-one of them can be set in a configuration file which by default is ./config/config.properties.
-You are free to specify any file name and location on the command line.
+There are a total of ten parameters, but some apply only to signature generation. All but one of them
+can be set in a configuration file which by default is ./config/config.properties. You are free to
+specify any file name and location on the command line.
 
-When experimenting, it is convenient to keep multiple version of the properties file for
-various settings and encode the key properties into the name. Most of the values rarely change,
-so usually it is enough to encode the compression rate and neighborhood size. For example,
-with C=507 and N=17 you could name the properties file:
+When experimenting, it is convenient to keep multiple version of the properties file for various
+settings and encode the key properties into the name. Most of the values rarely change, so usually it
+is enough to encode the compression rate and neighborhood size. For example, with C=507 and N=17 you
+could name the properties file:
 
     ./confg/config_503_17.properties
 
