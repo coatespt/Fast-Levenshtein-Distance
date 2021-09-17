@@ -31,8 +31,9 @@ import static java.lang.Integer.valueOf;
 
  TODO: Estimates are highly accurate when the files are in fact related. They are exact when
     the files are the same, only slightly off when the files are almost the same, but deteriorate
-    to about 0.7 of the true LD for files that are totally unrelated.  This should be fixable.
-     It might just mean that the correction factor for length of signature is being misapplied.
+    to about 0.7 of the true LD for files that are totally unrelated.
+    Verify that this observation is true.
+    If so, it should be fixable. It could be an artifact of how I'm computing the scores.
 
  TODO: Check out the significance computation. It seems poorly thought out.
 
@@ -47,6 +48,8 @@ import static java.lang.Integer.valueOf;
  TODO: Deal with zero-length signatures that may result from tiny files and big C values.
 
  Possible Enhancements
+
+ TODO: Get rid of all the tiny Gutenberg files and update the allfiles.txt file to match.
 
  TODO: Should have option for input from pre-computed signatures similar to targets from file?
 
@@ -70,23 +73,6 @@ import static java.lang.Integer.valueOf;
 
  Statistical data gathering not necessarily part of CLI but probably essential for the paper.
 
- TODO: Make set A: large unrelated files of uniform size
-
- TODO: Make set B: Take one file from A and mutate it into a set of related files of similar size
-
- TODO: Run a dataset for accuracy of the estimate as a function of C over a wide range.
-    Match related files
-    Match unrelated files
-    Accuracy for same-length files
-    Accuracy for different length files.
-
- TODO: Run a dataset for speed estimate as a function of C over a wide range.
-    Match related files
-    Match unrelated files
-    Accuracy for same-length files
-    Accuracy for different length files.
-
-
  TODO: Develop a data set for matching accuracy as a function of N which has two big effects on accuracy:
     (1) Small N is less sensitive to minor differences as each can bleed out to at most
     N-1 character distance away.
@@ -96,20 +82,19 @@ import static java.lang.Integer.valueOf;
 
  TODO: Run the compression as a function of N. Pretty sure it makes not difference, but verify.
 
- TODO: test matching time as a function of C over a wide range of C and file size.
-    Does this need to be done for both related and unrelated files?
+ TODO: Add statistics output for a target set. We already compute m,md,stdev for the LD's of
+     unrelated files. Should add:
+     A statistic that takes into account file length differences.
+     Longest file, shortest file
+     Longest signture, shortest signature.
+
+ TODO: Compute a list of good compression and N values.
+
 
  TODO: Explain why the compression rates make such a difference to the output character distribution.
 
- TODO: Add statistics output for a target set. We already compute m,md,stdev for the LD's of
-    unrelated files. Should add:
-        A statistic that takes into account file length differences.
-        Longest file, shortest file
-        Longest signture, shortest signature.
-
  TODO: Index of Coincidence might be a good measure of signatures quality. See below this item.
 
- TODO: Compute a list of good compression and N values.
 
  *  https://www.johndcook.com/blog/2021/08/14/index-of-coincidence/
  *  John Cook blog post on "index of coincidence" which is similar to Renyi entropy
