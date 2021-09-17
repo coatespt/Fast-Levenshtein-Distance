@@ -38,18 +38,11 @@ public class SHA256Compressor extends ICompressor {
     // TODO: You can discard the development test. It's just here to see it work.
     public static void main(String args[]) {
         try {
-            // read in a realistic size file.
+            // read in a realistic size file and run SHA on it ITER times.
             String filename = "./data/10001.txt";
-            String longString = FileAndTimeUtility.getFileContents(filename);
 
-            // a million iterations so it takes long enough for a reliable elapsed time.
-            int ITER = 1000000;
-
-            // We want to take a different substring for each neighborhood calculation
-            // This turns out to only a minor speed decrease of using a hard-coded string.
-            int start = 3210;
-            int rollover = 5000;
-            int newPos = 0;
+            // A lot of iterations so it takes long enough for a reliable elapsed time.
+            int ITER = 100000000;
 
             // the neighborhood size, i.e., the length of the string we are hashing
             int n = 17;
@@ -60,28 +53,35 @@ public class SHA256Compressor extends ICompressor {
             String ret = "";
 
             long hash64 = 0;
-            long startTime = (new Date()).getTime();
-            for (int i = 0; i < ITER; i++) {
-                int p1 = start + newPos;
-                int p2 = p1 + n;
-                if (newPos++ > rollover) {
-                    newPos = 0;
-                }
-                input = longString.substring(p1, p2);
-                // Note, just the SHA256 runs at 1.706 million/second
-                byte[] bits64 = getSHA(input);
-                // plus converting 32 bytes to a long adds just a few percent total 1.858 seconds.
-                hash64 = bytesToLong256(bits64);
 
-                // With conversion to string rep of hex value is expensive! 550K/second, i.e. more than double
-                //   the cost of the SHA256 hash. We wouldn't use it anyway, but it's interesting.
-                // ret = toHexString(getSHA(input));
+            long startTime = (new Date()).getTime();
+            int computations=0;
+            while (true) {
+                String longString = FileAndTimeUtility.getFileContents(filename);
+                longString = longString.replaceAll("\\s+", " ");
+
+                int len = longString.length() - n;
+                for (int i = 0; i < len; i++) {
+                    input = longString.substring(i, i + n);
+                    // Note, just the SHA256 runs at 1.706 million/second
+                    byte[] bits64 = getSHA(input);
+                    // plus converting 32 bytes to a long adds just a few percent total 1.858 seconds.
+                    hash64 = Math.abs(bytesToLong256(bits64));
+                    // With conversion to string rep of hex value is expensive! 550K/second, i.e. more than double
+                    //   the cost of the SHA256 hash. We wouldn't use it anyway, but it's interesting.
+                    // ret = toHexString(getSHA(input));
+                    if (computations++ > ITER) {
+                        break;
+                    }
+                }
+                if (computations>ITER){
+                    break;
+                }
             }
             long endTime = (new Date()).getTime();
             long elapsed = endTime - startTime;
             double ratePerSecond = ITER / (double) elapsed * 1000d;
             System.out.println("\n[" + input + "]  hashed to: " + ret + " long:" + hash64 + " in:" + elapsed + " milliseconds = " + ratePerSecond + "/sec");
-
         }
         // For specifying wrong message digest algorithms
         catch (NoSuchAlgorithmException e) {
