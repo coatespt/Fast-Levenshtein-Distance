@@ -43,7 +43,7 @@ public class ScoreDistance {
      * <p></p>
      * factor to adjust the expectation.
      */
-    private double wholeFileRatio = 0.22;
+    private static double wholeFileRatio = 0.22;
 
     /**
      * Amount by which the LD of a pair of equal size plain-generated signatures
@@ -55,13 +55,13 @@ public class ScoreDistance {
      *
      * TODO: This may not be reliable
      */
-    private double sigRatio = 0.30d;
+    private static double sigRatio = 0.30d;
 
     /**
      * Empirical estimate of the amount by which the LD of a pair of equal
      * length plain-generated signatures is smaller than their length.
      */
-    public double getSigRatio() {
+    public static double getSigRatio() {
         return sigRatio;
     }
 
@@ -69,15 +69,15 @@ public class ScoreDistance {
      * Amount by which the LD of a pair of equal length plain-generated
      * signatures is smaller than their length.
      */
-    public void setSigRatio(double sigRatio) {
-        this.sigRatio = sigRatio;
+    public static void setSigRatio(double sigRatio) {
+        sigRatio = sigRatio;
     }
 
     /**
      * Amount by which the LD of a pair of equal length random text
      * strings is smaller than their length.
      */
-    public double getWholeFileRatio() {
+    public static double getWholeFileRatio() {
         return wholeFileRatio;
     }
 
@@ -85,8 +85,8 @@ public class ScoreDistance {
      * Amount by which the LD of a pair of equal length random text strings
      * is smaller than their length.
      */
-    public void setWholeFileRatio(double wholeFileRatio) {
-        this.wholeFileRatio = wholeFileRatio;
+    public static void setWholeFileRatio(double wholeFileRatio) {
+        wholeFileRatio = wholeFileRatio;
     }
 
     /**

@@ -12,11 +12,15 @@ import java.util.Date;
 
 public class SHA256Compressor extends ICompressor {
 
+    private char[] outputChars = null;
+    public SHA256Compressor(int n, int c, char[] outputChars){
+        setC(c);
+        setN(n);
+        this.outputChars=outputChars;
+    }
+
     public static byte[] getSHA(String input) throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance("SHA-256");
-        // digest() method called
-        // to calculate message digest of an input
-        // and return array of byte
         return md.digest(input.getBytes(StandardCharsets.UTF_8));
     }
 
@@ -33,6 +37,31 @@ public class SHA256Compressor extends ICompressor {
         }
 
         return hexString.toString();
+    }
+
+    public String _compress(String str) throws Exception {
+        StringBuffer sb = new StringBuffer();
+        int len=str.length();
+        int maxPos = len-getN();
+        if(maxPos<=0){
+            return "";
+        }
+        for(int i=0; i<maxPos; i++){
+            String neighborhood = str.substring(i,i+getN());
+            byte[] bytes = getSHA(neighborhood);
+            long hl = bytesToLong256(bytes);
+            // coercion to int simply takes the low-order 32 bits which I think is negative if the 32nd bit is set.
+            int hashVal = Math.abs((int) hl * prime);
+            if(hashVal % getC() != 0){
+                continue;
+            }
+            Character chOut = outputChars[hashVal % outputChars.length];
+            sb.append(chOut);
+        }
+        if(PRINT_DIAGNOSTICS){
+            System.out.println(sb);
+        }
+        return sb.toString();
     }
 
     // TODO: You can discard the development test. It's just here to see it work.
@@ -89,7 +118,6 @@ public class SHA256Compressor extends ICompressor {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
     static long bytesToLong256(byte[] bytehash) {
@@ -109,8 +137,4 @@ public class SHA256Compressor extends ICompressor {
         return  accumulator;
     }
 
-    @Override
-    public String compress(String str) {
-        return null;
-    }
 }

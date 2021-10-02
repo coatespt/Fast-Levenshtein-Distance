@@ -2,10 +2,12 @@ package com.levenshtein.leven.demo;
 
 import com.levenshtein.leven.ICompressor;
 import com.levenshtein.leven.ScoreDistance;
+import com.levenshtein.leven.StringCompressorPlainJava;
 import com.levenshtein.leven.StringCompressorRH;
 import com.levenshtein.leven.cli.FileSignature;
 import org.apache.log4j.Logger;
 import utilities.file.FileAndTimeUtility;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -68,8 +70,8 @@ import java.util.Properties;
  */
 public class Demo {
     static Logger log = Logger.getLogger(Demo.class);
-    static int MinBits = 26;
-    static int MaxBits = 39;
+    static int MinBits = 28;
+    static int MaxBits = 36;
     static int Seed = 12345;
     static int N = 17;
     static int C = 103;
@@ -81,6 +83,7 @@ public class Demo {
     private List<String> inputFileList = null;
     private String sigsDir = null;
     private ScoreDistance sd = null;
+    private String hashFunc = "JAVA";
 
     public static void main(String[] args) {
         Demo demo = new Demo();
@@ -137,15 +140,33 @@ public class Demo {
      * @throws Exception
      */
     protected ICompressor getCompressor() throws Exception {
-        if (compressor == null) {
-            StringCompressorRH.chars = "abcdefghijklmnopqrstuvwxsyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()_-+=[]{};:<>.?";
-            ICompressor ic = new StringCompressorRH(n, c,
-                    StringCompressorRH.StringToCharArray(StringCompressorRH.chars),
-                    MinBits, MaxBits, Seed);
-            ic.setN(n);
-            ic.setC(c);
-            compressor = ic;
+        // prime number of output chars
+        String chars = "abcdefghijklnmnoprstuvwxyz!@#$%^&*()_-+=<>;:[]{}ABCDEFGHIJKLMNOPQRSTUVWXYZ.?0123456";
+
+        if (hashFunc.equals("XOR")){
+            if (compressor == null) {
+                ICompressor ic = new StringCompressorRH(n, c, StringCompressorRH.StringToCharArray(chars), MinBits, MaxBits, Seed);
+                ic.setN(n);
+                ic.setC(c);
+                compressor = ic;
+            }
+            return compressor;
         }
+        else if (hashFunc.trim().equals("JAVA")){
+            if (compressor == null) {
+                compressor = new StringCompressorPlainJava(n, c, ICompressor.StringToCharArray(chars));
+            }
+            return compressor;
+        }
+        else if (hashFunc.equals("SHA-256")){
+            if (compressor == null) {
+                compressor = new SHA256Compressor(n, c, ICompressor.StringToCharArray(chars));
+                compressor.setN(n);
+                compressor.setC(c);
+            }
+            return compressor;
+        }
+
         return compressor;
     }
 
@@ -176,10 +197,6 @@ public class Demo {
                 int longerOriginal = Math.max(cont1.length(), cont2.length());
                 int shorterOriginal = Math.min(cont1.length(), cont2.length());
 
-                getCompressor().setC(c);
-                getCompressor().setN(n);
-
-
                 String sig1 = getCompressor().compress(cont1);
                 String sig2 = getCompressor().compress(cont2);
 
@@ -190,8 +207,8 @@ public class Demo {
                 double fileLDdRateSec = FileAndTimeUtility.rateSec(1, start, end);
 
                 int expectedForRandom = sd.expectedDistanceForSigs(cont1.length(), cont2.length());
-                FileSignature fs1 = new FileSignature(f1, cont1.length(), c, n, getCompressor().chars, sig1);
-                FileSignature fs2 = new FileSignature(f2, cont2.length(), c, n, getCompressor().chars, sig2);
+                FileSignature fs1 = new FileSignature(f1, cont1.length(), hashFunc, c, n, getCompressor().getChars(), sig1);
+                FileSignature fs2 = new FileSignature(f2, cont2.length(), hashFunc, c, n, getCompressor().getChars(), sig2);
 
                 int est = sd.getLDEst(fs1, fs2, sd.getLD(sig1, sig2));
 
@@ -489,13 +506,16 @@ public class Demo {
             c = Integer.parseInt((String) props.get("compression"));
             log.info("getProps() compression rate:" + c);
 
-            sigsDir = (String) props.get("sigs-dir");
+            hashFunc = ((String) props.get("hashfn")).trim();
+            log.info("getProps() hash function:" + hashFunc);
+
+            sigsDir = ((String) props.get("sigs-dir")).trim();
             log.info("getProps() sigs-dir:" + sigsDir);
 
-            String inputDir = (String) props.get("input-dir");
+            String inputDir = ((String) props.get("input-dir")).trim();
             log.info("getProps() input-dir:" + inputDir);
 
-            flag = (String) props.get("comment-flag");
+            flag = ((String) props.get("comment-flag")).trim();
             log.info("getProps() comment-flag:" + flag);
 
             List<String> inputFiles = FileAndTimeUtility.getFilesInDirectory(inputDir, "x");

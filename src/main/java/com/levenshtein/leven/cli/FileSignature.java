@@ -1,8 +1,5 @@
 package com.levenshtein.leven.cli;
-
-
 import utilities.file.FileAndTimeUtility;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +17,7 @@ public class FileSignature {
     private String cSet;
     private String sig;
     private int sigLen = 0;
+    private String hashname="UNKNOWN-HASH";
 
     /**
      * Parse a CSV file of signatures into a List of FileSignature objects.
@@ -46,9 +44,10 @@ public class FileSignature {
         List<String> lst = FileAndTimeUtility.getStringListFromString(csv,DELIM);
         setInputFname(lst.get(0));
         setInputFileLen(Integer.parseInt(lst.get(1)));
-        setC(Integer.parseInt(lst.get(3)));
-        setN(Integer.parseInt(lst.get(4)));
-        setcSet(lst.get(5));
+        setHashname(lst.get(3));
+        setC(Integer.parseInt(lst.get(4)));
+        setN(Integer.parseInt(lst.get(5)));
+//        setcSet(lst.get(5));
         setSig(lst.get(6));
         setSigLen(getSig().length());
     }
@@ -63,10 +62,11 @@ public class FileSignature {
      * @param cSet       The output character set.
      * @param signature  The signature.
      */
-    public FileSignature(String infile, int flen, int comp, int neigh,
+    public FileSignature(String infile, int flen, String hash, int comp, int neigh,
                          String cSet, String signature){
        this.inputFname=infile;
        this.inputFileLen=flen;
+       this.hashname=hash;
        this.c=comp;
        this.n=neigh;
        this.cSet=cSet;
@@ -124,6 +124,20 @@ public class FileSignature {
     public void setInputFileLen(int v){
         inputFileLen=v;
     }
+
+    public void setHashname(String h){
+        hashname=h;
+    }
+
+    public String getHashname(){
+       return hashname;
+    }
+
+
+    /**
+     * Write out a FileSignature object as a CSV line
+     * @param defsbsize
+     */
     public void compressionOutput(int defsbsize) {
         StringBuffer sb = new StringBuffer(defsbsize);
         sb.append(getInputFname());
@@ -132,12 +146,14 @@ public class FileSignature {
         sb.append(",");
         sb.append(getSigLen());
         sb.append(",");
+        sb.append(hashname);
+        sb.append(",");
         sb.append(c);
         sb.append(",");
         sb.append(n);
         sb.append(",");
-        sb.append(getcSet());
-        sb.append(",");
+//        sb.append(getcSet());
+//       sb.append(",");
         sb.append(getSig());
         System.out.println(sb.toString());
         System.out.flush();

@@ -29,7 +29,6 @@ public class StringCompressorRH extends ICompressor{
 	protected static int RANGE_HIGH = 127;
 	protected static int SUM_RANGE = MAX_N * 127;
 	protected static int A_PRIME = 17787;
-	protected static boolean PRINT_DIAGNOSTICS=false;
 	private RollingHash rh = null;
 	
 	@SuppressWarnings("unused")
@@ -43,25 +42,17 @@ public class StringCompressorRH extends ICompressor{
 	 * Replace all multiple white spaces in the string with a single white space.
 	 * @param value
 	 * @return
-	 */
 	public String squeezeWhite(String value){
 		String str=value.replaceAll("\\s+", " ");
 		return str.trim();
 	}
+	 */
 
 	/**
 	 * Compress input string into a hashed signature;
 	 */
 	public String compress(String str){
-		try{
-			if(SQUEEZE_WHITE==true){
-				str=squeezeWhite(str);
-			}
-			return _compress(str);
-		}
-		catch(Exception x){
-			return null;
-		}
+		return super.compress(str);
 	}
 	
 	/**

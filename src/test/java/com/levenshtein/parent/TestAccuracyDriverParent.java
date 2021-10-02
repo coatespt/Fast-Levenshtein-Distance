@@ -85,8 +85,8 @@ public abstract class TestAccuracyDriverParent extends TestParent {
         sb.append(String.format("%.4f", rateCompressed / rateUncompressed));
         sb.append("x\n");
 
-        FileSignature fs1 = new FileSignature(f1,f1Str.length(),getC(),getN(),outputCharString,compressedF1);
-        FileSignature fs2 = new FileSignature(f2,f2Str.length(),getC(),getN(),outputCharString,compressedF2);
+        FileSignature fs1 = new FileSignature(f1,f1Str.length(),"UNK",getC(),getN(),outputCharString,compressedF1);
+        FileSignature fs2 = new FileSignature(f2,f2Str.length(),"UNK", getC(),getN(),outputCharString,compressedF2);
         System.out.println("f1:" + fs1.getInputFname() + " len:" + fs1.getInputFileLen() +
                 " f2:" + fs2.getInputFname()+ " len:" + fs2.getInputFileLen());
         ScoreDistance sd = new ScoreDistance();

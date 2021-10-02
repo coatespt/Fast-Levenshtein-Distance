@@ -10,10 +10,19 @@ package com.levenshtein.leven;
  *
  */
 public abstract class ICompressor {
-
+	protected static int prime = 39595541;
 	private Integer n;
 	private Integer c;
 	protected boolean SQUEEZE_WHITE = true;
+	public static boolean PRINT_DIAGNOSTICS=false;
+	private static String chars = "abcdefghijklmnopqrstuvwxsyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()_-+=[]{};:<>.?";
+	public static String getChars(){
+		return chars;
+	}
+	public static void setChars(String ch ){
+		chars = ch;
+	}
+
 
 	/**
 	 * Turns all sequences of one or more whitespace chars into a single space.
@@ -46,17 +55,33 @@ public abstract class ICompressor {
 	}
 	public void setC(int c){
 		 this.c=c;
-	}	
-	
-	public abstract String compress(String str);
+	}
 
-	public static String chars = null;
+	//public abstract String compress(String str);
 
+	/**
+	 * Compress input string into a hashed signature;
+	 */
+	public String compress(String str){
+		try{
+			if(SQUEEZE_WHITE==true){
+				str=squeezeWhite(str);
+			}
+			return _compress(str);
+		}
+		catch(Exception x){
+			return null;
+		}
+	}
+
+	public String _compress(String str) throws Exception {
+		return "";
+	};
 
 	// Convert a string to an array of characters.
 	//
 	public static char[] StringToCharArray(String ch) throws Exception {
-		chars=ch;
+		String chars = ch;
 		if (chars==null || chars.length()<26){
 			// Sanity check--so few chars means you probably passed in the wrong string. This can be changed or removed.
 			throw new Exception("output characters set null or very short in StringToCharArray method");

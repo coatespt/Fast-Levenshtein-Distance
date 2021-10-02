@@ -1,20 +1,16 @@
 package com.levenshtein.leven.cli;
-import com.levenshtein.leven.ICompressor;
-import com.levenshtein.leven.ScoreDistance;
-import com.levenshtein.leven.SignificanceResult;
-import com.levenshtein.leven.StringCompressorRH;
+import com.levenshtein.leven.*;
+import com.levenshtein.leven.demo.SHA256Compressor;
 import utilities.file.FileAndTimeUtility;
 import java.io.FileInputStream;
 import java.util.*;
 import static java.lang.Integer.valueOf;
 
 /**
- *
  * Command Line Interface
  * This program is intended to run in standard Unix pipeline style, accepting
  * CSV input from either a file or from standard-in and writing output to standard-in
  * allowing the input to be directed to a file or piped into another program as input.
- *
  * <p>
  * Compression mode: takes list of files from filenames given on command line
  * or one-by-one from stdin. The output is csv lines on stout. This output can be used
@@ -24,40 +20,72 @@ import static java.lang.Integer.valueOf;
  * The files are given as file names similarly to compression mode.  The targets are read
  * from precomputed CSV signature lines in a file. The CSV Signature lines are exactly
  * the format of the compression-mode output.
- *
-*
 
  Important errors or weaknesses
 
- TODO: Estimates are highly accurate when the files are in fact related. They are exact when
-    the files are the same, only slightly off when the files are almost the same, but deteriorate
-    to about 0.7 of the true LD for files that are totally unrelated.
-    Verify that this observation is true.
-    If so, it should be fixable. It could be an artifact of how I'm computing the scores.
 
- TODO: Check out the significance computation. It seems poorly thought out.
+ TODO: Need definitive numbers for ratio of LD to length for unrelated text.
+
+ TODO: Also, definitive number for ratio of sig-LD to length of sigs.
+
+ TODO: Print the hash function in the output.
+
+ TODO: The wholeFileRatio and the sigFileRatio seem backwards. Shouldn't files shrink more than signatures?
+
+ TODO: Certain combinations of values give terrible hashes.  JAVA hash with 1001,1009, are terrible, many B's while
+    1011 works fine. WTF? even numbers that are both prime seem to do it. Not even mutually prime--prime.
+
+ TODO: See above item. Implement a feature or a test that computes the distribution of output characters for a given value of C.
+        Run consecutive C values through it and write CSV  C, mean, stdev, min, max of the bucket-counts.
+
+ TODO: Estimates seem to be more accurate when the files are in fact related. They  are exact when
+    the files are identical, only slightly off when the files are almost the same, but deteriorate
+    to about 0.7 of the true LD for files that are totally unrelated.
+    Verify that this observation is true and if so, quantify. Possibly it is simply a consequence of the
+    fact that the LD varies from 0 to the mean for randomly selected files and it CAN'T be off when the
+    distance is zero so the mean error can only go up from there.
+
+ TODO: Check out the significance computation (A) is it correct? (B) could it be more nuanced.
+    It's a scalar between [0,1] but it might make more sense to somehow separate the cases where the
+    differences seem to be concentrated.
+    For instance, if a result is significant, do a second level that does the computation on K-length blocks of the
+    files, e.g. 1/4 or 1/10 the length of the larger, with the smaller chopped into blocks of the same size (not
+    the same number of blacks.) Return the global significance as computed now, and also compute the block-ordering
+    that gives the highest score e.g. total-sig, b1 c3, b4 c1, b3 c2, b2   Note that the final b had no
+    matching c block.
+
+ TODO: Need to work out how to put a true confidence interval around an estimate.
+
+ TODO: Part of above, what are the Mean and Stdev for LD of unrelated text?
+    Use the tool to find a large number of pairs that are not related---score at the bottom of significance.
+    YOu probably need write a program to blindly chop off the first and last few hundred lines so  there is no
+    boiler plate and leave a residuum of one fixed size.
 
  TODO: The test TestRollingHash.testCompressionDistRH() shows a surprising variation in the
     lumpiness of the distribution of output characters for values of C that are not very different.
-    Likewise the min/max used characters.
-    Figure out why. It could be dumb. If it's not, write a utility feature to
-    generate the best C and N combinations for ranges of compressions.
-
- Possible errors
+    Likewise the min/max used characters. See the spreadsheet results.
+    Find out why and if it's random, we need to compute a set of best values empirically.
 
  TODO: Deal with zero-length signatures that may result from tiny files and big C values.
+    What it does now is is abort if the hash is empty.
 
  Possible Enhancements
 
- TODO: Get rid of all the tiny Gutenberg files and update the allfiles.txt file to match.
+ TODO: Compute a list of good compression and N values.
+
+ TODO: Make it work for binary data. Need a hash that works for arbitrary characters, not just strings.
+    perhaps the Java string hash could be modified?
 
  TODO: Should have option for input from pre-computed signatures similar to targets from file?
 
  TODO: Implement multi-threading for the matching. Would probably increase throughput by several x.
     Frank says this is low priority.
 
- TODO: Implement multi-threading for compression. Would probably increase throughput by several x.
-    Frank says this is low priority.
+ TODO: Implement multi-threading for compression. Considered strategy of breaking an input into K pieces
+    then computing hashes for n characters on either side and stitching them together at the point where
+    the output for the Nth position
+    Not too hard, but why not simply hand an entire file to each thread? Simpler and probably more
+    efficient as it's easier to keep the input streaming for longer.
 
  TODO: Effective use requires that files be in bucket of similar size. Work out a command-line
     pipeline to bucket files by size into overlapping buckets.
@@ -66,34 +94,33 @@ import static java.lang.Integer.valueOf;
     components. This would allow files with areas with a high degree of similarity in a limited
     region to be more readily recognized.
 
+ TODO: The significance is quite simple. Could there be a version of it that considers the
+    signatures piecemeal? Sort of like the scheme to do the signatures in sections?
+
  Testing
   TODO:  Input from stdin has not been tested--only input from files of filenames.
 
   TODO: Test with some other document types such as MS Word .doc files, PDF's, etc.
 
- Statistical data gathering not necessarily part of CLI but probably essential for the paper.
-
  TODO: Develop a data set for matching accuracy as a function of N which has two big effects on accuracy:
     (1) Small N is less sensitive to minor differences as each can bleed out to at most
-    N-1 character distance away.
+    N-1 characters in either direction.
     (2) On the other hand small N results in a low cardinality of neighborhood hash values and thus
     less pseudo-randomness in the signatures.
-    Verify that (2) is in fact correct. There is a RollingHash test class with the basics already.
+    (3) Number (2) is probably true because if you have N=1, you definitely get a very lumpy distribution.
+        for N=2 there are 9000+ values, but many never occur. Is the number so large for reasonable size
+        N that it never really matters?
 
- TODO: Run the compression as a function of N. Pretty sure it makes not difference, but verify.
-
- TODO: Add statistics output for a target set. We already compute m,md,stdev for the LD's of
-     unrelated files. Should add:
-     A statistic that takes into account file length differences.
-     Longest file, shortest file
-     Longest signture, shortest signature.
-
- TODO: Compute a list of good compression and N values.
-
-
- TODO: Explain why the compression rates make such a difference to the output character distribution.
 
  TODO: Index of Coincidence might be a good measure of signatures quality. See below this item.
+
+ TODO: A script to go through a set of input files or find all files below some point in the fs, and assign them to
+    buckets by size. This would go with an enhancement to scale the compression to the signature size.
+    You would probably need to generate multiple signatures to bracket the ideal size of the signature.
+    Each search sig would have to be generated in three sizes too.
+    So that's nine computations for each match.
+    The same signature sets could be used with multiple approaches. E.g. you could scan at highest compression,
+    find a match, then estimate at lowest compression IIF it's a good match.
 
 
  *  https://www.johndcook.com/blog/2021/08/14/index-of-coincidence/
@@ -105,15 +132,13 @@ import static java.lang.Integer.valueOf;
  *
  https://towardsdatascience.com/non-negative-matrix-factorization-for-image-compression-and-clustering-89bb0f9fa8ee
  */
+
 public class Cli {
     static String ARG_DASHES = "-";
-    // StringBuffer init size to avoid reallocating many times.
     static int DEF_SB_SIZE = 1024;
-    // Used in XOR hash to ensure that psueod-random values don't have too many ones or zeros.
-    static int MinBits=25;
-    static int MaxBits=39;
+    static int MinBits=28;
+    static int MaxBits=36;
     static int Seed=12345;
-
     protected String[] argv = null;
     protected String propsfile = null;
     protected String infile = null;
@@ -124,10 +149,16 @@ public class Cli {
     protected String targetFile = null;
     protected double t = 0.0;
     private ScoreDistance sd = null;
-
     protected boolean printHeader=true;
     protected boolean verbose = false;
     protected int outputLevel = 0;
+    protected String hashType = "JAVA";
+    // ld smaller than equal-len file by this much
+    // TODO: Set this default to the best value we can compute
+    protected double fr=0.22d;
+    // ld smaller than equal-len signature by this much
+    // TODO: Set this default to a to the best value we can compute
+    protected double sr=0.30d;
 
     /**
      * A CLI gets all it's setup via command-line arguments but you can
@@ -135,6 +166,8 @@ public class Cli {
      * @param argv An array of strings in the usual command-line form.
      */
     public Cli(String[] argv) {
+        // If config or the cmd line does not set it, everything uses the default set
+        outChars=ICompressor.getChars();
         this.argv = argv;
     }
 
@@ -163,7 +196,8 @@ public class Cli {
         }
         if (ld) {
             try {
-                // TODO: set properties for LD significance?
+                ScoreDistance.setSigRatio(sr);
+                ScoreDistance.setWholeFileRatio(fr);
                 sd = new ScoreDistance();
                 doLdComparisons();
             } catch (Exception x) {
@@ -389,10 +423,17 @@ public class Cli {
             try {
                 List<String> fnames = FileAndTimeUtility.readListFromFile(infile);
                 for (int i = 0; i < fnames.size(); i++) {
-                   fileSignatureFromFilename(fnames.get(i)).compressionOutput(DEF_SB_SIZE);
+                    String fn = fnames.get(i);
+                    try {
+                        fileSignatureFromFilename(fn).compressionOutput(DEF_SB_SIZE);
+                    }
+                    catch(Exception x){
+                        System.err.println("Failed reading input file:" + fn + " msg:" + x.getMessage());
+                        continue;
+                    }
                 }
             } catch (Exception x) {
-                System.err.println("Failed reading input file:" + infile + " msg:" + x.getMessage());
+                System.err.println("Failed for unknown reason:" + infile + " msg:" + x.getMessage());
             }
         } else {
             System.err.println("Input file for compression does not exist:" + infile);
@@ -407,8 +448,8 @@ public class Cli {
      */
     protected FileSignature fileSignatureFromFilename(String fname) throws Exception {
         String contents = FileAndTimeUtility.getFileContents(fname);
-        String sig = getCompressor().compress(contents);
-        return new FileSignature(fname,contents.length(),c,n,outChars,sig);
+        String sig = getCompressor(hashType).compress(contents);
+        return new FileSignature(fname,contents.length(),hashType,c,n,outChars,sig);
     }
 
     protected ICompressor compressor = null;
@@ -417,9 +458,9 @@ public class Cli {
      * Return an ICompressor object for the given n,c,and output character set
      * that the CLI was initialized with.
      * @return
-     */
     protected ICompressor getCompressor() throws Exception{
         //compressor = new StringCompressorRH(getN(), getC(), outputChars , minBits, maxBits, seed);
+        // TODO: This needs to switch on the type of compressor wanted.
         if (compressor == null) {
             compressor = new StringCompressorRH(n, c, ICompressor.StringToCharArray(outChars), MinBits, MaxBits, Seed);
             compressor.setN(n);
@@ -428,6 +469,35 @@ public class Cli {
         }
         return compressor;
     }
+     */
+
+    protected ICompressor getCompressor(String type) throws Exception{
+        if(type.equals("XOR")) {
+            if (compressor == null) {
+                compressor = new StringCompressorRH(n, c, ICompressor.StringToCharArray(outChars), MinBits, MaxBits, Seed);
+                compressor.setN(n);
+                compressor.setC(c);
+                //System.err.println("charset = " + outChars);
+            }
+            return compressor;
+        }
+        else if(type.equals("JAVA")){
+            if (compressor == null) {
+                compressor = new StringCompressorPlainJava(n, c, ICompressor.StringToCharArray(outChars));
+            }
+            return compressor;
+        }
+        else if(type.equals("SHA-256")){
+            if (compressor == null) {
+                compressor = new SHA256Compressor(n, c, ICompressor.StringToCharArray(outChars));
+                compressor.setN(n);
+                compressor.setC(c);
+            }
+            return compressor;
+        }
+        else throw new Exception("Unknown compressor type:" + type);
+    }
+
 
 
 //////////////////////////////////////////
@@ -468,6 +538,7 @@ public class Cli {
                 n = Integer.parseInt(v);
             } else if (a.equals("ch")) {
                 outChars = v;
+                ICompressor.setChars(outChars);
             }
             else if (a.equals("ld")) {
                 v=v.toLowerCase(Locale.ROOT);
@@ -496,6 +567,19 @@ public class Cli {
                   String err = "Output level must be in range 0:3";
                   throw new Exception(err);
               }
+            }
+            else if (a.equals("ht")){
+               hashType=v;
+            }
+            else if (a.equals("sr")) {
+                // ld this much less than equal len sig
+                sr = Double.parseDouble(v);
+                System.err.println("sr=" + sr);
+            }
+            else if (a.equals("fr")) {
+                // LS this much less than equal len file
+                fr = Double.parseDouble(v);
+                System.err.println("fr=" + fr);
             }
             else {
                 System.err.println("Unknown argument encountered:" + a);
@@ -535,7 +619,10 @@ public class Cli {
         sb.append("-t is how different from the expected value the estimated LD has to be.\n");
         sb.append("-v true/false suppress the informational ouput written to stderr.\n");
         sb.append("-h true/false print the output file header.\n");
-        sb.append("-ol 1 to 3, Higher number gives fewer output fields. \n");
+        sb.append("-ol 0 to 3, Higher number gives fewer output fields. \n");
+        sb.append("-ht hash type XOR, JAVA, SHA-256. \n");
+        sb.append("-fr a float [0,1] that is the shrinkage factor for LD or unrelated text. \n");
+        sb.append("-sr a float [0.1] that is the shrinkage factor for LD of unrelated signatures. \n");
         return sb.toString();
     }
 
@@ -562,6 +649,7 @@ public class Cli {
         }
         if (getStringVal("ch", defaultProps) != null) {
             outChars = getStringVal("ch", defaultProps);
+            ICompressor.setChars(outChars);
         }
         if (getBoolVal("ld", defaultProps) != null) {
             ld = getBoolVal("ld", defaultProps);
@@ -579,12 +667,28 @@ public class Cli {
             verbose = getBoolVal("v", defaultProps);
         }
         if (getIntVal("ol", defaultProps) != null) {
-            outputLevel = getIntVal("c", defaultProps);
+            outputLevel = getIntVal("ol", defaultProps);
+        }
+        if (getStringVal("ht", defaultProps) != null) {
+            hashType = getStringVal("ht", defaultProps);
+        }
+        if (getDoubleVal("fr", defaultProps) != null) {
+            fr = getDoubleVal("fr", defaultProps);
+            System.err.println("sr=" + sr);
+        }
+        if (getDoubleVal("sr", defaultProps) != null) {
+            sr = getDoubleVal("sr", defaultProps);
+            System.err.println("sr=" + sr);
         }
     }
 
     private String getStringVal(String a, Properties props) throws Exception {
-        Object ob = props.get(a);
+        String aa = a.toLowerCase(Locale.ROOT);
+        Object ob = props.get(aa);
+        if(ob==null){
+            aa=a.toUpperCase(Locale.ROOT);
+            ob = props.get(aa);
+        }
         if (ob == null) {
             String err = "No " + a + " value in properties";
         } else {
@@ -595,7 +699,12 @@ public class Cli {
     }
 
     private Boolean getBoolVal(String a, Properties props) throws Exception {
-        Object ob = props.get(a);
+        String aa = a.toLowerCase(Locale.ROOT);
+        Object ob = props.get(aa);
+        if(ob==null){
+            aa=a.toUpperCase(Locale.ROOT);
+            ob = props.get(aa);
+        }
         if (ob == null) {
             String err = "No " + a + " value in properties";
         } else {
@@ -606,6 +715,7 @@ public class Cli {
 
     private Boolean boolFromString(String str) throws Exception{
         //System.err.println("Found  " + a + " value in  properties:" + props.get(a));
+
         String arg = (str.trim().toLowerCase(Locale.ROOT));
         if (arg.equals("true")){
             return true;
@@ -619,7 +729,12 @@ public class Cli {
         }
     }
         private Double getDoubleVal(String a, Properties props) throws Exception {
+        String aa = a.toLowerCase(Locale.ROOT);
         Object ob = props.get(a);
+        if(ob==null){
+            aa=a.toUpperCase(Locale.ROOT);
+            ob = props.get(aa);
+        }
         if (ob == null) {
             String err = "No " + a + " value in properties";
         } else {
@@ -630,7 +745,12 @@ public class Cli {
         }
 
     private Integer getIntVal(String a, Properties props) throws Exception {
-        Object ob = props.get(a);
+        String aa=a.toLowerCase(Locale.ROOT);
+        Object ob = props.get(aa);
+        if (ob==null){
+            aa=a.toUpperCase(Locale.ROOT);
+            ob = props.get(aa);
+        }
         if (ob == null) {
             String err = "No " + a + " value in properties";
         } else {

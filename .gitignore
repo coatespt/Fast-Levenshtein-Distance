@@ -28,6 +28,7 @@ testFiles.txt
 testSigs.txt
 data-bulk/all32kSigs.txt.backup
 data-bulk/junk.txt
+data/targets_*.csv
 doc/speedup-levenshtien.log
 data/allfiles-sigs.txt
 data/testfile-sigs.txt
