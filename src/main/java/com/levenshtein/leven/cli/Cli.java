@@ -1,16 +1,20 @@
 package com.levenshtein.leven.cli;
+
 import com.levenshtein.leven.*;
 import com.levenshtein.leven.demo.SHA256Compressor;
 import utilities.file.FileAndTimeUtility;
+
+import java.io.Console;
 import java.io.FileInputStream;
 import java.util.*;
+
 import static java.lang.Integer.valueOf;
 
 /**
  * Command Line Interface
- * This program is intended to run in standard Unix pipeline style, accepting
- * CSV input from either a file or from standard-in and writing output to standard-in
- * allowing the input to be directed to a file or piped into another program as input.
+ * This program runs in standard Unix pipeline style, accepting CSV input from either a
+ * file or from standard-in and writing output to standard-in allowing the input to be
+ * directed to a file or piped into another program as input.
  * <p>
  * Compression mode: takes list of files from filenames given on command line
  * or one-by-one from stdin. The output is csv lines on stout. This output can be used
@@ -23,17 +27,21 @@ import static java.lang.Integer.valueOf;
 
  Important errors or weaknesses
 
-
  TODO: Need definitive numbers for ratio of LD to length for unrelated text.
 
  TODO: Also, definitive number for ratio of sig-LD to length of sigs.
 
- TODO: Print the hash function in the output.
-
  TODO: The wholeFileRatio and the sigFileRatio seem backwards. Shouldn't files shrink more than signatures?
+        It is important to explain this!  The signatures should shrink about like random text.
 
- TODO: Certain combinations of values give terrible hashes.  JAVA hash with 1001,1009, are terrible, many B's while
-    1011 works fine. WTF? even numbers that are both prime seem to do it. Not even mutually prime--prime.
+ TODO: Certain combinations of values give terrible hashes. The TestRollingHash.testCompressionDistRH() shows why.
+    Note this is modified to use Java but similar stuff may go for others. If C is divisible by the cardnality of the
+    output set, the  Java hash will give awful results. ((h % C==0) && (h % chars.length))==true
+    What if the test were for a  congruence to a prime > (char.length)? That would constrain C to be bigger than
+    output set because it would have to is all, but
+    it almost always will be.
+    Need a test for divisibility to reject/warn about bad combinations.
+    Need to look closely at the algorithm to see if there is some other tricky stuff.
 
  TODO: See above item. Implement a feature or a test that computes the distribution of output characters for a given value of C.
         Run consecutive C values through it and write CSV  C, mean, stdev, min, max of the bucket-counts.
@@ -56,7 +64,7 @@ import static java.lang.Integer.valueOf;
 
  TODO: Need to work out how to put a true confidence interval around an estimate.
 
- TODO: Part of above, what are the Mean and Stdev for LD of unrelated text?
+ TODO: Part of above, what are the mean and stdev for LD of unrelated text?
     Use the tool to find a large number of pairs that are not related---score at the bottom of significance.
     YOu probably need write a program to blindly chop off the first and last few hundred lines so  there is no
     boiler plate and leave a residuum of one fixed size.
@@ -83,9 +91,11 @@ import static java.lang.Integer.valueOf;
 
  TODO: Implement multi-threading for compression. Considered strategy of breaking an input into K pieces
     then computing hashes for n characters on either side and stitching them together at the point where
-    the output for the Nth position
-    Not too hard, but why not simply hand an entire file to each thread? Simpler and probably more
-    efficient as it's easier to keep the input streaming for longer.
+    the output for the Nth position. This would not be too hard but why not simply hand an entire file
+    to each thread? Simpler and probably more efficient as it's easier to keep the input streaming for longer.
+    Note, the problem will almost never be how long it takes to process a single file because
+    a file so long that this was an issue would result in an unusable signature too long to run LD on.
+    So just multi-thread at an input file level.
 
  TODO: Effective use requires that files be in bucket of similar size. Work out a command-line
     pipeline to bucket files by size into overlapping buckets.
@@ -97,10 +107,9 @@ import static java.lang.Integer.valueOf;
  TODO: The significance is quite simple. Could there be a version of it that considers the
     signatures piecemeal? Sort of like the scheme to do the signatures in sections?
 
- Testing
-  TODO:  Input from stdin has not been tested--only input from files of filenames.
+ TODO:  Input from stdin has not been tested--only input from files of filenames.
 
-  TODO: Test with some other document types such as MS Word .doc files, PDF's, etc.
+ TODO: Test with some other document types such as MS Word .doc files, PDF's, etc.
 
  TODO: Develop a data set for matching accuracy as a function of N which has two big effects on accuracy:
     (1) Small N is less sensitive to minor differences as each can bleed out to at most
@@ -110,7 +119,6 @@ import static java.lang.Integer.valueOf;
     (3) Number (2) is probably true because if you have N=1, you definitely get a very lumpy distribution.
         for N=2 there are 9000+ values, but many never occur. Is the number so large for reasonable size
         N that it never really matters?
-
 
  TODO: Index of Coincidence might be a good measure of signatures quality. See below this item.
 
@@ -153,12 +161,41 @@ public class Cli {
     protected boolean verbose = false;
     protected int outputLevel = 0;
     protected String hashType = "JAVA";
+
     // ld smaller than equal-len file by this much
     // TODO: Set this default to the best value we can compute
     protected double fr=0.22d;
     // ld smaller than equal-len signature by this much
     // TODO: Set this default to a to the best value we can compute
     protected double sr=0.30d;
+
+
+    /**
+     * You want C and the cardinality of the output set to be co-prime.
+     * @param a
+     * @param b
+     * @return
+     */
+    private boolean isCoprime(int a, int b){
+           if (gcd(a,b)==1){
+              return true;
+           }
+           return false;
+    }
+
+    /**
+     * Recursively determine if C and the size of the output set are co-prime.
+     * @param a
+     * @param b
+     * @return
+     */
+    public int gcd(int a, int b) {
+        if (b==0) {
+            return a;
+        }
+        return gcd(b,a%b);
+    }
+
 
     /**
      * A CLI gets all it's setup via command-line arguments but you can
@@ -191,6 +228,13 @@ public class Cli {
     public int go() {
         try {
             parseArgs(argv);
+            if (!isCoprime(c, outChars.length())){
+               System.err.println("Warning, c=" + c + " and outchars.length()=" + outChars.length() + " are not mutually-prime.");
+               if(quit()) {
+                   System.exit(0);
+               }
+                System.err.println("Warning, continuing despite conflict!");
+            }
         } catch (Exception x) {
             failure("Failed getting arguments or properties.", x);
         }
@@ -212,7 +256,6 @@ public class Cli {
         }
         return 0;
     }
-
 
     // TODO: Always quit? Definitely for initialization failures but do you want to
     //      quit if one comparison blows up?
@@ -451,26 +494,7 @@ public class Cli {
         String sig = getCompressor(hashType).compress(contents);
         return new FileSignature(fname,contents.length(),hashType,c,n,outChars,sig);
     }
-
     protected ICompressor compressor = null;
-
-    /**
-     * Return an ICompressor object for the given n,c,and output character set
-     * that the CLI was initialized with.
-     * @return
-    protected ICompressor getCompressor() throws Exception{
-        //compressor = new StringCompressorRH(getN(), getC(), outputChars , minBits, maxBits, seed);
-        // TODO: This needs to switch on the type of compressor wanted.
-        if (compressor == null) {
-            compressor = new StringCompressorRH(n, c, ICompressor.StringToCharArray(outChars), MinBits, MaxBits, Seed);
-            compressor.setN(n);
-            compressor.setC(c);
-            //System.err.println("charset = " + outChars);
-        }
-        return compressor;
-    }
-     */
-
     protected ICompressor getCompressor(String type) throws Exception{
         if(type.equals("XOR")) {
             if (compressor == null) {
@@ -759,4 +783,33 @@ public class Cli {
         }
         return null;
     }
+
+    /**
+     * Ask if they want to continue and warn if they say yes...
+     * @return
+     */
+    private boolean quit() {
+        Console console = System.console();
+        if (console==null) {
+            return true;
+        }
+        String input = "";
+        System.out.print("Do you want to exit? Y/N: ");
+        while (!"Y".equalsIgnoreCase(input) || !"N".equalsIgnoreCase(input)) {
+            input = console.readLine();
+            if(input.length()>1){
+                input=input.substring(0,input.length()-1);
+            }
+            input=input.toUpperCase(Locale.ROOT);
+            if (input.startsWith("Y")) {
+                return true;
+            }
+            if (input.startsWith("N")) {
+                return false;
+            }
+            System.out.print("Do you want to exit? Y/N: ");
+        }
+        return false;
+    }
+
 }

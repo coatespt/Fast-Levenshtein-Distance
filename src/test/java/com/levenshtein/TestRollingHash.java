@@ -3,6 +3,7 @@ package com.levenshtein;
 //import org.apache.log4j.Logger;
 
 import com.levenshtein.leven.ICompressor;
+import com.levenshtein.leven.StringCompressorPlainJava;
 import com.levenshtein.leven.StringCompressorRH;
 import com.levenshtein.parent.TestParent;
 import org.junit.Test;
@@ -70,7 +71,7 @@ public class TestRollingHash extends TestParent {
 		String reallybig = "./data/allfiles/jbunc10.txt";
 		System.out.println("testCompressionSpeedRH() starting.");
 		for(int i=51; i<2000; i+=17){
-			_rollingHashCharDist(reallybig, i, 11, 500);
+			_rollingHashCharDist(reallybig, i, 17, 500);
 		}
 		System.out.println("testCompressionSpeedRH() ending.");
 	}
@@ -91,23 +92,26 @@ public class TestRollingHash extends TestParent {
 			_testSpeedRH(big, i, 17, 50);
 		}
 		System.out.println("testCompressionSpeedRH() ending.");
-	}
+}
 
 	public void _rollingHashCharDist(String fname, int c, int n, int iterations) throws Exception {
-		setC(c);
-		setN(n);
-		setOutputChars(charString);
-		getCompressor().squeezeWhite(true);
+		// Note, leaving this at the default 84 chars is a disaster!
+		//String chstr = charString.substring(3, charString.length()-1);
+		//setOutputChars(chstr);
+		//setOutputChars(charString);
+		//ICompressor comp  = new StringCompressorRH(n, c, outputChars , MIN_BITS, MAX_BITS, SEED);
+    	ICompressor comp = new StringCompressorPlainJava(n, c, outputChars);
+		comp.setC(c);
+		comp.setN(n);
 
 		if (!MINIMAL_OUPUT) {
 			System.out.println("_testCompressionRH()  Testing compression on a large " +
 					"string with c:" + c + " n: " + n);
 		}
-		comp = getCompressor();
 		String longOne = readFile(fname);
 		String compressed=null;
 		compressed = comp.compress(longOne);
-		_outcharStats(compressed);
+		_outcharStats(compressed, c , n);
 	}
 
 	/** Compress a with the given parameters and see how closely the actual compression
@@ -133,7 +137,7 @@ public class TestRollingHash extends TestParent {
 		}
 		comp = getCompressor();
 		String longOne = readFile(fname);
-		System.out.println("file size:" + longOne.length() + " iteratiosn:" + iterations);
+		//System.out.println("file size:" + longOne.length() + " iteratiosn:" + iterations);
 		TimeAndRate tAndR = new TimeAndRate();
 		String compressed=null;
 		tAndR.start();
@@ -152,9 +156,9 @@ public class TestRollingHash extends TestParent {
 		sb.append(c);
 		sb.append(" neighborhood:");
 		sb.append(n);
-		sb.append(" total chars:");
+		sb.append(" chars:");
 		sb.append(totalChars);
-		sb.append(" elapse MS:");
+		sb.append(" millis:");
 		sb.append(tAndR.elapsedMS());
 		sb.append(" chars/second:");
 		sb.append(rate);
@@ -176,15 +180,18 @@ public class TestRollingHash extends TestParent {
 	 *
 	 * @param compstr
 	 */
-	public void _outcharStats(String compstr){
+	public void _outcharStats(String compstr, int cmp, int nei){
 		Map<Character,Integer> cts = new HashMap<Character,Integer>();
 		for (int i=0; i<compstr.length(); i++){
 			Character c = compstr.charAt(i);
 			if (! cts.containsKey(c)){
-				cts.put(c,1);
+				cts.put(c,0);
 			}
-			cts.put(c,cts.get(c)+1);
+			cts.put(c, cts.get(c) + 1);
 		}
+		// System.out.println("compster.length:" + compstr.length());
+		// System.out.println("cts.size():" + cts.size());
+		// System.out.println("cts.keyset().size():" + cts.keySet().size());
 		int total = 0;
 		for (Character entry : cts.keySet()){
 			total += cts.get(entry);
@@ -207,13 +214,12 @@ public class TestRollingHash extends TestParent {
 		double stdev = Math.sqrt(var);
 		var = (int)(var * 1000)/1000d;
 		stdev = (int)(stdev * 1000) / 1000d;
-		System.out.println("Comp: " + getC() + "\tN: " + getN() + "\tmin: " + min + "\tmax: " + max + "\t diff: " + diffMinMax +
+		System.out.println("C: " + cmp + "\tN: " + nei +  "\tmin: " + min + "\tmax: " + max + "\t diff: " + diffMinMax +
 				"\t\tmean: " + mean +  "\tstdev: " + stdev + "\t chars in output:" + cts.size() + "\tchars in set:" + outputChars.length);
 		if (cts.size()!=outputChars.length) {
 			// This will fail sometimes for smaller values of n unless you uses a very large file.
 			// E.g n=7 will fail occasionally for 150k files.  This isn't an error per se but it's in
 			// here so it doesn't get forgotten.
-			assert (cts.size() == outputChars.length);
 			System.out.println("\toutput chars used:" + cts.size() + " != output set size: " + outputChars.length);
 		}
 	}

@@ -729,6 +729,53 @@ public class FileAndTimeUtility {
 		return sb.toString();
 	}
 
+
+	public static void main(String [] argv) {
+		String testfile = "./testfiles.csv";
+		System.out.println("Calling trimToSize() on " + testfile);
+		try {
+			trimToSize(testfile,10000);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		System.out.println("Completed trimToSize(). All files in " + testfile + " Should be 10k");
+	}
+
+	/**
+	 * A Procrustean file trim.
+	 * Read a list of file names
+	 * For each, trim it to some fixed size in terms of characters.
+	 * @param filename
+	 */
+	public static void trimToSize(String filename, int size) throws Exception {
+			List<String> flist = new ArrayList<String>();
+			BufferedReader br  = new BufferedReader(new FileReader(filename));
+			String in;
+			while ((in = br.readLine()) != null) {
+				flist.add(in);
+			}
+			br.close();
+		for(int i=0; i<flist.size(); i++){
+			String infilename = flist.get(i);
+			System.out.println("trimming: " + infilename);
+			String contents = getFileContents(infilename);
+			String trimmedContents = contents.substring(0,size-1);
+			deleteAndWrite(infilename,trimmedContents);
+			System.out.println("modified file: " + infilename);
+		}
+	}
+	public static void deleteAndWrite(String filename,String contents) throws Exception {
+		File f = new File(filename);
+		boolean success = f.delete();
+		if(!success){
+			throw new Exception("Could not delete the file.");
+		}
+		BufferedWriter out = new BufferedWriter(new FileWriter(filename, false));
+		out.write(contents + "\n");
+		out.close();
+	}
+
+
 	/**
 	 * for a pair of files, return the first line of the one that contains the flag string.
 	 * This is used for diagnostics on test files.

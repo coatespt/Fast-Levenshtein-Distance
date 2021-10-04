@@ -179,7 +179,7 @@ public class RollingHash {
 				throw new Exception(error);
 			}
 			char c =  ch.charValue();
-			lng = charsToLongs.get(ch);
+			lng = charsToLongs.get(c);
 		}
 		catch(Exception x){
 			// is this error even possible?
@@ -201,17 +201,12 @@ public class RollingHash {
 			long hval = Math.abs(xorProduct);
 			int v = (int) hval % compFactor;
 			if(v == 0){
-				long clen = chars.length;
-				long rawVal = hval % clen;
-				// TODO: What if I mulitply rawval by a large prime right here?
-				// Will that prevent certain prime C values from resulting in non-random behavior?
-				int index = Math.abs((int)(rawVal*ICompressor.prime));
-				Character ct =  chars[(int) (index%chars.length)];
+				long rawVal = hval % chars.length;
+				int index = Math.abs((int)(rawVal));
+				Character ct =  chars[index%chars.length];
 				return ct;
 			}
 		}
-		// if we have not read n characters yet or the accumulator value
-		// modulo C wasn't 0, we return null.
 		return null;
 	}
 	

@@ -200,6 +200,10 @@ public class Demo {
                 String sig1 = getCompressor().compress(cont1);
                 String sig2 = getCompressor().compress(cont2);
 
+                int longerSig = Math.max(sig1.length(), sig2.length());
+                int shorterSig = Math.min(sig1.length(), sig2.length());
+
+
                 Date start = new Date();
                 // this is slow--we only need to do one to get a rate.
                 int act = sd.getLD(cont1, cont2);
@@ -209,6 +213,21 @@ public class Demo {
                 int expectedForRandom = sd.expectedDistanceForSigs(cont1.length(), cont2.length());
                 FileSignature fs1 = new FileSignature(f1, cont1.length(), hashFunc, c, n, getCompressor().getChars(), sig1);
                 FileSignature fs2 = new FileSignature(f2, cont2.length(), hashFunc, c, n, getCompressor().getChars(), sig2);
+
+                int sigLd = sd.getLD(sig1, sig2);
+                double sigLldShrink = sigLd/((double)(sig1.length() + sig2.length()));
+
+                // The is significant variance in the size of the signatures even for different files of the same size!
+                double sigLDShrinkTrunc = 0.0d;
+                if (Math.max(sig1.length(), sig2.length()) == sig1.length()){
+                    // sig1 is longer
+                    int ld  = sd.getLD(sig1.substring(0,sig2.length()-1), sig2);
+                    sigLDShrinkTrunc  = ((double)ld)/sig2.length();
+                } else {
+                    // sig1 is not longer
+                    int ld  = sd.getLD(sig2.substring(0,sig1.length()-1), sig1);
+                    sigLDShrinkTrunc  = ((double)ld)/sig1.length();
+                }
 
                 int est = sd.getLDEst(fs1, fs2, sd.getLD(sig1, sig2));
 
@@ -240,78 +259,94 @@ public class Demo {
                 double scaledToSize = ldAbsError * ldToSize;
 
                 scaledToSize = ((int)(scaledToSize*1000))/1000d;
+
+                double origLDShrink =  act/((double)(longerOriginal+shorterOriginal)/2);
+
                 ct++;
-                System.out.println( logLineAlt(f1, f2, longerOriginal, shorterOriginal,
+                System.out.println( logLineAlt(
+                                f1, f2,
+                                longerOriginal, shorterOriginal,
+                                longerSig, shorterSig,
+                                origLDShrink, sigLldShrink, sigLDShrinkTrunc,
                                 expectedForRandom, act, est, (int) corrected, scaledToSize,
                                 fileLDdRateSec, sigLDRateSec, firstLine));
             }
         }
     }
 
-    private String logHeaders() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("FILE 1,\t\t");
-        sb.append("FILE 2,\t");
-        sb.append("FLEN 1,\t");
-        sb.append("FLEN 2,\t");
-        sb.append("FLEN DIFF,\t");
-        sb.append("EXPECTED LD,\t");
-        sb.append("CALC'D LD,\t");
-        sb.append("RAW EST,\t");
-        sb.append("CORRECTED EST,\t");
-        sb.append("RAW ERR,\t");
-        sb.append("CORRECTED ERR,\t");
-        sb.append("SCALED TO ORIG,\t");
-        sb.append("FILE LD/sec,\t");
-        sb.append("SIG LD/sec\t");
-        sb.append("SPEEDUP,\t");
-        sb.append("FILE CHANGES");
-        return sb.toString();
-    }
-
     private String logHeadersAlt() {
         StringBuffer sb = new StringBuffer();
-        sb.append("CALC'D LD,");
-        sb.append("RAW EST,");
-        sb.append("CORRECTED EST,");
-        sb.append("RAW ERR,");
-        sb.append("CORRECTED ERR,");
-        sb.append("SCALED TO ORIG,");
-        sb.append("SPEEDUP");
+        sb.append("FI, ");
+        sb.append("F2, ");
+        sb.append("F1Len, ");
+        sb.append("F2Len, ");
+        sb.append("Sig1Len, ");
+        sb.append("Sig2Len, ");
+        sb.append("Orig-shrink, ");
+        sb.append("Sig-shrink, ");
+        sb.append("Sig-shrink-trunc, ");
+        sb.append("Expected, ");
+        sb.append("Actual, ");
+        sb.append("Estimate, ");
+        sb.append("Corrected Est, ");
+        sb.append("Raw Error, ");
+        sb.append("Corrected Error, ");
+        sb.append("Scaled Error, ");
+        sb.append("Est/Sec, ");
+        sb.append("Speedup, ");
         return sb.toString();
     }
 
-    private String logLineAlt(String f1, String f2, int lgrOrig, int shtrOrig,
-                           int expctd, int act, int est, int correctedEst, double scaledToSize,
-                           double ldRateSec, double estRateSec, String firstLine) {
+    private String logLineAlt(String f1, String f2,
+                                int lgrOrig, int shtrOrig,
+                                int s1len, int s2len,
+                                double origShrink, double sigShrink, double sigShrinkTrunc,
+                                int expctd, int act, int est, int correctedEst, double scaledToSize,
+                                double ldRateSec, double estRateSec, String firstLine) {
         StringBuffer sb = new StringBuffer();
-        // actual LD`
+        sb.append(f1);
+        sb.append(", ");
+        sb.append(f2);
+        sb.append(", ");
+        sb.append(lgrOrig);
+        sb.append(", ");
+        sb.append(shtrOrig);
+        sb.append(", ");
+        sb.append(s1len);
+        sb.append(", ");
+        sb.append(s2len);
+        sb.append(", ");
+        sb.append(origShrink);
+        sb.append(", ");
+        sb.append(sigShrink);
+        sb.append(", ");
+        sb.append(sigShrinkTrunc);
+        sb.append(", ");
+        sb.append(expctd);
+        sb.append(", ");
         sb.append(act);
-        sb.append(",");
-        // estimated
+        sb.append(", ");
         sb.append(est);
-        sb.append(",");
-        // corrected estimate
+        sb.append(", ");
         sb.append(correctedEst);
-        sb.append(",");
+        sb.append(", ");
         // raw error
         double e = (1 - Math.round(((double) est / act) * 1000)) / 1000.0;
         sb.append(e);
-        sb.append(",");
+        sb.append(", ");
         // corrected estimate
         double v = 1-(double) correctedEst / act;
         v = Math.round(v * 1000) / 1000.0;
         sb.append(v);
-        sb.append(",");
+        sb.append(", ");
         // scaled to size
         sb.append(scaledToSize);
-        sb.append(",");
+        sb.append(", ");
         sb.append(Math.round(estRateSec * 1000.0) / 1000.0);
-        sb.append(",");
+        sb.append(", ");
         // estimate/second
         double spdup=(int)((estRateSec / (double)ldRateSec));
         sb.append(spdup);
-        sb.append("");
         return sb.toString();
     }
 

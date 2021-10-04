@@ -26,7 +26,7 @@ public class StringCompressorPlainJava extends ICompressor{
         }
         for(int i=0; i<maxPos; i++){
             String neighborhood = str.substring(i, i+getN());
-            int hashval = Math.abs(neighborhood.hashCode() * prime);
+            int hashval = Math.abs(neighborhood.hashCode());
             int noRet = hashval % getC();
             if(noRet != 0){
                continue;

@@ -405,7 +405,7 @@ public class TestParent  extends TestCase {
 	// TODO This string could have more characters. This is only 62. You could add in puctuation, etc.
 	// TODO Might be useful to make it setable.
 	protected static String outputCharString = "abcdefghijklmnopqrstuvwxyzABCDEFGHI" +
-			"JKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+{}[]?><.";
+			"JKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+{}[]?><";
 	protected static ICompressor comp = null;
 	protected static char [] outputChars=null;
 	protected static int MINBITS=31;
@@ -421,6 +421,7 @@ public class TestParent  extends TestCase {
 	}
 
 	static {
+		System.err.println("Test parent setting output char array: " + outputCharString.length() + " characters");
 		setOutputChars(outputCharString);
 	}
 

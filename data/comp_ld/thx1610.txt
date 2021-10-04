@@ -1,0 +1,522 @@
+
+
+GEOLOGICAL CONTEMPORANEITY AND PERSISTENT TYPES OF LIFE.*
+
+by Thomas H. Huxley
+
+
+
+
+    [footnote] *The Anniversary Address to the Geological
+    Society for 1862.
+
+MERCHANTS occasionally go through a wholesome, though troublesome and
+not always satisfactory, process which they term "taking stock."  After
+all the excitement of speculation, the pleasure of gain, and the pain
+of loss, the trader makes up his mind to face facts and to learn the
+exact quantity and quality of his solid and reliable possessions.
+
+The man of science does well sometimes to imitate this procedure; and,
+forgetting for the time the importance of his own small winnings, to
+re-examine the common stock in trade, so that he may make sure how far
+the stock of bullion in the cellar--on the faith of whose existence so
+much paper has been circulating--is really the solid gold of truth.
+
+The Anniversary Meeting of the Geological Society seems to be an
+occasion well suited for an undertaking of this kind--for an inquiry,
+in fact, into the nature and value of the present results of
+paleontological investigation; and the more so, as all those who have
+paid close attention to the late multitudinous discussions in which
+paleontology is implicated, must have felt the urgent necessity of some
+such scrutiny.
+
+First in order, as the most definite and unquestionable of all the
+results of paleontology, must be mentioned the immense extension and
+impulse given to botany, zoology, and comparative anatomy, by the
+investigation of fossil remains.  Indeed, the mass of biological facts
+has been so greatly increased, and the range of biological speculation
+has been so vastly widened, by the researches of the geologist and
+paleontologist, that it is to be feared there are naturalists in
+existence who look upon geology as Brindley regarded rivers.  "Rivers,"
+said the great engineer, "were made to feed canals"; and geology, some
+seem to think, was solely created to advance comparative anatomy.
+
+Were such a thought justifiable, it could hardly expect to be received
+with favour by this assembly.  But it is not justifiable.  Your
+favourite science has her own great aims independent of all others; and
+if, notwithstanding her steady devotion to her own progress, she can
+scatter such rich alms among her sisters, it should be remembered that
+her charity is of the sort that does not impoverish, but "blesseth him
+that gives and him that takes."
+
+Regard the matter as we will, however, the facts remain.  Nearly 40,000
+species of animals and plants have been added to the Systema Naturae by
+paleontologic research.  This is a living population equivalent to that
+of a new continent in mere number; equivalent to that of a new
+hemisphere, if we take into account the small population of insects as
+yet found fossil, and the large proportion and peculiar organization of
+many of the Vertebrata.
+
+But, beyond this, it is perhaps not too much to say that, except for the
+necessity of interpreting paleontologic facts, the laws of distribution
+would have received less careful study; while few comparative
+anatomists (and those not of the first order) would have been induced by
+mere love of detail, as such, to study the minutiae of osteology, were
+it not that in such minutiae lie the only keys to the most interesting
+riddles offered by the extinct animal world.
+
+These assuredly are great and solid gains.  Surely it is matter for no
+small congratulation that in half a century (for paleontology, though
+it dawned earlier, came into full day only with Cuvier) a subordinate
+branch of biology should have doubled the value and the interest of the
+whole group of sciences to which it belongs.
+
+But this is not all.  Allied with geology, paleontology has established
+two laws of inestimable importance: the first, that one and the same
+area of the earth's surface has been successively occupied by very
+different kinds of living beings; the second, that the order of
+succession established in one locality holds good, approximately, in
+all.
+
+The first of these laws is universal and irreversible; the second is an
+induction from a vast number of observations, though it may possibly,
+and even probably, have to admit of exceptions.  As a consequence of
+the second law, it follows that a peculiar relation frequently subsists
+between series of strata, containing organic remains, in different
+localities.  The series resemble one another, not only in virtue of a
+general resemblance of the organic remains in the two, but also in
+virtue of a resemblance in the order and character of the serial
+succession in each.  There is a resemblance of arrangement; so that the
+separate terms of each series, as well as the whole series, exhibit a
+correspondence.
+
+Succession implies time; the lower members of a series of sedimentary
+rocks are certainly older than the upper; and when the notion of age
+was once introduced as the equivalent of succession, it was no wonder
+that correspondence in succession came to be looked upon as a
+correspondence in age, or "contemporaneity."  And, indeed, so long as
+relative age only is spoken of, correspondence in succession 'is'
+correspondence in age; it is 'relative' contemporaneity.
+
+But it would have been very much better for geology if so loose and
+ambiguous a word as "contemporaneous" had been excluded from her
+terminology, and if, in its stead, some term expressing similarity of
+serial relation, and excluding the notion of time altogether, had been
+employed to denote correspondence in position in two or more series of
+strata.
+
+In anatomy, where such correspondence of position has constantly to be
+spoken of, it is denoted by the word "homology" and its derivatives;
+and for Geology (which after all is only the anatomy and physiology of
+the earth) it might be well to invent some single word, such as
+"homotaxis" (similarity of order), in order to express an essentially
+similar idea.  This, however, has not been done, and most probably the
+inquiry will at once be made--To what end burden science with a new and
+strange term in place of one old, familiar, and part of our common
+language?
+
+The reply to this question will become obvious as the inquiry into the
+results of paleontology is pushed further.
+
+Those whose business it is to acquaint themselves specially with the
+works of paleontologists, in fact, will be fully aware that very few,
+if any, would rest satisfied with such a statement of the conclusions
+of their branch of biology as that which has just been given.
+
+Our standard repertories of paleontology profess to teach us far higher
+things--to disclose the entire succession of living forms upon the
+surface of the globe; to tell us of a wholly different distribution of
+climatic conditions in ancient times; to reveal the character of the
+first of all living existences; and to trace out the law of progress
+from them to us.
+
+It may not be unprofitable to bestow on these professions a somewhat
+more critical examination than they have hitherto received, in order to
+ascertain how far they rest on an irrefragable basis; or whether, after
+all, it might not be well for paleontologists to learn a little more
+carefully that scientific "ars artium," the art of saying "I don't
+know."  And to this end let us define somewhat more exactly the extent
+of these pretensions of paleontology.
+
+Every one is aware that Professor Bronn's 'Untersuchungen' and Professor
+Pictet's 'Traite de Paleontologie' are works of standard authority,
+familiarly consulted by every working paleontologist.  It is desirable
+to speak of these excellent books, and of their distinguished authors,
+with the utmost respect, and in a tone as far as possible removed from
+carping criticism; indeed, if they are specially cited in this place,
+it is merely in justification of the assertion that the following
+propositions, which may be found implicitly, or explicitly, in the
+works in question, are regarded by the mass of paleontologists and
+geologists, not only on the Continent but in this country, as
+expressing some of the best-established results of paleontology.
+Thus:--
+
+Animals and plants began their existence together, not long after the
+commencement of the deposition of the sedimentary rocks; and then
+succeeded one another, in such a manner, that totally distinct faunae
+and florae occupied the whole surface of the earth, one after the
+other, and during distinct epochs of time.
+
+A geological formation is the sum of all the strata deposited over the
+whole surface of the earth during one of these epochs: a geological
+fauna or flora is the sum of all the species of animals or plants which
+occupied the whole surface of the globe, during one of these epochs.
+
+The population of the earth's surface was at first very similar in all
+parts, and only from the middle of the Tertiary epoch onwards, began to
+show a distinct distribution in zones.
+
+The constitution of the original population, as well as the numerical
+proportions of its members, indicates a warmer and, on the whole,
+somewhat tropical climate, which remained tolerably equable throughout
+the year.  The subsequent distribution of living beings in zones is the
+result of a gradual lowering of the general temperature, which first
+began to be felt at the poles.
+
+It is not now proposed to inquire whether these doctrines are true or
+false; but to direct your attention to a much simpler though very
+essential preliminary question--What is their logical basis?  what are
+the fundamental assumptions upon which they all logically depend?  and
+what is the evidence on which those fundamental propositions demand our
+assent?
+
+These assumptions are two: the first, that the commencement of the
+geological record is coeval with the commencement of life on the globe;
+the second, that geological contemporaneity is the same thing as
+chronological synchrony.  Without the first of these assumptions there
+would of course be no ground for any statement respecting the
+commencement of life; without the second, all the other statements
+cited, every one of which implies a knowledge of the state of different
+parts of the earth at one and the same time, will be no less devoid of
+demonstration.
+
+The first assumption obviously rests entirely on negative evidence.
+This is, of course, the only evidence that ever can be available to
+prove the commencement of any series of phenomena; but, at the same
+time, it must be recollected that the value of negative evidence
+depends entirely on the amount of positive corroboration it receives.
+If A B wishes to prove an 'alibi', it is of no use for him to get a
+thousand witnesses simply to swear that they did not see him in such
+and such a place, unless the witnesses are prepared to prove that they
+must have seen him had he been there.  But the evidence that animal
+life commenced with the Lingula-flags, 'e.g.', would seem to be exactly
+of this unsatisfactory uncorroborated sort.  The Cambrian witnesses
+simply swear they "haven't seen anybody their way"; upon which the
+counsel for the other side immediately puts in ten or twelve thousand
+feet of Devonian sandstones to make oath they never saw a fish or a
+mollusk, though all the world knows there were plenty in their time.
+
+But then it is urged that, though the Devonian rocks in one part of the
+world exhibit no fossils, in another they do, while the lower Cambrian
+rocks nowhere exhibit fossils, and hence no living being could have
+existed in their epoch.
+
+To this there are two replies: the first, that the observational basis
+of the assertion that the lowest rocks are nowhere fossiliferous is an
+amazingly small one, seeing how very small an area, in comparison to
+that of the whole world, has yet been fully searched; the second, that
+the argument is good for nothing unless the unfossiliferous rocks in
+question were not only 'contemporaneous' in the geological sense, but
+'synchronous' in the chronological sense.  To use the 'alibi'
+illustration again.  If a man wishes to prove he was in neither of two
+places, A and B, on a given day, his witnesses for each place must be
+prepared to answer for the whole day.  If they can only prove that he
+was not at A in the morning, and not at B in the afternoon, the
+evidence of his absence from both is 'nil', because he might have been
+at B in the morning and at A in the afternoon.
+
+Thus everything depends upon the validity of the second assumption.  And
+we must proceed to inquire what is the real meaning of the word
+"contemporaneous" as employed by geologists. To this end a concrete
+example may be taken.
+
+The Lias of England and the Lias of Germany, the Cretaceous rocks of
+Britain and the Cretaceous rocks of Southern India, are termed by
+geologists "contemporaneous" formations; but whenever any thoughtful
+geologist is asked whether he means to say that they were deposited
+synchronously, he says, "No,--only within the same great epoch."  And
+if, in pursuing the inquiry, he is asked what may be the approximate
+value in time of a "great epoch"--whether it means a hundred years, or
+a thousand, or a million, or ten million years--his reply is, "I cannot
+tell."
+
+If the further question be put, whether physical geology is in
+possession of any method by which the actual synchrony (or the reverse)
+of any two distant deposits can be ascertained, no such method can be
+heard of; it being admitted by all the best authorities that neither
+similarity of mineral composition, nor of physical character, nor even
+direct continuity of stratum, are 'absolute' proofs of the synchronism
+of even approximated sedimentary strata: while, for distant deposits,
+there seems to be no kind of physical evidence attainable of a nature
+competent to decide whether such deposits were formed simultaneously, or
+whether they possess any given difference of antiquity.  To return to
+an example already given: All competent authorities will probably
+assent to the proposition that physical geology does not enable us in
+any way to reply to this question--Were the British Cretaceous rocks
+deposited at the same time as those of India, or are they a million of
+years younger or a million of years older?
+
+Is paleontology able to succeed where physical geology fails?  Standard
+writers on paleontology, as has been seen, assume that she can.  They
+take it for granted, that deposits containing similar organic remains
+are synchronous--at any rate in a broad sense; and yet, those who will
+study the eleventh and twelfth chapters of Sir Henry De La Beche's
+remarkable 'Researches in Theoretical Geology', published now nearly
+thirty years ago, and will carry out the arguments there most
+luminously stated, to their logical consequences, may very easily
+convince themselves that even absolute identity of organic contents is
+no proof of the synchrony of deposits, while absolute diversity is no
+proof of difference of date.  Sir Henry De La Beche goes even further,
+and adduces conclusive evidence to show that the different parts of one
+and the same stratum, having a similar composition throughout,
+containing the same organic remains, and having similar beds above and
+below it, may yet differ to any conceivable extent in age.
+
+Edward Forbes was in the habit of asserting that the similarity of the
+organic contents of distant formations was 'prima facie' evidence, not
+of their similarity, but of their difference of age; and holding as he
+did the doctrine of single specific centres, the conclusion was as
+legitimate as any other; for the two districts must have been occupied
+by migration from one of the two, or from an intermediate spot, and the
+chances against exact coincidence of migration and of imbedding are
+infinite.
+
+In point of fact, however, whether the hypothesis of single or of
+multiple specific centres be adopted, similarity of organic contents
+cannot possibly afford any proof of the synchrony of the deposits which
+contain them; on the contrary, it is demonstrably compatible with the
+lapse of the most prodigious intervals of time, and with the
+interposition of vast changes in the organic and inorganic worlds,
+between the epochs in which such deposits were formed.
+
+On what amount of similarity of their faunae is the doctrine of the
+contemporaneity of the European and of the North American Silurians
+based?  In the last edition of Sir Charles Lyell's 'Elementary Geology'
+it is stated, on the authority of a former President of this Society,
+the late Daniel Sharpe, that between 30 and 40 per cent. of the species
+of Silurian Mollusca are common to both sides of the Atlantic.  By way
+of due allowance for further discovery, let us double the lesser number
+and suppose that 60 per cent. of the species are common to the North
+American and the British Silurians.  Sixty per cent. of species in
+common is, then, proof of contemporaneity.
+
+Now suppose that, a million or two of years hence, when Britain has made
+another dip beneath the sea and has come up again, some geologist
+applies this doctrine, in comparing the strata laid bare by the
+upheaval of the bottom, say, of St. George's Channel with what may then
+remain of the Suffolk Crag.  Reasoning in the same way, he will at once
+decide the Suffolk Crag and the St. George's Channel beds to be
+contemporaneous; although we happen to know that a vast period (even in
+the geological sense) of time, and physical changes of almost
+unprecedented extent, separate the two.
+
+But if it be a demonstrable fact that strata containing more than 60 or
+70 per cent. of species of Mollusca in common, and comparatively close
+together, may yet be separated by an amount of geological time
+sufficient to allow of some of the greatest physical changes the world
+has seen, what becomes of that sort of contemporaneity the sole
+evidence of which is a similarity of facies, or the identity of half a
+dozen species, or of a good many genera?
+
+And yet there is no better evidence for the contemporaneity assumed by
+all who adopt the hypothesis of universal faunae and florae, of a
+universally uniform climate, and of a sensible cooling of the globe
+during geological time.
+
+There seems, then, no escape from the admission that neither physical
+geology, nor paleontology, possesses any method by which the absolute
+synchronism of two strata can be demonstrated.  All that geology can
+prove is local order of succession.  It is mathematically certain that,
+in any given vertical linear section of an undisturbed series of
+sedimentary deposits, the bed which lies lowest is the oldest.  In many
+other vertical linear sections of the same series, of course,
+corresponding beds will occur in a similar order; but, however great
+may be the probability, no man can say with absolute certainty that the
+beds in the two sections were synchronously deposited.  For areas of
+moderate extent, it is doubtless true that no practical evil is likely
+to result from assuming the corresponding beds to be synchronous or
+strictly contemporaneous; and there are multitudes of accessory
+circumstances which may fully justify the assumption of such
+synchrony.  But the moment the geologist has to deal with large areas,
+or with completely separated deposits, the mischief of confounding that
+"homotaxis" or "similarity of arrangement," which 'can' be
+demonstrated, with "synchrony" or "identity of date," for which there
+is not a shadow of proof, under the one common term of
+"contemporaneity" becomes incalculable, and proves the constant source
+of gratuitous speculations.
+
+For anything that geology or paleontology are able to show to the
+contrary, a Devonian fauna and flora in the British Islands may have
+been contemporaneous with Silurian life in North America, and with a
+Carboniferous fauna and flora in Africa.  Geographical provinces and
+zones may have been as distinctly marked in the Paleozoic epoch as at
+present, and those seemingly sudden appearances of new genera and
+species, which we ascribe to new creation, may be simple results of
+migration.
+
+It may be so; it may be otherwise.  In the present condition of our
+knowledge and of our methods, one verdict--"not proven, and not
+provable"--must be recorded against all the grand hypotheses of the
+paleontologist respecting the general succession of life on the globe.
+The order and nature of terrestrial life, as a whole, are open
+questions.  Geology at present provides us with most valuable
+topographical records, but she has not the means of working them into a
+universal history.  Is such a universal history, then, to be regarded as
+unattainable? Are all the grandest and most interesting problems which
+offer themselves to the geological student essentially insoluble?  Is
+he in the position of a scientific Tantalus--doomed always to thirst
+for a knowledge which he cannot obtain?  The reverse is to be hoped;
+nay, it may not be impossible to indicate the source whence help will
+come.
+
+In commencing these remarks, mention was made of the great obligations
+under which the naturalist lies to the geologist and paleontologist.
+Assuredly the time will come when these obligations will be repaid
+tenfold, and when the maze of the world's past history, through which
+the pure geologist and the pure paleontologist find no guidance, will be
+securely threaded by the clue furnished by the naturalist.
+
+All who are competent to express an opinion on the subject are, at
+present, agreed that the manifold varieties of animal and vegetable
+form have not either come into existence by chance, nor result from
+capricious exertions of creative power; but that they have taken place
+in a definite order, the statement of which order is what men of
+science term a natural law. Whether such a law is to be regarded as an
+expression of the mode of operation of natural forces, or whether it is
+simply a statement of the manner in which a supernatural power has
+thought fit to act, is a secondary question, so long as the existence of
+the law and the possibility of its discovery by the human intellect are
+granted.  But he must be a half-hearted philosopher who, believing in
+that possibility, and having watched the gigantic strides of the
+biological sciences during the last twenty years, doubts that science
+will sooner or later make this further step, so as to become possessed
+of the law of evolution of organic forms--of the unvarying order of
+that great chain of causes and effects of which all organic forms,
+ancient and modern, are the links.  And then, if ever, we shall be able
+to begin to discuss, with profit, the questions respecting the
+commencement of life, and the nature of the successive populations of
+the globe, which so many seem to think are already answered.
+
+The preceding arguments make no particular claim to novelty; indeed they
+have been floating more or less distinctly before the minds of
+geologists for the last thirty years; and if, at the present time, it
+has seemed desirable to give them more definite and systematic
+expression, it is because paleontology is every day assuming a greater
+importance, and now requires to rest on a basis the firmness of which
+is thoroughly well assured.  Among its fundamental conceptions, there
+must be no confusion between what is certain and what is more or less
+probable.*  But, pending the construction of a surer foundation than
+paleontology now possesses, it may be instructive, assuming for the
+nonce the general correctness of the ordinary hypothesis of geological
+contemporaneity, to consider whether the deductions which are ordinarily
+drawn from the whole body of paleontologic facts are justifiable.
+
+    [footnote] *"le plus grand service qu'on puisse rendre a la
+    science est d'y faire place nette avant d'y rien
+    construire."--CUVIER
+
+The evidence on which such conclusions are based is of two kinds,
+negative and positive.  The value of negative evidence, in connection
+with this inquiry, has been so fully and clearly discussed in an
+address from the chair of this Society*, which none of us have
+forgotten, that nothing need at present be said about it; the more, as
+the considerations which have been laid before you have certainly not
+tended to increase your estimation of such evidence.  It will be
+preferable to turn to the positive facts of paleontology, and to inquire
+what they tell us.
+
+    [footnote] *Anniversary Address for 1851, 'Quart. Journ.
+    Geol. Soc.' vol. vii.
+
+We are all accustomed to speak of the number and the extent of the
+changes in the living population of the globe during geological time as
+something enormous: and indeed they are so, if we regard only the
+negative differences which separate the older rocks from the more
+modern, and if we look upon specific and generic changes as great
+changes, which from one point of view, they truly are.  But leaving the
+negative differences out of consideration, and looking only at the
+positive data furnished by the fossil world from a broader point of
+view--from that of the comparative anatomist who has made the study of
+the greater modifications of animal form his chief business--a surprise
+of another kind dawns upon the mind; and under 'this' aspect the
+smallness of the total change becomes as astonishing as was its
+greatness under the other.
+
+There are two hundred known orders of plants; of these not one is
+certainly known to exist exclusively in the fossil state.  The whole
+lapse of geological time has as yet yielded not a single new ordinal
+type of vegetable structure.*
+
+    [footnote] *See Hooker's 'Introductory Essay to the Flora of
+    Tasmania', p. xxiii.
+
+The positive change in passing from the recent to the ancient animal
+world is greater, but still singularly small.  No fossil animal is so
+distinct from those now living as to require to be arranged even in a
+separate class from those which contain existing forms.  It is only when
+we come to the orders, which may be roughly estimated at about a
+hundred and thirty, that we meet with fossil animals so distinct from
+those now living as to require orders for themselves; and these do not
+amount, on the most liberal estimate, to more than about 10 per cent. of
+the whole.
+
+There is no certainly known extinct order of Protozoa; there is but one
+among the Coelenterata--that of the rugose corals; there is none among
+the Mollusca; there are three, the Cystidea, Blastoidea, and
+Edrioasterida, among the Echinoderms; and two, the Trilobita and
+Eurypterida, among the Crustacea; making altogether five for the great
+sub-kingdom of Annulosa.  Among Vertebrates there is no ordinally
+distinct fossil fish: there is only one extinct order of Amphibia--the
+Labyrinthodonts; but there are at least four distinct orders of
+Reptilia, viz. the Ichthyosauria, Plesiosauria, Pterosauria,
+Dinosauria, and perhaps another or two. There is no known extinct order
+of Birds, and no certainly known extinct order of Mammals, the ordinal
+distinctness of the "Toxodontia" being doubtful.
+
+The objection that broad statements of this kind, after all, rest
+largely on negative evidence is obvious, but it has less force than may
+at first be supposed; for, as might be expected from the circumstances
+of the case, we possess more abundant positive evidence regarding Fishes
+and marine Mollusks than respecting any other forms of animal life; and
+yet these offer us, through the whole range of geological time, no
+species ordinally distinct from those now living; while the far less
+numerous class of Echinoderms presents three; and the Crustacea two,
+such orders, though none of these come down later than the Paleozoic
+age.  Lastly, the Reptilia present the extraordinary and exceptional
+phenomenon of as many extinct as existing orders, if not more; the four
+mentioned maintaining their existence from the Lias to the Chalk
+inclusive.
+
+Some years ago one of your Secretaries pointed out another kind of
+positive paleontologic evidence tending towards the same
+conclusion--afforded by the existence of what he termed "persistent
+types" of vegetable and of animal life.*  He stated, on the authority of
+Dr. Hooker, that there are Carboniferous plants which appear to be
+generically identical with some now living; that the cone of the
+Oolitic 'Araucaria' is hardly distinguishable from that of an existing
+species; that a true 'Pinus' appears in the Purbecks, and a 'Juglans' in
+the Chalk; while, from the Bagshot Sands, a 'Banksia', the wood of
+which is not distinguishable from that of species now living in
+Australia, had been obtained.
+
+    [footnote] *See the abstract of a Lecture "On the Persistent
+    Types of Animal Life," in the 'Notices of the Meetings of
+    the Royal Institution of Great Britain'.--June 3, 1859,
+    vol. iii. p.  151.
+
+Turning to the animal kingdom, he affirmed the tabulate corals of the
+Silurian rocks to be wonderfully like those which now exist; while even
+the families of the Aporosa were all represented in the older Mesozoic
+rocks.
+
+Among the Molluska similar facts were adduced.  Let it be borne in mind
+that 'Avicula', 'Mytails', 'Chiton', 'Natica', 'Patella', 'Trochus',
+'Discina', 'Orbicula', 'Lingula', 'Rhynchonella', and 'Nautilus', all
+of which are existing 'genera', are given without a doubt as Silurian in
+the last edition of 'Siluria'; while the highest forms of the highest
+Cephalopods are represented in the Lias by a genus, 'Belemnoteuthis',
+which presents the closest relation to the existing 'Loligo'.
+
+The two highest groups of the Annulosa, the Insecta and the Arachnida,
+are represented in the Coal, either by existing genera, or by forms
+differing from existing genera in quite mino

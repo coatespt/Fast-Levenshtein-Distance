@@ -37,3 +37,17 @@ data/testfile-sigs.txt
 *.pdf
 *.swp
 allfiles_sigs.csv.back
+comp_ld.csv
+comp_ld_targets_251_17.csv
+cp.sh
+data/awk
+data/chinese/
+data/comp_ld.back/
+testdir/
+testfile.txt
+testfiles.csv
+testfiles.csv.back
+testlist.csv
+tmp.sh
+wc.csv
+
