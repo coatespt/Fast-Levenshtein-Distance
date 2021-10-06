@@ -101,6 +101,7 @@ public class Demo {
      * @param args
      */
     protected void parseArgs(String[] args) {
+        System.err.println("Parsing arguments.");
         if (args.length != 0 && args.length != 1) {
             System.err.println("takes either no arguments or one argument, the full path name of a properties file.");
             System.exit(1);
@@ -119,7 +120,7 @@ public class Demo {
     }
 
     /**
-     * Execute the demon on the input directory specified in configuration.
+     * Execute the demo on the input directory specified in configuration.
      *
      * @throws Exception
      */
@@ -203,21 +204,22 @@ public class Demo {
                 int longerSig = Math.max(sig1.length(), sig2.length());
                 int shorterSig = Math.min(sig1.length(), sig2.length());
 
-
                 Date start = new Date();
                 // this is slow--we only need to do one to get a rate.
                 int act = sd.getLD(cont1, cont2);
                 Date end = new Date();
                 double fileLDdRateSec = FileAndTimeUtility.rateSec(1, start, end);
 
-                int expectedForRandom = sd.expectedDistanceForSigs(cont1.length(), cont2.length());
+                int expectedForRandomSigs = sd.expectedDistanceForSigs(sig1.length(), sig2.length());
+                int expectedForRandomFiles = sd.expectedDistanceForOriginals(cont1.length(), cont2.length());
+
+
                 FileSignature fs1 = new FileSignature(f1, cont1.length(), hashFunc, c, n, getCompressor().getChars(), sig1);
                 FileSignature fs2 = new FileSignature(f2, cont2.length(), hashFunc, c, n, getCompressor().getChars(), sig2);
 
                 int sigLd = sd.getLD(sig1, sig2);
                 double sigLldShrink = sigLd/((double)(sig1.length() + sig2.length()));
 
-                // The is significant variance in the size of the signatures even for different files of the same size!
                 double sigLDShrinkTrunc = 0.0d;
                 if (Math.max(sig1.length(), sig2.length()) == sig1.length()){
                     // sig1 is longer
@@ -229,6 +231,7 @@ public class Demo {
                     sigLDShrinkTrunc  = ((double)ld)/sig1.length();
                 }
 
+                // Estimated LD
                 int est = sd.getLDEst(fs1, fs2, sd.getLD(sig1, sig2));
 
                 // this is fast--do it many times to get a rate.
@@ -243,19 +246,8 @@ public class Demo {
                    System.err.println("Oh no!");
                 }
 
-                //  TODO Verify that the calculation match what is done in the CLI and review the error
-                // 		calculations (which have no analog in the CLI, of course.)
-                //  TODO: Use the declared value--this is the shrinkage for a signature
-                double corrected = est / 1.3d;
-
-                // The error needs to be scaled to the ratio of the LD to the size of the strings.
-                // e.g an estimate of 10 when the actual difference is 100 sounds bad, but if the strings
-                // are a megabyte it's amazingly perfect.
-                // TODO: But is the the right calculation? Seems close...
-
-                // The mean of the two sizes? Does that make sense?
                 double ldToSize = act/((longerOriginal+shorterOriginal)/2d);
-                double ldAbsError = corrected/act;
+                double ldAbsError = est/act;
                 double scaledToSize = ldAbsError * ldToSize;
 
                 scaledToSize = ((int)(scaledToSize*1000))/1000d;
@@ -268,7 +260,7 @@ public class Demo {
                                 longerOriginal, shorterOriginal,
                                 longerSig, shorterSig,
                                 origLDShrink, sigLldShrink, sigLDShrinkTrunc,
-                                expectedForRandom, act, est, (int) corrected, scaledToSize,
+                                expectedForRandomFiles, act, est, scaledToSize,
                                 fileLDdRateSec, sigLDRateSec, firstLine));
             }
         }
@@ -288,7 +280,6 @@ public class Demo {
         sb.append("Expected, ");
         sb.append("Actual, ");
         sb.append("Estimate, ");
-        sb.append("Corrected Est, ");
         sb.append("Raw Error, ");
         sb.append("Corrected Error, ");
         sb.append("Scaled Error, ");
@@ -301,8 +292,8 @@ public class Demo {
                                 int lgrOrig, int shtrOrig,
                                 int s1len, int s2len,
                                 double origShrink, double sigShrink, double sigShrinkTrunc,
-                                int expctd, int act, int est, int correctedEst, double scaledToSize,
-                                double ldRateSec, double estRateSec, String firstLine) {
+                                int expctd, int act, int est,
+                                double scaledToSize, double ldRateSec, double estRateSec, String firstLine) {
         StringBuffer sb = new StringBuffer();
         sb.append(f1);
         sb.append(", ");
@@ -321,23 +312,16 @@ public class Demo {
         sb.append(sigShrink);
         sb.append(", ");
         sb.append(sigShrinkTrunc);
-        sb.append(", ");
+        sb.append(",\t\t");
         sb.append(expctd);
         sb.append(", ");
         sb.append(act);
         sb.append(", ");
         sb.append(est);
         sb.append(", ");
-        sb.append(correctedEst);
-        sb.append(", ");
         // raw error
         double e = (1 - Math.round(((double) est / act) * 1000)) / 1000.0;
         sb.append(e);
-        sb.append(", ");
-        // corrected estimate
-        double v = 1-(double) correctedEst / act;
-        v = Math.round(v * 1000) / 1000.0;
-        sb.append(v);
         sb.append(", ");
         // scaled to size
         sb.append(scaledToSize);

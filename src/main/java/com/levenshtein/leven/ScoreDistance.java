@@ -102,8 +102,8 @@ public class ScoreDistance {
         double shorterEst = shorter * (1 - sigRatio);
         int overlapPart =  Math.abs(s1 - s2);
         double est = shorterEst + overlapPart;
-        int oldEst = (int) (Math.max(s1, s2) * sigRatio)  + Math.abs(s1 - s2);
-        double oldToNew = oldEst/(1.0*est);
+        //int oldEst = (int) (Math.max(s1, s2) * sigRatio)  + Math.abs(s1 - s2);
+        //double oldToNew = oldEst/(1.0*est);
         return (int) est;
     }
 
@@ -200,7 +200,7 @@ public class ScoreDistance {
         double effectiveC = (longerUnCompressed+shorterUnCompressed)/(1.0*(longerSig+shorterSig));
 
         //int ld = rawLd!=null?rawLd: getDistance().LD(sig1, sig2);
-        int sigLD = rawSigLD!=null?rawSigLD: getLD(fs2.getSig(), fs2.getSig());
+        int sigLD = rawSigLD!=null?rawSigLD: getLD(fs1.getSig(), fs2.getSig());
 
         // The total file length difference contributes 1:1 character operations.
         //

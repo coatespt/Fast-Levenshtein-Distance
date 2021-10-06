@@ -31,20 +31,13 @@ import static java.lang.Integer.valueOf;
 
  TODO: Also, definitive number for ratio of sig-LD to length of sigs.
 
- TODO: The wholeFileRatio and the sigFileRatio seem backwards. Shouldn't files shrink more than signatures?
-        It is important to explain this!  The signatures should shrink about like random text.
+ TODO: Put in a flag to run squeezeWhite() or not and have a default in the properties.
 
- TODO: Certain combinations of values give terrible hashes. The TestRollingHash.testCompressionDistRH() shows why.
-    Note this is modified to use Java but similar stuff may go for others. If C is divisible by the cardnality of the
-    output set, the  Java hash will give awful results. ((h % C==0) && (h % chars.length))==true
-    What if the test were for a  congruence to a prime > (char.length)? That would constrain C to be bigger than
-    output set because it would have to is all, but
-    it almost always will be.
-    Need a test for divisibility to reject/warn about bad combinations.
-    Need to look closely at the algorithm to see if there is some other tricky stuff.
+ TODO: ScoreDistance has two versions of the getLDEst one of which isn't used in the real code. Get rid of it
+    and fix the test.
 
- TODO: See above item. Implement a feature or a test that computes the distribution of output characters for a given value of C.
-        Run consecutive C values through it and write CSV  C, mean, stdev, min, max of the bucket-counts.
+ TODO: Package up the code that computes distributions.
+    It and the code from demo should go in a utility class for getting research statistics.
 
  TODO: Estimates seem to be more accurate when the files are in fact related. They  are exact when
     the files are identical, only slightly off when the files are almost the same, but deteriorate
@@ -53,26 +46,20 @@ import static java.lang.Integer.valueOf;
     fact that the LD varies from 0 to the mean for randomly selected files and it CAN'T be off when the
     distance is zero so the mean error can only go up from there.
 
- TODO: Check out the significance computation (A) is it correct? (B) could it be more nuanced.
-    It's a scalar between [0,1] but it might make more sense to somehow separate the cases where the
-    differences seem to be concentrated.
-    For instance, if a result is significant, do a second level that does the computation on K-length blocks of the
-    files, e.g. 1/4 or 1/10 the length of the larger, with the smaller chopped into blocks of the same size (not
-    the same number of blacks.) Return the global significance as computed now, and also compute the block-ordering
-    that gives the highest score e.g. total-sig, b1 c3, b4 c1, b3 c2, b2   Note that the final b had no
-    matching c block.
+ TODO: Check out the significance computation (A) is it correct?
+
+ TODO significance is a scalar between [0,1] but it might make more sense to somehow separate the cases where the
+    differences seem to be concentrated. For instance, if a result is significant, do a second level that
+    does the computation on K-length blocks of the files, e.g. 1/4 or 1/10 the length of the larger, with the
+    smaller chopped into blocks of the same size (not the same number of blacks.) Return the global significance
+     as computed now, and also compute the block-ordering that gives the highest score e.g. total-sig, b1 c3, b4
+    c1, b3 c2, b2   Note that the final b had no matching c block.
 
  TODO: Need to work out how to put a true confidence interval around an estimate.
-
- TODO: Part of above, what are the mean and stdev for LD of unrelated text?
+    Part of above, what are the mean and stdev for LD of unrelated text?
     Use the tool to find a large number of pairs that are not related---score at the bottom of significance.
     YOu probably need write a program to blindly chop off the first and last few hundred lines so  there is no
     boiler plate and leave a residuum of one fixed size.
-
- TODO: The test TestRollingHash.testCompressionDistRH() shows a surprising variation in the
-    lumpiness of the distribution of output characters for values of C that are not very different.
-    Likewise the min/max used characters. See the spreadsheet results.
-    Find out why and if it's random, we need to compute a set of best values empirically.
 
  TODO: Deal with zero-length signatures that may result from tiny files and big C values.
     What it does now is is abort if the hash is empty.
@@ -391,7 +378,6 @@ public class Cli {
                     sd.expectedDistanceForSigs(fsi.getSig().length(), fst.getSig().length());
             int est =
                     sd.getLDEst(fsi,fst, rawLd);
-                    //sd.getLDEstForOriginals(fsi,fst, rawLd);
             LDResult ldr = new LDResult(
                     infile, fst.getInputFname(),
                     fsi.getInputFileLen(), fst.getInputFileLen(),

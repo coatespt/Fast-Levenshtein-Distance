@@ -129,7 +129,7 @@ public class TestRollingHash extends TestParent {
 		setC(c);
 		setN(n);
 		setOutputChars(charString);
-		getCompressor().squeezeWhite(true);
+		getCompressor().setSqueezeWhite(true);
 
 		if (!MINIMAL_OUPUT) {
 			System.out.println("_testCompressionRH()  Testing compression on a large " +

@@ -172,7 +172,7 @@ public class TestBasicOperations extends TestParent {
 		setC(307);
 		setN(11);
 		setOutputChars(charString);
-		getCompressor().squeezeWhite(true);
+		getCompressor().setSqueezeWhite(true);
 
 		String longOne = readFile(infile1);
 		int len = longOne.length();
