@@ -27,17 +27,11 @@ import static java.lang.Integer.valueOf;
 
  Important errors or weaknesses
 
- TODO: Need definitive numbers for ratio of LD to length for unrelated text.
-
- TODO: Also, definitive number for ratio of sig-LD to length of sigs.
-
- TODO: Put in a flag to run squeezeWhite() or not and have a default in the properties.
-
  TODO: ScoreDistance has two versions of the getLDEst one of which isn't used in the real code. Get rid of it
     and fix the test.
 
- TODO: Package up the code that computes distributions.
-    It and the code from demo should go in a utility class for getting research statistics.
+ TODO: Factor the properties file and command line arguments code out to their own class that can
+    be shared with the StatisticsUtility class.
 
  TODO: Estimates seem to be more accurate when the files are in fact related. They  are exact when
     the files are identical, only slightly off when the files are almost the same, but deteriorate
@@ -148,6 +142,7 @@ public class Cli {
     protected boolean verbose = false;
     protected int outputLevel = 0;
     protected String hashType = "JAVA";
+    private boolean squeeze=true;
 
     // ld smaller than equal-len file by this much
     // TODO: Set this default to the best value we can compute
@@ -215,6 +210,7 @@ public class Cli {
     public int go() {
         try {
             parseArgs(argv);
+            ICompressor.setSqueezeWhite(squeeze);
             if (!isCoprime(c, outChars.length())){
                System.err.println("Warning, c=" + c + " and outchars.length()=" + outChars.length() + " are not mutually-prime.");
                if(quit()) {
@@ -591,6 +587,11 @@ public class Cli {
                 fr = Double.parseDouble(v);
                 System.err.println("fr=" + fr);
             }
+            else if (a.equals("s")) {
+                // LS this much less than equal len file
+                squeeze = Boolean.parseBoolean(v);
+                System.err.println("s=" + fr);
+            }
             else {
                 System.err.println("Unknown argument encountered:" + a);
             }
@@ -633,6 +634,7 @@ public class Cli {
         sb.append("-ht hash type XOR, JAVA, SHA-256. \n");
         sb.append("-fr a float [0,1] that is the shrinkage factor for LD or unrelated text. \n");
         sb.append("-sr a float [0.1] that is the shrinkage factor for LD of unrelated signatures. \n");
+        sb.append("-s a boolean. Squeeze all strings of whitespace into a single space character. \n");
         return sb.toString();
     }
 
@@ -689,6 +691,9 @@ public class Cli {
         if (getDoubleVal("sr", defaultProps) != null) {
             sr = getDoubleVal("sr", defaultProps);
             System.err.println("sr=" + sr);
+        }
+        if (getBoolVal("s", defaultProps) != null) {
+            squeeze = getBoolVal("s", defaultProps);
         }
     }
 

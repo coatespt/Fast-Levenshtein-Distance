@@ -12,14 +12,14 @@ public abstract class ICompressor {
     private Integer c;
 
     // Default to squeezing out the white space.
-    protected boolean SQUEEZE_WHITE = true;
+    protected static boolean SQUEEZE_WHITE = true;
     public static boolean PRINT_DIAGNOSTICS = false;
 
     // This defaults to 83 characters. because that the largest prime that includes most of the
     // ASCII set that is printable but are unlikely to affect CSV formatting.
-    // You can go larger if you want.  The length of this string should be mutually prime wiht C.
+    // You can go larger if you want.  The length of this string should be mutually prime wrt C.
+    // TODO: I think this could contain arbitrary Unicode but it's not tested.
     private static String chars = "abcdefghijklmnopqrstuvwxsyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456!@#$%^&*()_-+=[]{};:<>.?";
-
     public static String getChars() {
         return chars;
     }
@@ -34,7 +34,7 @@ public abstract class ICompressor {
      *
      * @param b
      */
-    public void setSqueezeWhite(boolean b) {
+    public static void setSqueezeWhite(boolean b) {
         SQUEEZE_WHITE = b;
     }
 
