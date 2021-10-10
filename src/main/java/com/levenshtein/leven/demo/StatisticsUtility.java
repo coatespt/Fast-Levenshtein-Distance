@@ -332,6 +332,8 @@ public class StatisticsUtility {
         printMMMStderr("Corrected Errror Variants ",correctedErrorsVariantsList);
         printMMMStderr("Corrected Errror Different ",correctedErrorsDifferentList);
         printMMMStderr("est/sec ",perSecondList);
+        System.err.println("total pairs:" + rawErrorsList.size()+ " variants: " + rawErrorsVariantsList.size()
+                + " different:" + rawErrorsDifferentList.size());
     }
 
     protected void printMMMStderr(String label, List<Double> lst){

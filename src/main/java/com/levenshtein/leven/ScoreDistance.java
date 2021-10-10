@@ -224,12 +224,12 @@ public class ScoreDistance {
         boolean ptcFormula=true;
         double tst = 0;
         if (ptcFormula) {
-            // way to big when actual is close to expected
-            ldForTheRest = (sigLD-sigDiff) * effectiveC * (1.0 + wholeFileRatio) ;
+            // Much too big when actual is close to expected
+            //ldForTheRest = (sigLD-sigDiff) * effectiveC * (1.0 + wholeFileRatio) ;
 
 
-            // pretty good when the actual is close to the expected
-            ldForTheRest = (sigLD-sigDiff) * effectiveC * (1.0/(1.0d+sigRatio));
+            // Pretty good when the actual is close to the expected
+            //ldForTheRest = (sigLD-sigDiff) * effectiveC * (1.0/(1.0d+sigRatio));
 
             //
             ldForTheRest  = (sigLD-sigDiff) * effectiveC * (1.0d-sigRatio);
