@@ -55,7 +55,7 @@ public class ScoreDistance {
      *
      * TODO: This may not be reliable
      */
-    private static double sigRatio = 0.30d;
+    private static double sigRatio = 0.03d;
 
     /**
      * Empirical estimate of the amount by which the LD of a pair of equal
@@ -182,6 +182,19 @@ public class ScoreDistance {
      * TODO: This appears to give very good estimates for related files but progressively
      *  poorer estimates as the objects diverge. For unrelated objects the estimates
      *  are about 0.69 of what they should be.
+     First of all, I think we agree on the majority of your formula except the best value for W as well as the last formula which currently in the implementation says
+
+     double ldForTheRest = (sigLD-sigDiff) * effectiveC * (1.0 + wholeFileRatio) ;
+
+     ldForRest describes the portion of the signatures that do not match, e.g., sigA = XXXYYY and sigB=XXAA,
+     this focuses on the AA part. As we know the ration, we multiply it by the original ratio (e.g., 2x 48)
+     thus these two elements in the signature correspond approx 96 characters in the original files.
+     But, in fact, we know from our tests that even though they are not matching, there will be a little overlap
+     (W = 0.22), so instead of adding 96 to the signature, we have to reduce the 96 by what "usually"
+     overlaps which is 96/1,22. Remark: the goal is to come as close as possible to the original LD and there the 0.22 would exists.
+
+     I hope this makes sense....
+
      *
      * @param fs1
      * @param fs2
@@ -206,8 +219,25 @@ public class ScoreDistance {
         //
         double ldForTheDiff = longerUnCompressed-shorterUnCompressed;
 
-        // The difference in length wsa 1:1 but
-        double ldForTheRest = (sigLD-sigDiff) * effectiveC * (1.0 + wholeFileRatio) ;
+        double ldForTheRest = 0d;
+
+        boolean ptcFormula=true;
+        double tst = 0;
+        if (ptcFormula) {
+            // way to big when actual is close to expected
+            ldForTheRest = (sigLD-sigDiff) * effectiveC * (1.0 + wholeFileRatio) ;
+
+
+            // pretty good when the actual is close to the expected
+            ldForTheRest = (sigLD-sigDiff) * effectiveC * (1.0/(1.0d+sigRatio));
+
+            //
+            ldForTheRest  = (sigLD-sigDiff) * effectiveC * (1.0d-sigRatio);
+
+        } else {
+            // This estimates much too high. E.g 1.2 to 1.5+
+            ldForTheRest = (sigLD - sigDiff) * effectiveC * ((1.0d-sigRatio)/(1.0d-wholeFileRatio));
+        }
 
         int retval =  (int) (ldForTheDiff + ldForTheRest);
 

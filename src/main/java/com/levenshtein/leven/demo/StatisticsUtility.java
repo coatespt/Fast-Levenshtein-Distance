@@ -29,6 +29,7 @@ import java.util.*;
  *
  * TODO: Need a way to compute the unlikeliness of a give expected/actual length ratio.
  *
+ *
  * @author pcoates
  */
 public class StatisticsUtility {
@@ -162,9 +163,34 @@ public class StatisticsUtility {
         }
     }
 
+    private List<Double> rawErrorsVariantsList = new ArrayList<Double>();
+    private List<Double> rawErrorsDifferentList = new ArrayList<Double>();
+    private List<Double> rawErrorsList = new ArrayList<Double>();
+    private List<Double> correctedErrorsVariantsList = new ArrayList<Double>();
+    private List<Double> correctedErrorsDifferentList = new ArrayList<Double>();
+    private List<Double> correctedErrorsList = new ArrayList<Double>();
+    private List<Double> perSecondList = new ArrayList<Double>();
+
+    /**
+     * If the first sameChars characters are the same return true, else false.
+     * I'm using a naming convention with 3 character names for he base file and -1 to -n for variants.
+     * @param f1
+     * @param f2
+     * @param sameChars
+     * @return
+     */
+    boolean same(String f1, String f2, int sameChars){
+        String s1 = f1.substring(0,sameChars);
+        String s2 = f2.substring(0,sameChars);
+        return s1.equals(s2);
+    }
+
     /**
      * Process a single pair of files given by path-names.
      * TODO: Should we attempt to save compressions across runs?
+     * TODO: See below for ways this is fragile.
+     * Note, this is fragile because it would blow up for zero length signatures.
+     * Note, this is fragile because it depends on the file naming convention.
      * @param f1
      * @param f2
      * @param iterations
@@ -228,18 +254,38 @@ public class StatisticsUtility {
         // Actual LD to mean file size
         double ldToSize = act/((longerOriginal+shorterOriginal)/2d);
 
-        // Absolute error
-        double ldAbsError = est/act;
-
+        // Absolute error.
+        // TODO This was giving NaN in a couple of cases. That indicates that the input file set must have a
+        //  duplicated file
+        double ldAbsError = act==0?0d:(double)(est-act)/(double)act;
+        if(Double.isNaN(ldAbsError)){
+            System.err.println("Not a Number for act: " + act + " est: " + est + " f1: " + f1 + " f2: " + f2);
+        } else {
+            rawErrorsList.add(ldAbsError);
+        }
         // Absolute error scaled to the ratio of the LD and the file size.
-        // Two estimate that 100K files have an LD of 10 when they actually have an LD of 2 is
-        // a 500% absolte error, but relative to the size of the files, it's a tiny error.
+        // Note that an estimate that 100K files have an LD of 10 when they actually have an LD of 2 is
+        // a 500% absolute error, but relative to the size of the files, it's a tiny error.
+        // if the ld of the files was 15k, they would clearly be related, as the mean LD of files that size would
+        // be 78k. A 500% absolute error would be the avera
         double scaledToSize = ldAbsError * ldToSize;
+        correctedErrorsList.add(scaledToSize);
+        if(same(f1,f2,23)){
+            rawErrorsVariantsList.add(ldAbsError);
+            correctedErrorsVariantsList.add(scaledToSize);
+        }
+        else {
+            rawErrorsDifferentList.add(ldAbsError);
+            correctedErrorsDifferentList.add(scaledToSize);
+        }
         scaledToSize = ((int)(scaledToSize*1000))/1000d;
 
         // The amount that LD of the originals is different from the size of the originals.
+        // TODO: Is the average of the file lengths legitimate?  I think you can only get this with equal length
+        //  files because correcting for the difference in length would require that you know the result already.`
         double origLDShrink =  act/((double)(longerOriginal+shorterOriginal)/2);
-        System.out.println( logLineAlt(
+        perSecondList.add(sigLDRateSec);
+        System.out.println( logLineBasic(
                 f1, f2,
                 longerOriginal, shorterOriginal,
                 longerSig, shorterSig,
@@ -250,7 +296,7 @@ public class StatisticsUtility {
 
     // Set this true if you want to consider only original files, not variants (that
     // end with hypehen followed by some integer.
-    protected static boolean ONLY_FULL_SIZE=true;
+    protected static boolean ONLY_FULL_SIZE=false;
     /**
      * Execute LD and other computations on every pair of files (not including file-x against file-x)
      * and on the corresponding signature pairs.
@@ -264,21 +310,81 @@ public class StatisticsUtility {
         log.info("createSigs() starting");
         String firstLine = null;
         int TEST_ITERATIONS = 2000;
-        System.out.println(logHeadersAlt());
+//        System.out.println(logHeadersAll());
+        System.out.println(logHeadersBasic());
         for (int i = 0; i < iFileList.size(); i++) {
             long ct = 0;
             for (int j = i + 1; j < iFileList.size(); j++) {
                 String f1 = iFileList.get(i);
                 String f2 = iFileList.get(j);
+                //same(f1,f2,23);
                 if ((ONLY_FULL_SIZE) && ((f1.charAt(f1.length()-2)=='-') || (f2.charAt(f2.length()-2)=='-'))) {
                     continue;
                 }
                 processPair(f1, f2, TEST_ITERATIONS);
             }
         }
+        // TODO: Make multiple error lists--for variant files and for non-variant files.
+        printMMMStderr("Raw Error ",rawErrorsList);
+        printMMMStderr("Raw Error Variants ",rawErrorsVariantsList);
+        printMMMStderr("Raw Error Different ",rawErrorsDifferentList);
+        printMMMStderr("Corrected Errror ",correctedErrorsList);
+        printMMMStderr("Corrected Errror Variants ",correctedErrorsVariantsList);
+        printMMMStderr("Corrected Errror Different ",correctedErrorsDifferentList);
+        printMMMStderr("est/sec ",perSecondList);
     }
 
-    private String logHeadersAlt() {
+    protected void printMMMStderr(String label, List<Double> lst){
+       double total = 0d;
+       double min = Double.MAX_VALUE;
+       double max = Double.MIN_VALUE;
+       for (int i=0; i<lst.size(); i++){
+           double v = lst.get(i);
+           min = Math.min(v, min);
+           max = Math.max(v, max);
+           total += v;
+        }
+        double mean = total/lst.size();
+        double ssd = 0d;
+        for (int i=0; i<lst.size(); i++){
+            double err = mean - lst.get(i);
+            ssd += err * err;
+        }
+        double var = ssd/lst.size();
+        double stdev = Math.sqrt(var);
+        StringBuffer sb = new StringBuffer(256);
+        sb.append("label,\tmean,\tmin,\tmax,\tvariance,\tstdev\n");
+        sb.append(label).append(",\t");
+        sb.append(mean).append(",\t");
+        sb.append(min).append(",\t");
+        sb.append(max).append(",\t");
+        sb.append(var).append(",\t");
+        sb.append(stdev);
+        System.err.println(sb.toString());
+    }
+
+    private String logHeadersBasic() {
+        StringBuffer sb = new StringBuffer();
+        sb.append("FI,                     \t");
+        sb.append("F2,                    \t\t");
+        sb.append("F1Len,\t");
+        sb.append("F2Len,\t");
+        //sb.append("Sig1Len, ");
+        //sb.append("Sig2Len, ");
+        //sb.append("Orig-shrink, ");
+        //sb.append("Sig-shrink, ");
+        //sb.append("Sig-shrink-trunc, ");
+        //sb.append("Expected-sigs, ");
+        sb.append("Exptd,\t");
+        sb.append("Actul,\t");
+        sb.append("Est,  \t");
+        sb.append("Raw Error,\t");
+        sb.append("Scaled Error,\t");
+        sb.append("Est/Sec,\t");
+        sb.append("Speedup,");
+        return sb.toString();
+    }
+    private String logHeadersAll() {
         StringBuffer sb = new StringBuffer();
         sb.append("FI, ");
         sb.append("F2, ");
@@ -300,8 +406,61 @@ public class StatisticsUtility {
         sb.append("Speedup, ");
         return sb.toString();
     }
+    private String logLineBasic(String f1, String f2,
+                              int lgrOrig, int shtrOrig,
+                              int s1len, int s2len,
+                              double origShrink, double sigShrink, double sigShrinkTrunc,
+                              int expctdSig, int expctd, int act, int est,
+                              double scaledToSize, double ldRateSec, double estRateSec, String firstLine) {
+        StringBuffer sb = new StringBuffer();
+        sb.append(f1);
+        sb.append(",\t");
+        sb.append(f2);
+        sb.append(",\t");
+        sb.append(lgrOrig);
+        sb.append(",\t");
+        sb.append(shtrOrig);
+        sb.append(",\t");
+//        sb.append(s1len);
+//        sb.append(", ");
+//        sb.append(s2len);
+//        sb.append(", ");
+//        sb.append(origShrink);
+//        sb.append(", ");
+//        sb.append(sigShrink);
+//        sb.append(", ");
+//        sb.append(sigShrinkTrunc);
+//        sb.append(",\t\t");
+//        sb.append(expctdSig);
+//        sb.append(", ");
+        sb.append(expctd);
+        sb.append(",\t");
+        sb.append(act);
+        sb.append(",\t");
+        sb.append(est);
+        sb.append(",\t");
+        // raw error
+        double e = (double)(est-act)/act;
+        //rawErrorsList.add(e);
+        e=((int)(e*1000))/1000d;
+        sb.append(e);
+        sb.append(",\t\t");
 
-    private String logLineAlt(String f1, String f2,
+        // scaled to size
+        sb.append(scaledToSize);
+        //correctedErrorsList.add(scaledToSize);
+        sb.append(",\t\t");
+        sb.append(Math.round(estRateSec * 1000.0) / 1000.0);
+        sb.append(",\t");
+
+        // estimate/second
+        double spdup=(int)((estRateSec / (double)ldRateSec));
+        sb.append(spdup);
+        return sb.toString();
+    }
+
+
+    private String logLineAll(String f1, String f2,
                                 int lgrOrig, int shtrOrig,
                                 int s1len, int s2len,
                                 double origShrink, double sigShrink, double sigShrinkTrunc,
@@ -348,6 +507,10 @@ public class StatisticsUtility {
         sb.append(spdup);
         return sb.toString();
     }
+
+
+
+
 
     /**
      * Read the configuration file for test parameters.
