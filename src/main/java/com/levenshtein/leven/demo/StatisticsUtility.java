@@ -573,39 +573,28 @@ public class StatisticsUtility {
         sb.append("\n");
         sb.append("The output fields.");
         sb.append("\n");
-        sb.append("\t\t[FILE 1] First file name 1.");
+        sb.append("\t\t[FILE 1] First file name.");
         sb.append("\n");
-        sb.append("\t\t[FILE 2] Second file name 2.");
+        sb.append("\t\t[FILE 2] Second file name.");
         sb.append("\n");
-        sb.append("\t\t[FLEN 1] File length 1.");
+        sb.append("\t\t[FLEN 1] First file length.");
         sb.append("\n");
-        sb.append("\t\t[FLEN 2] File length 2.");
-        sb.append("\n");
-        sb.append("\t\t[FLEN DIFF] Difference of file lengths.");
+        sb.append("\t\t[FLEN 2] Second file length.");
         sb.append("\n");
         sb.append("\t\t[EXPECTED LD] Expected LD for random text pairs of comparable lengths.");
         sb.append("\n");
-        sb.append("\t\t[CALC'D LD]\tComputed LD for the file pair.");
+        sb.append("\t\t[CALCULATED LD]\t The actual LD for the file pair.");
         sb.append("\n");
-        sb.append("\t\t[RAW EST]\tRaw estimated LD for the file pair--the LD of the signatures.");
+        sb.append("\t\t[ESTIMATE]\tEstimated LD for the file pair.");
         sb.append("\n");
-        sb.append("\t\t[CORRECTED EST]\tCorrected LD estimate for the file pair. There are three scaling factors.");
+        sb.append("\t\t[RAW ERROR]\t abs(estimate-actual)/actual. Not what you usually want");
         sb.append("\n");
-        sb.append("\t\t[RAW ERR]\tRaw error--signature LD multiplied by C.");
+        sb.append("\t\t[SCALED ERROR]\t The raw error normalized to the file size.");
         sb.append("\n");
-        sb.append("\t\t[CORRECTED ERR]\tA constant applied to the results");
-        sb.append("\n");
-        sb.append("\t\t[SCALED TO ORIG]\tError scaled to file sizes.");
-        sb.append("\n");
-        sb.append("\t\t[FILE LD/sec]\tNumber of 25K LD computations/second (It's < 1)");
-        sb.append("\n");
-        sb.append("\t\t[SIG LD/sec]\testimate computations per second.");
+        sb.append("\t\t[EST/SEC]\tEstimate computations per second.");
         sb.append("\n");
         sb.append("\t\t[SPEEDUP]\tSpeedup factor for estimate v full LD computation.");
         sb.append("\n");
-        sb.append("\t\t[FILE CHANGES]\tPlain English description of how the files differ from the original.");
-        sb.append("\n");
         return sb.toString();
     }
-
 }

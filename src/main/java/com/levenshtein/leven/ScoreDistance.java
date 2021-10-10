@@ -224,18 +224,19 @@ public class ScoreDistance {
         boolean ptcFormula=true;
         double tst = 0;
         if (ptcFormula) {
-            // Much too big when actual is close to expected
+            // This one is the worst so far.
+            //
             //ldForTheRest = (sigLD-sigDiff) * effectiveC * (1.0 + wholeFileRatio) ;
 
-
-            // Pretty good when the actual is close to the expected
+            // These give good estimates for both files that completely different and files that are
+            // closely related.  The uncommented one seems marginally better but they are very close.
+            // Details in the spreadsheet.
             //ldForTheRest = (sigLD-sigDiff) * effectiveC * (1.0/(1.0d+sigRatio));
-
-            //
             ldForTheRest  = (sigLD-sigDiff) * effectiveC * (1.0d-sigRatio);
 
         } else {
-            // This estimates much too high. E.g 1.2 to 1.5+
+            // Frank's formula. Somewhat more accurate for files that are close. A lot worse for files
+            // that are different.
             ldForTheRest = (sigLD - sigDiff) * effectiveC * ((1.0d-sigRatio)/(1.0d-wholeFileRatio));
         }
 
