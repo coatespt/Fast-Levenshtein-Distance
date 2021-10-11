@@ -15,21 +15,19 @@ import java.io.InputStream;
 import java.util.*;
 
 /**
- * Do a pair-wise LD v estimated LD for all files in the specified directory.
+ * Do a pair-wise LD v. estimated LD for all files in the specified directory.
  * <p>
  * This only has one function as of October 7 2021. It takes all the files in a given directory
  * and does a number of operations that yield useful statistics on the behavior of the algorithm.
- * Most notably it computes the true LD of each pair of originals as well as an estimate of
+ * Most notably, it computes the true LD of each pair of originals as well as an estimate of
  * the LD based on signatures computed for the two files.
- *
+ * <p>
  * Other useful statistics are computed including the significance, the size of the original files
- * the LD, the signature sizes, the LD of the sigatures, and various error computations.
- * This is where the constants for the mean ratios of original files to LD and
- * mean signature size to signature LD are computed.
- *
+ * the LD, the signature sizes, the LD of the sigatures, and various error computations. This is
+ * where the constants for the mean ratios of original files to LD and mean signature size to
+ * signature LD are computed.
+ * <p>
  * TODO: Need a way to compute the unlikeliness of a give expected/actual length ratio.
- *
- *
  * @author pcoates
  */
 public class StatisticsUtility {
@@ -47,10 +45,10 @@ public class StatisticsUtility {
     private List<String> inputFileList = null;
     private String sigsDir = null;
     private ScoreDistance sd = null;
-    private String hashFunc = "JAVA";
+    private String hashFunc = "XOR";
 
     /**
-     * TODO: This can have multiple functions that can be chosen from CMD line or properties
+     * TODO: This could have multiple functions that can be chosen from CMD line or properties
      * @param args
      */
     public static void main(String[] args) {
@@ -98,13 +96,9 @@ public class StatisticsUtility {
         processPairs(inputFileList);
     }
 
-    /**
-     *
-     */
     protected ICompressor compressor = null;
 
     /**
-     *
      * @return
      * @throws Exception
      */
@@ -112,7 +106,6 @@ public class StatisticsUtility {
         // This should be length=83 which is the largest prime that gets most of the printable ASCII characters that
         // don't have a high probablilty of  causing confusion in CSV interpretation.
         String chars = "abcdefghijklnmnoprstuvwxyz!@#$%^&*()_-+=<>;:[]{}ABCDEFGHIJKLMNOPQRSTUVWXYZ.?0123456";
-
         if (hashFunc.equals("XOR")){
             if (compressor == null) {
                 ICompressor ic = new StringCompressorRH(n, c, StringCompressorRH.StringToCharArray(chars), MinBits, MaxBits, Seed);
@@ -140,6 +133,9 @@ public class StatisticsUtility {
         return compressor;
     }
 
+    /**
+     *  Save the sigs to save some time.
+     */
     private Map<String,String []> sigs = new HashMap<String,String[]>();
 
     /**
@@ -325,12 +321,13 @@ public class StatisticsUtility {
             }
         }
         // TODO: Make multiple error lists--for variant files and for non-variant files.
+        System.out.println("label,mean,min,max,variance,stdev\n");
         printMMMStderr("Raw Error ",rawErrorsList);
         printMMMStderr("Raw Error Variants ",rawErrorsVariantsList);
         printMMMStderr("Raw Error Different ",rawErrorsDifferentList);
-        printMMMStderr("Corrected Errror ",correctedErrorsList);
-        printMMMStderr("Corrected Errror Variants ",correctedErrorsVariantsList);
-        printMMMStderr("Corrected Errror Different ",correctedErrorsDifferentList);
+        printMMMStderr("Corrected Error ",correctedErrorsList);
+        printMMMStderr("Corrected Error Variants ",correctedErrorsVariantsList);
+        printMMMStderr("Corrected Error Different ",correctedErrorsDifferentList);
         printMMMStderr("est/sec ",perSecondList);
         System.err.println("total pairs:" + rawErrorsList.size()+ " variants: " + rawErrorsVariantsList.size()
                 + " different:" + rawErrorsDifferentList.size());
@@ -355,57 +352,28 @@ public class StatisticsUtility {
         double var = ssd/lst.size();
         double stdev = Math.sqrt(var);
         StringBuffer sb = new StringBuffer(256);
-        sb.append("label,\tmean,\tmin,\tmax,\tvariance,\tstdev\n");
-        sb.append(label).append(",\t");
-        sb.append(mean).append(",\t");
-        sb.append(min).append(",\t");
-        sb.append(max).append(",\t");
-        sb.append(var).append(",\t");
+        sb.append(label).append(",");
+        sb.append(mean).append(",");
+        sb.append(min).append(",");
+        sb.append(max).append(",");
+        sb.append(var).append(",");
         sb.append(stdev);
         System.err.println(sb.toString());
     }
 
     private String logHeadersBasic() {
         StringBuffer sb = new StringBuffer();
-        sb.append("FI,                     \t");
-        sb.append("F2,                    \t\t");
-        sb.append("F1Len,\t");
-        sb.append("F2Len,\t");
-        //sb.append("Sig1Len, ");
-        //sb.append("Sig2Len, ");
-        //sb.append("Orig-shrink, ");
-        //sb.append("Sig-shrink, ");
-        //sb.append("Sig-shrink-trunc, ");
-        //sb.append("Expected-sigs, ");
-        sb.append("Exptd,\t");
-        sb.append("Actul,\t");
-        sb.append("Est,  \t");
-        sb.append("Raw Error,\t");
-        sb.append("Scaled Error,\t");
-        sb.append("Est/Sec,\t");
+        sb.append("FI,");
+        sb.append("F2,");
+        sb.append("F1Len,");
+        sb.append("F2Len,");
+        sb.append("Exptd,");
+        sb.append("Actul,");
+        sb.append("Est,");
+        sb.append("Raw Error,");
+        sb.append("Scaled Error,");
+        sb.append("Est/Sec,");
         sb.append("Speedup,");
-        return sb.toString();
-    }
-    private String logHeadersAll() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("FI, ");
-        sb.append("F2, ");
-        sb.append("F1Len, ");
-        sb.append("F2Len, ");
-        sb.append("Sig1Len, ");
-        sb.append("Sig2Len, ");
-        sb.append("Orig-shrink, ");
-        sb.append("Sig-shrink, ");
-        sb.append("Sig-shrink-trunc, ");
-        sb.append("Expected-sigs, ");
-        sb.append("Expected, ");
-        sb.append("Actual, ");
-        sb.append("Estimate, ");
-        sb.append("Raw Error, ");
-        sb.append("Corrected Error, ");
-        sb.append("Scaled Error, ");
-        sb.append("Est/Sec, ");
-        sb.append("Speedup, ");
         return sb.toString();
     }
     private String logLineBasic(String f1, String f2,
@@ -416,103 +384,37 @@ public class StatisticsUtility {
                               double scaledToSize, double ldRateSec, double estRateSec, String firstLine) {
         StringBuffer sb = new StringBuffer();
         sb.append(f1);
-        sb.append(",\t");
+        sb.append(",");
         sb.append(f2);
-        sb.append(",\t");
+        sb.append(",");
         sb.append(lgrOrig);
-        sb.append(",\t");
+        sb.append(",");
         sb.append(shtrOrig);
-        sb.append(",\t");
-//        sb.append(s1len);
-//        sb.append(", ");
-//        sb.append(s2len);
-//        sb.append(", ");
-//        sb.append(origShrink);
-//        sb.append(", ");
-//        sb.append(sigShrink);
-//        sb.append(", ");
-//        sb.append(sigShrinkTrunc);
-//        sb.append(",\t\t");
-//        sb.append(expctdSig);
-//        sb.append(", ");
+        sb.append(",");
         sb.append(expctd);
-        sb.append(",\t");
+        sb.append(",");
         sb.append(act);
-        sb.append(",\t");
+        sb.append(",");
         sb.append(est);
-        sb.append(",\t");
+        sb.append(",");
         // raw error
         double e = (double)(est-act)/act;
         //rawErrorsList.add(e);
         e=((int)(e*1000))/1000d;
         sb.append(e);
-        sb.append(",\t\t");
-
+        sb.append(",");
         // scaled to size
         sb.append(scaledToSize);
         //correctedErrorsList.add(scaledToSize);
-        sb.append(",\t\t");
+        sb.append(",");
         sb.append(Math.round(estRateSec * 1000.0) / 1000.0);
-        sb.append(",\t");
+        sb.append(",");
 
         // estimate/second
         double spdup=(int)((estRateSec / (double)ldRateSec));
         sb.append(spdup);
         return sb.toString();
     }
-
-
-    private String logLineAll(String f1, String f2,
-                                int lgrOrig, int shtrOrig,
-                                int s1len, int s2len,
-                                double origShrink, double sigShrink, double sigShrinkTrunc,
-                                int expctdSig, int expctd, int act, int est,
-                                double scaledToSize, double ldRateSec, double estRateSec, String firstLine) {
-        StringBuffer sb = new StringBuffer();
-        sb.append(f1);
-        sb.append(", ");
-        sb.append(f2);
-        sb.append(", ");
-        sb.append(lgrOrig);
-        sb.append(", ");
-        sb.append(shtrOrig);
-        sb.append(", ");
-        sb.append(s1len);
-        sb.append(", ");
-        sb.append(s2len);
-        sb.append(", ");
-        sb.append(origShrink);
-        sb.append(", ");
-        sb.append(sigShrink);
-        sb.append(", ");
-        sb.append(sigShrinkTrunc);
-        sb.append(",\t\t");
-        sb.append(expctdSig);
-        sb.append(", ");
-        sb.append(expctd);
-        sb.append(", ");
-        sb.append(act);
-        sb.append(", ");
-        sb.append(est);
-        sb.append(", ");
-        // raw error
-        double e = (1 - Math.round(((double) est / act) * 1000)) / 1000.0;
-        sb.append(e);
-        sb.append(", ");
-        // scaled to size
-        sb.append(scaledToSize);
-        sb.append(", ");
-        sb.append(Math.round(estRateSec * 1000.0) / 1000.0);
-        sb.append(", ");
-        // estimate/second
-        double spdup=(int)((estRateSec / (double)ldRateSec));
-        sb.append(spdup);
-        return sb.toString();
-    }
-
-
-
-
 
     /**
      * Read the configuration file for test parameters.

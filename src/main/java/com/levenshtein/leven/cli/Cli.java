@@ -33,15 +33,6 @@ import static java.lang.Integer.valueOf;
  TODO: Factor the properties file and command line arguments code out to their own class that can
     be shared with the StatisticsUtility class.
 
- TODO: Estimates seem to be more accurate when the files are in fact related. They  are exact when
-    the files are identical, only slightly off when the files are almost the same, but deteriorate
-    to about 0.7 of the true LD for files that are totally unrelated.
-    Verify that this observation is true and if so, quantify. Possibly it is simply a consequence of the
-    fact that the LD varies from 0 to the mean for randomly selected files and it CAN'T be off when the
-    distance is zero so the mean error can only go up from there.
-
- TODO: Check out the significance computation (A) is it correct?
-
  TODO significance is a scalar between [0,1] but it might make more sense to somehow separate the cases where the
     differences seem to be concentrated. For instance, if a result is significant, do a second level that
     does the computation on K-length blocks of the files, e.g. 1/4 or 1/10 the length of the larger, with the
@@ -61,6 +52,8 @@ import static java.lang.Integer.valueOf;
  Possible Enhancements
 
  TODO: Compute a list of good compression and N values.
+    Right now we're detecting pairs of C and outchars.size() for which GCD does not equal one.
+    I've been always using primes for both.
 
  TODO: Make it work for binary data. Need a hash that works for arbitrary characters, not just strings.
     perhaps the Java string hash could be modified?
@@ -70,10 +63,10 @@ import static java.lang.Integer.valueOf;
  TODO: Implement multi-threading for the matching. Would probably increase throughput by several x.
     Frank says this is low priority.
 
- TODO: Implement multi-threading for compression. Considered strategy of breaking an input into K pieces
+ TODO: Implement multi-threading for compression. I considered a strategy of breaking an input into K pieces
     then computing hashes for n characters on either side and stitching them together at the point where
     the output for the Nth position. This would not be too hard but why not simply hand an entire file
-    to each thread? Simpler and probably more efficient as it's easier to keep the input streaming for longer.
+    to each thread? This is simpler and probably more efficient as it's easier to keep the input streaming for longer.
     Note, the problem will almost never be how long it takes to process a single file because
     a file so long that this was an issue would result in an unusable signature too long to run LD on.
     So just multi-thread at an input file level.
